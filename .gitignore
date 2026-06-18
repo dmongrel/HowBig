@@ -12,9 +12,10 @@
 
 # Dependency directories
 vendor/
-/mapdata/
+
 /mapdata_lastgood/
 /mapdata_orig/
+/util/
 
 # Go module cache
 .cache/go-build/
