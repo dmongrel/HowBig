@@ -6,7 +6,8 @@
       "ISOCode": "AFG",
       "Area": 252072,
       "flip_y": true,
-      "rotate": -90
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Albania",
@@ -14,7 +15,8 @@
       "ISOCode": "ALB",
       "Area": 11100,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Algeria",
@@ -22,15 +24,17 @@
       "ISOCode": "DZA",
       "Area": 919595,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Andorra",
       "CompactName": "Andorra.gjson",
       "ISOCode": "AND",
       "Area": 181,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Angola",
@@ -38,7 +42,8 @@
       "ISOCode": "AGO",
       "Area": 481350,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Antigua and Barbuda",
@@ -46,7 +51,8 @@
       "ISOCode": "ATG",
       "Area": 170,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Argentina",
@@ -54,7 +60,8 @@
       "ISOCode": "ARG",
       "Area": 1073500,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Armenia",
@@ -62,7 +69,8 @@
       "ISOCode": "ARM",
       "Area": 11484,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Australia",
@@ -70,7 +78,8 @@
       "ISOCode": "AUS",
       "Area": 2988900,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Austria",
@@ -78,7 +87,8 @@
       "ISOCode": "AUT",
       "Area": 32385,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Azerbaijan",
@@ -86,7 +96,8 @@
       "ISOCode": "AZE",
       "Area": 33436,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Bahamas",
@@ -94,7 +105,8 @@
       "ISOCode": "BHS",
       "Area": 5358,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Bahrain",
@@ -102,7 +114,8 @@
       "ISOCode": "BHR",
       "Area": 293,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Bangladesh",
@@ -110,23 +123,26 @@
       "ISOCode": "BGD",
       "Area": 56977,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Barbados",
       "CompactName": "Barbados.gjson",
       "ISOCode": "BRB",
       "Area": 167,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Belarus",
       "CompactName": "Belarus.gjson",
       "ISOCode": "BLR",
       "Area": 80166,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Belgium",
@@ -134,7 +150,8 @@
       "ISOCode": "BEL",
       "Area": 11787,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Belize",
@@ -142,23 +159,26 @@
       "ISOCode": "BLZ",
       "Area": 8867,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Benin",
       "CompactName": "Benin.gjson",
       "ISOCode": "BEN",
       "Area": 44310,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Bhutan",
       "CompactName": "Bhutan.gjson",
       "ISOCode": "BTN",
       "Area": 14824,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Bolivia",
@@ -166,7 +186,8 @@
       "ISOCode": "BOL",
       "Area": 424164,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Bosnia and Herzegovina",
@@ -174,15 +195,17 @@
       "ISOCode": "BIH",
       "Area": 19772,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Botswana",
       "CompactName": "Botswana.gjson",
       "ISOCode": "BWA",
       "Area": 225000,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Brazil",
@@ -190,7 +213,8 @@
       "ISOCode": "BRA",
       "Area": 3285862,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Brunei",
@@ -198,31 +222,35 @@
       "ISOCode": "BRN",
       "Area": 2226,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Bulgaria",
       "CompactName": "Bulgaria.gjson",
       "ISOCode": "BGR",
       "Area": 42855,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Burkina Faso",
       "CompactName": "BurkinaFaso.gjson",
       "ISOCode": "BFA",
       "Area": 104543,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Burundi",
       "CompactName": "Burundi.gjson",
       "ISOCode": "BDI",
       "Area": 10745,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Cabo Verde",
@@ -230,7 +258,8 @@
       "ISOCode": "CPV",
       "Area": 1557,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Cambodia",
@@ -238,15 +267,17 @@
       "ISOCode": "KHM",
       "Area": 71056,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Cameroon",
       "CompactName": "Cameroon.gjson",
       "ISOCode": "CMR",
       "Area": 183569,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Canada",
@@ -254,23 +285,26 @@
       "ISOCode": "CAN",
       "Area": 3855100,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Central African Republic",
       "CompactName": "CentralAfricanRepublic.gjson",
       "ISOCode": "CAF",
       "Area": 240535,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Chad",
       "CompactName": "Chad.gjson",
       "ISOCode": "TCD",
       "Area": 495800,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Chile",
@@ -278,7 +312,8 @@
       "ISOCode": "CHL",
       "Area": 291932,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "China",
@@ -286,15 +321,17 @@
       "ISOCode": "CHN",
       "Area": 3705410,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Colombia",
       "CompactName": "Colombia.gjson",
       "ISOCode": "COL",
       "Area": 439735,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Comoros",
@@ -302,15 +339,17 @@
       "ISOCode": "COM",
       "Area": 719,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Congo (Congo-Brazzaville)",
       "CompactName": "Congo(Congo-Brazzaville).gjson",
       "ISOCode": "COG",
       "Area": 132047,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Costa Rica",
@@ -318,7 +357,8 @@
       "ISOCode": "CRI",
       "Area": 19730,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Croatia",
@@ -326,7 +366,8 @@
       "ISOCode": "HRV",
       "Area": 21851,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Cuba",
@@ -334,7 +375,8 @@
       "ISOCode": "CUB",
       "Area": 42426,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Cyprus",
@@ -342,15 +384,17 @@
       "ISOCode": "CYP",
       "Area": 3572,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Czechia",
       "CompactName": "Czechia.gjson",
       "ISOCode": "CZE",
       "Area": 30452,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Denmark",
@@ -358,23 +402,26 @@
       "ISOCode": "DNK",
       "Area": 16573,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Djibouti",
       "CompactName": "Djibouti.gjson",
       "ISOCode": "DJI",
       "Area": 8958,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Dominica",
       "CompactName": "Dominica.gjson",
       "ISOCode": "DMA",
       "Area": 290,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Dominican Republic",
@@ -382,7 +429,8 @@
       "ISOCode": "DOM",
       "Area": 18704,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Ecuador",
@@ -390,7 +438,8 @@
       "ISOCode": "ECU",
       "Area": 100224,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Egypt",
@@ -398,15 +447,17 @@
       "ISOCode": "EGY",
       "Area": 386662,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "El Salvador",
       "CompactName": "ElSalvador.gjson",
       "ISOCode": "SLV",
       "Area": 8124,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Equatorial Guinea",
@@ -414,7 +465,8 @@
       "ISOCode": "GNQ",
       "Area": 10830,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Eritrea",
@@ -422,7 +474,8 @@
       "ISOCode": "ERI",
       "Area": 45406,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Estonia",
@@ -430,23 +483,26 @@
       "ISOCode": "EST",
       "Area": 17529,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Eswatini",
       "CompactName": "Eswatini.gjson",
       "ISOCode": "SWZ",
       "Area": 6704,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Ethiopia",
       "CompactName": "Ethiopia.gjson",
       "ISOCode": "ETH",
       "Area": 426370,
-      "flip_y": false,
-      "rotate": 0
+      "flip_y": true,
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "Fiji",
@@ -454,7 +510,8 @@
       "ISOCode": "FJI",
       "Area": 7055,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Finland",
@@ -462,7 +519,8 @@
       "ISOCode": "FIN",
       "Area": 130666,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "France",
@@ -470,7 +528,8 @@
       "ISOCode": "FRA",
       "Area": 248573,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Gabon",
@@ -478,7 +537,8 @@
       "ISOCode": "GAB",
       "Area": 103347,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Gambia",
@@ -486,7 +546,8 @@
       "ISOCode": "GMB",
       "Area": 4361,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Georgia",
@@ -494,7 +555,8 @@
       "ISOCode": "GEO",
       "Area": 26911,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Germany",
@@ -502,7 +564,8 @@
       "ISOCode": "DEU",
       "Area": 137882,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Ghana",
@@ -510,7 +573,8 @@
       "ISOCode": "GHA",
       "Area": 92098,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Greece",
@@ -518,7 +582,8 @@
       "ISOCode": "GRC",
       "Area": 50949,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Grenada",
@@ -526,7 +591,8 @@
       "ISOCode": "GRD",
       "Area": 133,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Guatemala",
@@ -534,7 +600,8 @@
       "ISOCode": "GTM",
       "Area": 42042,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Guinea",
@@ -542,7 +609,8 @@
       "ISOCode": "GIN",
       "Area": 94926,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Guinea-Bissau",
@@ -550,7 +618,8 @@
       "ISOCode": "GNB",
       "Area": 13948,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Guyana",
@@ -558,7 +627,8 @@
       "ISOCode": "GUY",
       "Area": 83012,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Haiti",
@@ -566,7 +636,8 @@
       "ISOCode": "HTI",
       "Area": 10714,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Honduras",
@@ -574,7 +645,8 @@
       "ISOCode": "HND",
       "Area": 43433,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Hungary",
@@ -582,7 +654,8 @@
       "ISOCode": "HUN",
       "Area": 35917,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Iceland",
@@ -590,7 +663,8 @@
       "ISOCode": "ISL",
       "Area": 40000,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "India",
@@ -598,7 +672,8 @@
       "ISOCode": "IND",
       "Area": 1269219,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Indonesia",
@@ -606,7 +681,8 @@
       "ISOCode": "IDN",
       "Area": 735358,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Iran",
@@ -614,7 +690,8 @@
       "ISOCode": "IRN",
       "Area": 636371,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Iraq",
@@ -622,7 +699,8 @@
       "ISOCode": "IRQ",
       "Area": 169235,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Ireland",
@@ -630,7 +708,8 @@
       "ISOCode": "IRL",
       "Area": 27133,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Israel",
@@ -638,7 +717,8 @@
       "ISOCode": "ISR",
       "Area": 8019,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Italy",
@@ -646,7 +726,8 @@
       "ISOCode": "ITA",
       "Area": 116587,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Jamaica",
@@ -654,7 +735,8 @@
       "ISOCode": "JAM",
       "Area": 4244,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Japan",
@@ -662,7 +744,8 @@
       "ISOCode": "JPN",
       "Area": 145920,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Jordan",
@@ -670,7 +753,8 @@
       "ISOCode": "JOR",
       "Area": 34284,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Kazakhstan",
@@ -678,7 +762,8 @@
       "ISOCode": "KAZ",
       "Area": 1052090,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Kenya",
@@ -686,7 +771,8 @@
       "ISOCode": "KEN",
       "Area": 224081,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Kiribati",
@@ -694,7 +780,8 @@
       "ISOCode": "KIR",
       "Area": 313,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Korea (North)",
@@ -702,7 +789,8 @@
       "ISOCode": "PRK",
       "Area": 46490,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Korea (South)",
@@ -710,7 +798,8 @@
       "ISOCode": "KOR",
       "Area": 38696,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Kuwait",
@@ -718,7 +807,8 @@
       "ISOCode": "KWT",
       "Area": 6880,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Kyrgyzstan",
@@ -726,7 +816,8 @@
       "ISOCode": "KGZ",
       "Area": 77199,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Laos",
@@ -734,7 +825,8 @@
       "ISOCode": "LAO",
       "Area": 91429,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Latvia",
@@ -742,7 +834,8 @@
       "ISOCode": "LVA",
       "Area": 24940,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Lebanon",
@@ -750,7 +843,8 @@
       "ISOCode": "LBN",
       "Area": 4015,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Lesotho",
@@ -758,7 +852,8 @@
       "ISOCode": "LSO",
       "Area": 11720,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Liberia",
@@ -766,7 +861,8 @@
       "ISOCode": "LBR",
       "Area": 37420,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Libya",
@@ -774,7 +870,8 @@
       "ISOCode": "LBY",
       "Area": 679362,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Liechtenstein",
@@ -782,7 +879,8 @@
       "ISOCode": "LIE",
       "Area": 62,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Lithuania",
@@ -790,7 +888,8 @@
       "ISOCode": "LTU",
       "Area": 25207,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Luxembourg",
@@ -798,7 +897,8 @@
       "ISOCode": "LUX",
       "Area": 998,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Madagascar",
@@ -806,7 +906,8 @@
       "ISOCode": "MDG",
       "Area": 226658,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Malawi",
@@ -814,7 +915,8 @@
       "ISOCode": "MWI",
       "Area": 45745,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Malaysia",
@@ -822,7 +924,8 @@
       "ISOCode": "MYS",
       "Area": 127724,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Maldives",
@@ -830,7 +933,8 @@
       "ISOCode": "MDV",
       "Area": 115,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Mali",
@@ -838,7 +942,8 @@
       "ISOCode": "MLI",
       "Area": 478841,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Malta",
@@ -846,7 +951,8 @@
       "ISOCode": "MLT",
       "Area": 122,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Marshall Islands",
@@ -854,7 +960,8 @@
       "ISOCode": "MHL",
       "Area": 70,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Mauritania",
@@ -862,7 +969,8 @@
       "ISOCode": "MRT",
       "Area": 397960,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Mauritius",
@@ -870,7 +978,8 @@
       "ISOCode": "MUS",
       "Area": 790,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Mexico",
@@ -878,7 +987,8 @@
       "ISOCode": "MEX",
       "Area": 758449,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Micronesia",
@@ -886,7 +996,8 @@
       "ISOCode": "FSM",
       "Area": 271,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Moldova",
@@ -894,7 +1005,8 @@
       "ISOCode": "MDA",
       "Area": 130668,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Monaco",
@@ -902,7 +1014,8 @@
       "ISOCode": "MCO",
       "Area": 0.77,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Mongolia",
@@ -910,7 +1023,8 @@
       "ISOCode": "MNG",
       "Area": 603908,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Montenegro",
@@ -918,7 +1032,8 @@
       "ISOCode": "MNE",
       "Area": 5333,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Morocco",
@@ -926,7 +1041,8 @@
       "ISOCode": "MAR",
       "Area": 172414,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Mozambique",
@@ -934,7 +1050,8 @@
       "ISOCode": "MOZ",
       "Area": 308640,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Myanmar",
@@ -942,7 +1059,8 @@
       "ISOCode": "MMR",
       "Area": 261228,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Namibia",
@@ -950,7 +1068,8 @@
       "ISOCode": "NAM",
       "Area": 318261,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Nauru",
@@ -958,7 +1077,8 @@
       "ISOCode": "NRU",
       "Area": 8.1,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Nepal",
@@ -966,7 +1086,8 @@
       "ISOCode": "NPL",
       "Area": 56827,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Netherlands",
@@ -974,7 +1095,8 @@
       "ISOCode": "NLD",
       "Area": 16040,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Nevis and Saint Kitts",
@@ -982,7 +1104,8 @@
       "ISOCode": "KNA",
       "Area": 101,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "New Zealand",
@@ -990,7 +1113,8 @@
       "ISOCode": "NZL",
       "Area": 103481,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Nicaragua",
@@ -998,7 +1122,8 @@
       "ISOCode": "NIC",
       "Area": 50337,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Niger",
@@ -1006,7 +1131,8 @@
       "ISOCode": "NER",
       "Area": 489200,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Nigeria",
@@ -1014,7 +1140,8 @@
       "ISOCode": "NGA",
       "Area": 356669,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "North Macedonia",
@@ -1022,7 +1149,8 @@
       "ISOCode": "MKD",
       "Area": 9928,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Norway",
@@ -1030,7 +1158,8 @@
       "ISOCode": "NOR",
       "Area": 124756,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Oman",
@@ -1038,7 +1167,8 @@
       "ISOCode": "OMN",
       "Area": 119499,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Pakistan",
@@ -1046,7 +1176,8 @@
       "ISOCode": "PAK",
       "Area": 340682,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Palau",
@@ -1054,7 +1185,8 @@
       "ISOCode": "PLW",
       "Area": 177,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Palestine State",
@@ -1062,7 +1194,8 @@
       "ISOCode": "PSE",
       "Area": 2402,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Panama",
@@ -1070,7 +1203,8 @@
       "ISOCode": "PAN",
       "Area": 29157,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Papua New Guinea",
@@ -1078,7 +1212,8 @@
       "ISOCode": "PNG",
       "Area": 178703,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Paraguay",
@@ -1086,7 +1221,8 @@
       "ISOCode": "PRY",
       "Area": 157048,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Peru",
@@ -1094,7 +1230,8 @@
       "ISOCode": "PER",
       "Area": 496224,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Philippines",
@@ -1102,7 +1239,8 @@
       "ISOCode": "PHL",
       "Area": 132183,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Poland",
@@ -1110,7 +1248,8 @@
       "ISOCode": "POL",
       "Area": 120726,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Portugal",
@@ -1118,7 +1257,8 @@
       "ISOCode": "PRT",
       "Area": 35608,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Principe and Sao Tome",
@@ -1126,7 +1266,8 @@
       "ISOCode": "STP",
       "Area": 372,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Qatar",
@@ -1134,7 +1275,8 @@
       "ISOCode": "QAT",
       "Area": 4468,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Romania",
@@ -1142,7 +1284,8 @@
       "ISOCode": "ROU",
       "Area": 92046,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Russia",
@@ -1150,7 +1293,8 @@
       "ISOCode": "RUS",
       "Area": 6601667,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Rwanda",
@@ -1158,7 +1302,8 @@
       "ISOCode": "RWA",
       "Area": 10169,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Saint Kitts and Nevis",
@@ -1166,7 +1311,8 @@
       "ISOCode": "KNA",
       "Area": 101,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Saint Lucia",
@@ -1174,7 +1320,8 @@
       "ISOCode": "LCA",
       "Area": 238,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Saint Vincent and the Grenadines",
@@ -1182,7 +1329,8 @@
       "ISOCode": "VCT",
       "Area": 150,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Samoa",
@@ -1190,7 +1338,8 @@
       "ISOCode": "WSM",
       "Area": 1093,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "San Marino",
@@ -1198,7 +1347,8 @@
       "ISOCode": "SMR",
       "Area": 24,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Sao Tome and Principe",
@@ -1206,7 +1356,8 @@
       "ISOCode": "STP",
       "Area": 372,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Saudi Arabia",
@@ -1214,7 +1365,8 @@
       "ISOCode": "SAU",
       "Area": 830000,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Senegal",
@@ -1222,7 +1374,8 @@
       "ISOCode": "SEN",
       "Area": 75973,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Serbia",
@@ -1230,7 +1383,8 @@
       "ISOCode": "SRB",
       "Area": 29957,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Seychelles",
@@ -1238,7 +1392,8 @@
       "ISOCode": "SYC",
       "Area": 175,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Sierra Leone",
@@ -1246,7 +1401,8 @@
       "ISOCode": "SLE",
       "Area": 27699,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Singapore",
@@ -1254,7 +1410,8 @@
       "ISOCode": "SGP",
       "Area": 278,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Slovakia",
@@ -1262,7 +1419,8 @@
       "ISOCode": "SVK",
       "Area": 18933,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Slovenia",
@@ -1270,7 +1428,8 @@
       "ISOCode": "SVN",
       "Area": 7827,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Solomon Islands",
@@ -1278,7 +1437,8 @@
       "ISOCode": "SLB",
       "Area": 11157,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Somalia",
@@ -1286,7 +1446,8 @@
       "ISOCode": "SOM",
       "Area": 246201,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "South Africa",
@@ -1294,7 +1455,8 @@
       "ISOCode": "ZAF",
       "Area": 470693,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "South Sudan",
@@ -1302,7 +1464,8 @@
       "ISOCode": "SSD",
       "Area": 248777,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Spain",
@@ -1310,7 +1473,8 @@
       "ISOCode": "ESP",
       "Area": 195120,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Sri Lanka",
@@ -1318,7 +1482,8 @@
       "ISOCode": "LKA",
       "Area": 25332,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Sudan",
@@ -1326,7 +1491,8 @@
       "ISOCode": "SDN",
       "Area": 725100,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Suriname",
@@ -1334,7 +1500,8 @@
       "ISOCode": "SUR",
       "Area": 63251,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Sweden",
@@ -1342,7 +1509,8 @@
       "ISOCode": "SWE",
       "Area": 173860,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Switzerland",
@@ -1350,7 +1518,8 @@
       "ISOCode": "CHE",
       "Area": 15940,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Syria",
@@ -1358,7 +1527,8 @@
       "ISOCode": "SYR",
       "Area": 71498,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Taiwan",
@@ -1366,7 +1536,8 @@
       "ISOCode": "TWN",
       "Area": 13974,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Tajikistan",
@@ -1374,7 +1545,8 @@
       "ISOCode": "TJK",
       "Area": 54595,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Tanzania",
@@ -1382,7 +1554,8 @@
       "ISOCode": "TZA",
       "Area": 365756,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Thailand",
@@ -1390,7 +1563,8 @@
       "ISOCode": "THA",
       "Area": 198120,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "the Grenadines and Saint Vincent",
@@ -1398,7 +1572,8 @@
       "ISOCode": "VCT",
       "Area": 150,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Timor-Leste",
@@ -1406,7 +1581,8 @@
       "ISOCode": "TLS",
       "Area": 5741,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Tobago and Trinidad",
@@ -1414,7 +1590,8 @@
       "ISOCode": "TTO",
       "Area": 1980,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Togo",
@@ -1422,7 +1599,8 @@
       "ISOCode": "TGO",
       "Area": 21925,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Tonga",
@@ -1430,7 +1608,8 @@
       "ISOCode": "TON",
       "Area": 288,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Trinidad and Tobago",
@@ -1438,7 +1617,8 @@
       "ISOCode": "TTO",
       "Area": 1980,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Tunisia",
@@ -1446,7 +1626,8 @@
       "ISOCode": "TUN",
       "Area": 63170,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Turkey",
@@ -1454,7 +1635,8 @@
       "ISOCode": "TUR",
       "Area": 302535,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Turkmenistan",
@@ -1462,7 +1644,8 @@
       "ISOCode": "TKM",
       "Area": 188500,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Tuvalu",
@@ -1470,7 +1653,8 @@
       "ISOCode": "TUV",
       "Area": 10,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Uganda",
@@ -1478,7 +1662,8 @@
       "ISOCode": "UGA",
       "Area": 93264,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Ukraine",
@@ -1486,7 +1671,8 @@
       "ISOCode": "UKR",
       "Area": 233030,
       "flip_y": true,
-      "rotate": -90
+      "rotate": -90,
+      "vertical_scale": 0
     },
     {
       "Name": "United Arab Emirates",
@@ -1494,7 +1680,8 @@
       "ISOCode": "ARE",
       "Area": 32300,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "United Kingdom",
@@ -1502,7 +1689,8 @@
       "ISOCode": "GBR",
       "Area": 93723,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "United States",
@@ -1510,7 +1698,8 @@
       "ISOCode": "USA",
       "Area": 3677647,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Uruguay",
@@ -1518,7 +1707,8 @@
       "ISOCode": "URY",
       "Area": 68037,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Uzbekistan",
@@ -1526,7 +1716,8 @@
       "ISOCode": "UZB",
       "Area": 172742,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Vanuatu",
@@ -1534,7 +1725,8 @@
       "ISOCode": "VUT",
       "Area": 4728,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Vatican City",
@@ -1542,7 +1734,8 @@
       "ISOCode": "VAT",
       "Area": 0.17,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Venezuela",
@@ -1550,7 +1743,8 @@
       "ISOCode": "VEN",
       "Area": 352140,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Vietnam",
@@ -1558,7 +1752,8 @@
       "ISOCode": "VNM",
       "Area": 127882,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Yemen",
@@ -1566,7 +1761,8 @@
       "ISOCode": "YEM",
       "Area": 203850,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Zambia",
@@ -1574,7 +1770,8 @@
       "ISOCode": "ZMB",
       "Area": 290585,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     },
     {
       "Name": "Zimbabwe",
@@ -1582,7 +1779,8 @@
       "ISOCode": "ZWE",
       "Area": 150872,
       "flip_y": false,
-      "rotate": 0
+      "rotate": 0,
+      "vertical_scale": 0
     }
   ]
 }
