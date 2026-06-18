@@ -1,0 +1,45 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binaries
+*_test
+
+# Output of 'go build'
+*.out
+
+# Dependency directories
+vendor/
+/mapdata/
+/mapdata_lastgood/
+/mapdata_orig/
+
+# Go module cache
+.cache/go-build/
+
+# IDE specific files
+.idea/
+.junie/
+.vscode/
+*.swp
+*.bak
+*.swo
+
+# Log files
+logs/
+*.log
+
+# Environment variables
+.env
+.env.*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+#Other files
+COMMENTS.md
+PERFORMANCE.md
+
