@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// CountryData holds the global collection of country information.
 var (
 	CountryData          *CountryCollection
 	cCenter              *fyne.Container
@@ -31,11 +32,13 @@ var (
 	zoomSlider           *widget.Slider
 )
 
+// Settings defines the scaling limits for the application.
 type Settings struct {
 	MinScale float32 `json:"minScale"`
 	MaxScale float32 `json:"maxScale"`
 }
 
+// ZoomableMap is a custom widget that provides a zoomable map interface.
 type ZoomableMap struct {
 	widget.BaseWidget
 	Container *fyne.Container
@@ -345,11 +348,11 @@ func updateMapDisplay() {
 	right, _ := rightSelectedCountry.Get()
 	if left != "" {
 		drawBar(leftBar, getArea(left), color.NRGBA{G: 255, A: 255})
-		drawCountry(cMap, left, false, color.NRGBA{G: 255, A: 255}, 4)
+		drawCountry(cMap, left, false, color.NRGBA{G: 255, A: 255})
 	}
 	if right != "" {
 		drawBar(rightBar, getArea(right), color.NRGBA{G: 255, B: 255, A: 255})
-		drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255}, 4)
+		drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255})
 	}
 }
 
@@ -446,12 +449,12 @@ func main() {
 		updateHeader()
 		if c != "" {
 			drawBar(leftBar, getArea(c), color.NRGBA{G: 255, A: 255})
-			drawCountry(cMap, c, true, color.NRGBA{G: 255, A: 255}, 4)
+			drawCountry(cMap, c, true, color.NRGBA{G: 255, A: 255})
 		}
 		right, _ := rightSelectedCountry.Get()
 		if right != "" {
 			drawBar(rightBar, getArea(right), color.NRGBA{G: 255, B: 255, A: 255})
-			drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255}, 4)
+			drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255})
 		}
 	}))
 	right := addBorder(createList(maxWidth, func(c string) {
@@ -468,12 +471,12 @@ func main() {
 		left, _ := leftSelectedCountry.Get()
 		if left != "" {
 			drawBar(leftBar, getArea(left), color.NRGBA{G: 255, A: 255})
-			drawCountry(cMap, left, clear, color.NRGBA{G: 255, A: 255}, 4)
+			drawCountry(cMap, left, clear, color.NRGBA{G: 255, A: 255})
 			clear = false
 		}
 		if c != "" {
 			drawBar(rightBar, getArea(c), color.NRGBA{G: 255, B: 255, A: 255})
-			drawCountry(cMap, c, clear, color.NRGBA{G: 255, B: 255, A: 255}, 4)
+			drawCountry(cMap, c, clear, color.NRGBA{G: 255, B: 255, A: 255})
 		}
 	}))
 	center := addBorder(innerBorder)
@@ -530,8 +533,8 @@ func getArea(name string) float64 {
 }
 
 // drawCountry draws the geoJSON paths of a country on the map.
-func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Color, fpSize int) {
-	paths, err := getCachedGeoJSON(country, true, true, 0, false, true, fpSize)
+func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Color) {
+	paths, err := getCachedGeoJSON(country, true)
 	if err != nil {
 		log.Printf("Error loading %s: %v", country, err)
 		return
@@ -565,6 +568,21 @@ func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Co
 	centroidLat := totalLat / float32(numPoints)
 	centroidLon := totalLon / float32(numPoints)
 
+	var countryInfo CountryInfo
+	for _, c := range CountryData.Countries {
+		if c.Name == country {
+			countryInfo = c
+			break
+		}
+	}
+
+	if countryInfo.Flip_Y {
+		centroidLat = -centroidLat
+	}
+	if countryInfo.Rotate == -90 {
+		centroidLat, centroidLon = centroidLon, centroidLat
+	}
+
 	canvasCenterX := size.Width / 2
 	canvasCenterY := size.Height / 2
 
@@ -582,9 +600,16 @@ func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Co
 	for _, path := range paths {
 		var points []fyne.Position
 		for _, pos := range path {
+			pX, pY := pos.X, pos.Y
+			if countryInfo.Flip_Y {
+				pX = -pX
+			}
+			if countryInfo.Rotate == -90 {
+				pX, pY = pY, -pX
+			}
 			points = append(points, fyne.NewPos(
-				(pos.Y-centroidLon)*fixedScale+canvasCenterX,
-				(centroidLat-pos.X)*fixedScale+canvasCenterY,
+				(pY-centroidLon)*fixedScale+canvasCenterX,
+				(centroidLat-pX)*fixedScale+canvasCenterY,
 			))
 		}
 		for i := 0; i < len(points)-1; i++ {
