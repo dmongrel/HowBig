@@ -22,6 +22,9 @@ var (
 
 // getCachedGeoJSON loads and caches parsed geoJSON from the mapdata directory.
 func getCachedGeoJSON(country string, singlePolyline bool) ([][]fyne.Position, error) {
+	if country == "Barbados" {
+		singlePolyline = false
+	}
 	fileName := getFileName(country)
 	filePath := filepath.Join("mapdata", fileName)
 
@@ -131,19 +134,17 @@ func GetBoundingBox(country string) (BoundingBox, error) {
 		var fc struct {
 			Features []struct {
 				Properties struct {
-					X  float32 `json:"x"`
-					Y  float32 `json:"y"`
-					X1 float32 `json:"x1"`
-					X2 float32 `json:"x2"`
+					BoundingBox []float32 `json:"boundingBox"`
 				} `json:"properties"`
 			} `json:"features"`
 		}
-		if err := json.Unmarshal(data, &fc); err == nil && len(fc.Features) > 0 && (fc.Features[0].Properties.X != 0 || fc.Features[0].Properties.X1 != 0) {
+		if err := json.Unmarshal(data, &fc); err == nil && len(fc.Features) > 0 && len(fc.Features[0].Properties.BoundingBox) == 4 {
+			bbox := fc.Features[0].Properties.BoundingBox
 			return BoundingBox{
-				MinX: fc.Features[0].Properties.X,
-				MinY: fc.Features[0].Properties.Y,
-				MaxX: fc.Features[0].Properties.X1,
-				MaxY: fc.Features[0].Properties.X2,
+				MinX: bbox[0],
+				MinY: bbox[1],
+				MaxX: bbox[2],
+				MaxY: bbox[3],
 			}, nil
 		}
 	}
