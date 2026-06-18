@@ -229,7 +229,7 @@ func getFitScale(country string) float32 {
 	if width == 0 || height == 0 {
 		return 1.0
 	}
-	
+
 	size := cMap.Container.Size()
 	scaleX := size.Width / width
 	scaleY := size.Height / height
@@ -259,12 +259,12 @@ func getTargetScale() (float32, int) {
 	if larger == "" {
 		return AppSettings.MinScale, 0
 	}
-	
+
 	targetScale := getFitScale(larger) / 20.0
-	
+
 	minScale := AppSettings.MinScale
 	maxScale := AppSettings.MaxScale
-	
+
 	level := int(19.0 * math.Log(float64(targetScale/minScale)) / math.Log(float64(maxScale/minScale)))
 	if level < 0 {
 		level = 0
@@ -272,10 +272,10 @@ func getTargetScale() (float32, int) {
 	if level > 19 {
 		level = 19
 	}
-	
+
 	// Recalculate scale from level to ensure consistency
 	actualScale := minScale * float32(math.Pow(float64(maxScale/minScale), float64(level)/19.0))
-	
+
 	return actualScale, level
 }
 
@@ -330,11 +330,11 @@ func updateMapDisplay() {
 	right, _ := rightSelectedCountry.Get()
 	if left != "" {
 		drawBar(leftBar, getArea(left), color.NRGBA{G: 255, A: 255})
-		drawCountry(cMap, left, false, color.NRGBA{G: 255, A: 255})
+		drawCountry(cMap, left, false, color.NRGBA{G: 255, A: 255}, 4)
 	}
 	if right != "" {
 		drawBar(rightBar, getArea(right), color.NRGBA{G: 255, B: 255, A: 255})
-		drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255})
+		drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255}, 4)
 	}
 }
 
@@ -422,12 +422,12 @@ func main() {
 		updateHeader()
 		if c != "" {
 			drawBar(leftBar, getArea(c), color.NRGBA{G: 255, A: 255})
-			drawCountry(cMap, c, true, color.NRGBA{G: 255, A: 255})
+			drawCountry(cMap, c, true, color.NRGBA{G: 255, A: 255}, 4)
 		}
 		right, _ := rightSelectedCountry.Get()
 		if right != "" {
 			drawBar(rightBar, getArea(right), color.NRGBA{G: 255, B: 255, A: 255})
-			drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255})
+			drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255}, 4)
 		}
 	}))
 	right := addBorder(createList(maxWidth, func(c string) {
@@ -444,12 +444,12 @@ func main() {
 		left, _ := leftSelectedCountry.Get()
 		if left != "" {
 			drawBar(leftBar, getArea(left), color.NRGBA{G: 255, A: 255})
-			drawCountry(cMap, left, clear, color.NRGBA{G: 255, A: 255})
+			drawCountry(cMap, left, clear, color.NRGBA{G: 255, A: 255}, 4)
 			clear = false
 		}
 		if c != "" {
 			drawBar(rightBar, getArea(c), color.NRGBA{G: 255, B: 255, A: 255})
-			drawCountry(cMap, c, clear, color.NRGBA{G: 255, B: 255, A: 255})
+			drawCountry(cMap, c, clear, color.NRGBA{G: 255, B: 255, A: 255}, 4)
 		}
 	}))
 	center := addBorder(innerBorder)
@@ -503,8 +503,8 @@ func getArea(name string) float64 {
 	return 0
 }
 
-func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Color) {
-	paths, err := getCachedGeoJSON(country, true, true)
+func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Color, fpSize int) {
+	paths, err := getCachedGeoJSON(country, true, true, 0, false, true, fpSize)
 	if err != nil {
 		log.Printf("Error loading %s: %v", country, err)
 		return
