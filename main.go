@@ -556,18 +556,6 @@ func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Co
 	zScale, _ := zm.ZoomScale.Get()
 	fixedScale := float32(20.0) * float32(zScale)
 
-	var totalLat, totalLon float32
-	var numPoints int
-	for _, path := range paths {
-		for _, pos := range path {
-			totalLat += pos.X
-			totalLon += pos.Y
-			numPoints++
-		}
-	}
-	centroidLat := totalLat / float32(numPoints)
-	centroidLon := totalLon / float32(numPoints)
-
 	var countryInfo CountryInfo
 	for _, c := range CountryData.Countries {
 		if c.Name == country {
@@ -576,12 +564,27 @@ func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Co
 		}
 	}
 
-	if countryInfo.Flip_Y {
-		centroidLat = -centroidLat
+	transformedPaths := make([][]fyne.Position, len(paths))
+	var totalLat, totalLon float32
+	var numPoints int
+	for i, path := range paths {
+		transformedPaths[i] = make([]fyne.Position, len(path))
+		for j, pos := range path {
+			pX, pY := pos.X, pos.Y
+			if countryInfo.Flip_Y {
+				pX = -pX
+			}
+			if countryInfo.Rotate == -90 {
+				pX, pY = pY, -pX
+			}
+			transformedPaths[i][j] = fyne.NewPos(pX, pY)
+			totalLat += pX
+			totalLon += pY
+			numPoints++
+		}
 	}
-	if countryInfo.Rotate == -90 {
-		centroidLat, centroidLon = centroidLon, centroidLat
-	}
+	centroidLat := totalLat / float32(numPoints)
+	centroidLon := totalLon / float32(numPoints)
 
 	canvasCenterX := size.Width / 2
 	canvasCenterY := size.Height / 2
@@ -597,19 +600,16 @@ func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Co
 		}
 	}
 
-	for _, path := range paths {
+	for _, path := range transformedPaths {
 		var points []fyne.Position
-		for _, pos := range path {
-			pX, pY := pos.X, pos.Y
-			if countryInfo.Flip_Y {
-				pX = -pX
-			}
-			if countryInfo.Rotate == -90 {
-				pX, pY = pY, -pX
-			}
+		vScale := float32(countryInfo.VerticalScale)
+		if vScale == 0 {
+			vScale = 1.5
+		}
+		for _, p := range path {
 			points = append(points, fyne.NewPos(
-				(pY-centroidLon)*fixedScale+canvasCenterX,
-				(centroidLat-pX)*fixedScale+canvasCenterY,
+				(p.Y-centroidLon)*fixedScale+canvasCenterX,
+				(centroidLat-p.X)*fixedScale*vScale+canvasCenterY,
 			))
 		}
 		for i := 0; i < len(points)-1; i++ {
