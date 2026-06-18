@@ -44,6 +44,7 @@ type ZoomableMap struct {
 	Slider    *widget.Slider
 }
 
+// NewZoomableMap creates and initializes a new ZoomableMap.
 func NewZoomableMap() *ZoomableMap {
 	zm := &ZoomableMap{
 		Container: container.NewWithoutLayout(),
@@ -56,6 +57,7 @@ func NewZoomableMap() *ZoomableMap {
 	return zm
 }
 
+// Scrolled handles scroll events to adjust the zoom level and scale.
 func (zm *ZoomableMap) Scrolled(e *fyne.ScrollEvent) {
 	zoomLevel, _ := zm.ZoomLevel.Get()
 	if e.Scrolled.DY > 0 {
@@ -80,6 +82,7 @@ func (zm *ZoomableMap) Scrolled(e *fyne.ScrollEvent) {
 	updateMapDisplay()
 }
 
+// createFooter creates the zoom slider footer component.
 func createFooter() fyne.CanvasObject {
 	minText := canvas.NewText("0", color.White)
 	minText.TextSize = 26
@@ -107,10 +110,12 @@ func createFooter() fyne.CanvasObject {
 	return container.NewBorder(nil, nil, container.NewPadded(minText), container.NewPadded(maxText), sliderWrapper)
 }
 
+// CreateRenderer creates a renderer for the ZoomableMap.
 func (zm *ZoomableMap) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(zm.Container)
 }
 
+// init initializes the country collection and application settings.
 func init() {
 	cc := NewCountryCollection()
 	path := filepath.Join("mapdata", "country_data.json")
@@ -121,6 +126,7 @@ func init() {
 	loadSettings()
 }
 
+// loadSettings reads application settings from settings.json.
 func loadSettings() {
 	data, err := os.ReadFile("settings.json")
 	if err != nil {
@@ -133,6 +139,8 @@ func loadSettings() {
 		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0}
 	}
 }
+
+// createList creates a scrollable list of countries with a selection callback.
 func createList(width float32, onSelected func(string)) fyne.CanvasObject {
 	list := widget.NewList(
 		func() int { return len(CountryData.Countries) },
@@ -167,6 +175,7 @@ func createList(width float32, onSelected func(string)) fyne.CanvasObject {
 	return container.NewStack(bg, scroll)
 }
 
+// addBorder adds a border to a Fyne canvas object.
 func addBorder(obj fyne.CanvasObject) fyne.CanvasObject {
 	border := canvas.NewRectangle(color.Transparent)
 	border.StrokeColor = color.White
@@ -174,6 +183,7 @@ func addBorder(obj fyne.CanvasObject) fyne.CanvasObject {
 	return container.NewStack(obj, border)
 }
 
+// formatNumber formats a float as a string with thousands separators.
 func formatNumber(n float64) string {
 	s := fmt.Sprintf("%.0f", n)
 	var res []byte
@@ -186,6 +196,7 @@ func formatNumber(n float64) string {
 	return string(res)
 }
 
+// calculateZoomLimits determines min and max scale for zoom based on selected countries.
 func calculateZoomLimits() (float32, float32) {
 	left, _ := leftSelectedCountry.Get()
 	right, _ := rightSelectedCountry.Get()
@@ -219,6 +230,7 @@ func calculateZoomLimits() (float32, float32) {
 	return minScale * 0.5, maxScale * 2.0
 }
 
+// getFitScale returns the scale needed to fit the bounding box of a country.
 func getFitScale(country string) float32 {
 	bbox, err := GetBoundingBox(country)
 	if err != nil {
@@ -236,6 +248,7 @@ func getFitScale(country string) float32 {
 	return min(scaleX, scaleY)
 }
 
+// getTargetScale calculates the appropriate scale and zoom level for displaying selected countries.
 func getTargetScale() (float32, int) {
 	left, _ := leftSelectedCountry.Get()
 	right, _ := rightSelectedCountry.Get()
@@ -279,6 +292,7 @@ func getTargetScale() (float32, int) {
 	return actualScale, level
 }
 
+// updateHeader updates the header displaying area information for selected countries.
 func updateHeader() {
 	const sqMiToSqKm = 2.58998811
 	left, _ := leftSelectedCountry.Get()
@@ -324,6 +338,7 @@ func updateHeader() {
 	headerContainer.Refresh()
 }
 
+// updateMapDisplay clears and redraws the map based on current selections.
 func updateMapDisplay() {
 	clearAll()
 	left, _ := leftSelectedCountry.Get()
@@ -338,6 +353,7 @@ func updateMapDisplay() {
 	}
 }
 
+// clearAll clears all containers on the map.
 func clearAll() {
 	leftBar.Objects = nil
 	leftBar.Refresh()
@@ -351,15 +367,22 @@ type customTheme struct {
 	base fyne.Theme
 }
 
+// Color returns the color for a given theme color name and variant.
 func (c *customTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	return c.base.Color(name, variant)
 }
+
+// Font returns the font resource for a given style.
 func (c *customTheme) Font(style fyne.TextStyle) fyne.Resource {
 	return c.base.Font(style)
 }
+
+// Icon returns the icon resource for a given icon name.
 func (c *customTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 	return c.base.Icon(name)
 }
+
+// Size returns the size for a given theme size name, with customizations for scrollbars.
 func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
 	if name == theme.SizeNameScrollBar || name == theme.SizeNameScrollBarSmall {
 		return 20
@@ -367,6 +390,7 @@ func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
 	return c.base.Size(name)
 }
 
+// main is the application entry point.
 func main() {
 	a := app.New()
 	leftSelectedCountry = binding.NewString()
@@ -459,6 +483,7 @@ func main() {
 	w.ShowAndRun()
 }
 
+// drawBar draws a bar representing the area of a country.
 func drawBar(c *fyne.Container, area float64, barColor color.Color) {
 	size := c.Size()
 	if size.Width == 0 || size.Height == 0 {
@@ -494,6 +519,7 @@ func drawBar(c *fyne.Container, area float64, barColor color.Color) {
 	c.Refresh()
 }
 
+// getArea retrieves the area of a country by its name.
 func getArea(name string) float64 {
 	for _, country := range CountryData.Countries {
 		if country.Name == name {
@@ -503,6 +529,7 @@ func getArea(name string) float64 {
 	return 0
 }
 
+// drawCountry draws the geoJSON paths of a country on the map.
 func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Color, fpSize int) {
 	paths, err := getCachedGeoJSON(country, true, true, 0, false, true, fpSize)
 	if err != nil {

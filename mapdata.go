@@ -79,6 +79,7 @@ func getCachedGeoJSON(country string, allowDownsampling bool, skipSmall bool, mi
 	return paths, nil
 }
 
+// getFileName returns the file name for the given country name.
 func getFileName(name string) string {
 	return strings.ReplaceAll(name, " ", "") + ".gjson"
 }
