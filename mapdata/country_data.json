@@ -4,1189 +4,1585 @@
       "Name": "Afghanistan",
       "CompactName": "Afghanistan.gjson",
       "ISOCode": "AFG",
-      "Area": 252072
+      "Area": 252072,
+      "flip_y": true,
+      "rotate": -90
     },
     {
       "Name": "Albania",
       "CompactName": "Albania.gjson",
       "ISOCode": "ALB",
-      "Area": 11100
+      "Area": 11100,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Algeria",
       "CompactName": "Algeria.gjson",
       "ISOCode": "DZA",
-      "Area": 919595
+      "Area": 919595,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Andorra",
       "CompactName": "Andorra.gjson",
       "ISOCode": "AND",
-      "Area": 181
+      "Area": 181,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Angola",
       "CompactName": "Angola.gjson",
       "ISOCode": "AGO",
-      "Area": 481350
+      "Area": 481350,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Antigua and Barbuda",
       "CompactName": "AntiguaandBarbuda.gjson",
       "ISOCode": "ATG",
-      "Area": 170
+      "Area": 170,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Argentina",
       "CompactName": "Argentina.gjson",
       "ISOCode": "ARG",
-      "Area": 1073500
+      "Area": 1073500,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Armenia",
       "CompactName": "Armenia.gjson",
       "ISOCode": "ARM",
-      "Area": 11484
+      "Area": 11484,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Australia",
       "CompactName": "Australia.gjson",
       "ISOCode": "AUS",
-      "Area": 2988900
+      "Area": 2988900,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Austria",
       "CompactName": "Austria.gjson",
       "ISOCode": "AUT",
-      "Area": 32385
+      "Area": 32385,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Azerbaijan",
       "CompactName": "Azerbaijan.gjson",
       "ISOCode": "AZE",
-      "Area": 33436
+      "Area": 33436,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Bahamas",
       "CompactName": "Bahamas.gjson",
       "ISOCode": "BHS",
-      "Area": 5358
+      "Area": 5358,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Bahrain",
       "CompactName": "Bahrain.gjson",
       "ISOCode": "BHR",
-      "Area": 293
+      "Area": 293,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Bangladesh",
       "CompactName": "Bangladesh.gjson",
       "ISOCode": "BGD",
-      "Area": 56977
+      "Area": 56977,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Barbados",
       "CompactName": "Barbados.gjson",
       "ISOCode": "BRB",
-      "Area": 167
+      "Area": 167,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Belarus",
       "CompactName": "Belarus.gjson",
       "ISOCode": "BLR",
-      "Area": 80166
+      "Area": 80166,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Belgium",
       "CompactName": "Belgium.gjson",
       "ISOCode": "BEL",
-      "Area": 11787
+      "Area": 11787,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Belize",
       "CompactName": "Belize.gjson",
       "ISOCode": "BLZ",
-      "Area": 8867
+      "Area": 8867,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Benin",
       "CompactName": "Benin.gjson",
       "ISOCode": "BEN",
-      "Area": 44310
+      "Area": 44310,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Bhutan",
       "CompactName": "Bhutan.gjson",
       "ISOCode": "BTN",
-      "Area": 14824
+      "Area": 14824,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Bolivia",
       "CompactName": "Bolivia.gjson",
       "ISOCode": "BOL",
-      "Area": 424164
+      "Area": 424164,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Bosnia and Herzegovina",
       "CompactName": "BosniaandHerzegovina.gjson",
       "ISOCode": "BIH",
-      "Area": 19772
+      "Area": 19772,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Botswana",
       "CompactName": "Botswana.gjson",
       "ISOCode": "BWA",
-      "Area": 225000
+      "Area": 225000,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Brazil",
       "CompactName": "Brazil.gjson",
       "ISOCode": "BRA",
-      "Area": 3285862
+      "Area": 3285862,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Brunei",
       "CompactName": "Brunei.gjson",
       "ISOCode": "BRN",
-      "Area": 2226
+      "Area": 2226,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Bulgaria",
       "CompactName": "Bulgaria.gjson",
       "ISOCode": "BGR",
-      "Area": 42855
+      "Area": 42855,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Burkina Faso",
       "CompactName": "BurkinaFaso.gjson",
       "ISOCode": "BFA",
-      "Area": 104543
+      "Area": 104543,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Burundi",
       "CompactName": "Burundi.gjson",
       "ISOCode": "BDI",
-      "Area": 10745
+      "Area": 10745,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Cabo Verde",
       "CompactName": "CaboVerde.gjson",
       "ISOCode": "CPV",
-      "Area": 1557
+      "Area": 1557,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Cambodia",
       "CompactName": "Cambodia.gjson",
       "ISOCode": "KHM",
-      "Area": 71056
+      "Area": 71056,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Cameroon",
       "CompactName": "Cameroon.gjson",
       "ISOCode": "CMR",
-      "Area": 183569
+      "Area": 183569,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Canada",
       "CompactName": "Canada.gjson",
       "ISOCode": "CAN",
-      "Area": 3855100
+      "Area": 3855100,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Central African Republic",
       "CompactName": "CentralAfricanRepublic.gjson",
       "ISOCode": "CAF",
-      "Area": 240535
+      "Area": 240535,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Chad",
       "CompactName": "Chad.gjson",
       "ISOCode": "TCD",
-      "Area": 495800
+      "Area": 495800,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Chile",
       "CompactName": "Chile.gjson",
       "ISOCode": "CHL",
-      "Area": 291932
+      "Area": 291932,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "China",
       "CompactName": "China.gjson",
       "ISOCode": "CHN",
-      "Area": 3705410
+      "Area": 3705410,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Colombia",
       "CompactName": "Colombia.gjson",
       "ISOCode": "COL",
-      "Area": 439735
+      "Area": 439735,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Comoros",
       "CompactName": "Comoros.gjson",
       "ISOCode": "COM",
-      "Area": 719
+      "Area": 719,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Congo (Congo-Brazzaville)",
       "CompactName": "Congo(Congo-Brazzaville).gjson",
       "ISOCode": "COG",
-      "Area": 132047
+      "Area": 132047,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Costa Rica",
       "CompactName": "CostaRica.gjson",
       "ISOCode": "CRI",
-      "Area": 19730
+      "Area": 19730,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Croatia",
       "CompactName": "Croatia.gjson",
       "ISOCode": "HRV",
-      "Area": 21851
+      "Area": 21851,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Cuba",
       "CompactName": "Cuba.gjson",
       "ISOCode": "CUB",
-      "Area": 42426
+      "Area": 42426,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Cyprus",
       "CompactName": "Cyprus.gjson",
       "ISOCode": "CYP",
-      "Area": 3572
+      "Area": 3572,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Czechia",
       "CompactName": "Czechia.gjson",
       "ISOCode": "CZE",
-      "Area": 30452
+      "Area": 30452,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Denmark",
       "CompactName": "Denmark.gjson",
       "ISOCode": "DNK",
-      "Area": 16573
+      "Area": 16573,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Djibouti",
       "CompactName": "Djibouti.gjson",
       "ISOCode": "DJI",
-      "Area": 8958
+      "Area": 8958,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Dominica",
       "CompactName": "Dominica.gjson",
       "ISOCode": "DMA",
-      "Area": 290
+      "Area": 290,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Dominican Republic",
       "CompactName": "DominicanRepublic.gjson",
       "ISOCode": "DOM",
-      "Area": 18704
+      "Area": 18704,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Ecuador",
       "CompactName": "Ecuador.gjson",
       "ISOCode": "ECU",
-      "Area": 100224
+      "Area": 100224,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Egypt",
       "CompactName": "Egypt.gjson",
       "ISOCode": "EGY",
-      "Area": 386662
+      "Area": 386662,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "El Salvador",
       "CompactName": "ElSalvador.gjson",
       "ISOCode": "SLV",
-      "Area": 8124
+      "Area": 8124,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Equatorial Guinea",
       "CompactName": "EquatorialGuinea.gjson",
       "ISOCode": "GNQ",
-      "Area": 10830
+      "Area": 10830,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Eritrea",
       "CompactName": "Eritrea.gjson",
       "ISOCode": "ERI",
-      "Area": 45406
+      "Area": 45406,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Estonia",
       "CompactName": "Estonia.gjson",
       "ISOCode": "EST",
-      "Area": 17529
+      "Area": 17529,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Eswatini",
       "CompactName": "Eswatini.gjson",
       "ISOCode": "SWZ",
-      "Area": 6704
+      "Area": 6704,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Ethiopia",
       "CompactName": "Ethiopia.gjson",
       "ISOCode": "ETH",
-      "Area": 426370
+      "Area": 426370,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Fiji",
       "CompactName": "Fiji.gjson",
       "ISOCode": "FJI",
-      "Area": 7055
+      "Area": 7055,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Finland",
       "CompactName": "Finland.gjson",
       "ISOCode": "FIN",
-      "Area": 130666
+      "Area": 130666,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "France",
       "CompactName": "France.gjson",
       "ISOCode": "FRA",
-      "Area": 248573
+      "Area": 248573,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Gabon",
       "CompactName": "Gabon.gjson",
       "ISOCode": "GAB",
-      "Area": 103347
+      "Area": 103347,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Gambia",
       "CompactName": "Gambia.gjson",
       "ISOCode": "GMB",
-      "Area": 4361
+      "Area": 4361,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Georgia",
       "CompactName": "Georgia.gjson",
       "ISOCode": "GEO",
-      "Area": 26911
+      "Area": 26911,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Germany",
       "CompactName": "Germany.gjson",
       "ISOCode": "DEU",
-      "Area": 137882
+      "Area": 137882,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Ghana",
       "CompactName": "Ghana.gjson",
       "ISOCode": "GHA",
-      "Area": 92098
+      "Area": 92098,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Greece",
       "CompactName": "Greece.gjson",
       "ISOCode": "GRC",
-      "Area": 50949
+      "Area": 50949,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Grenada",
       "CompactName": "Grenada.gjson",
       "ISOCode": "GRD",
-      "Area": 133
+      "Area": 133,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Guatemala",
       "CompactName": "Guatemala.gjson",
       "ISOCode": "GTM",
-      "Area": 42042
+      "Area": 42042,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Guinea",
       "CompactName": "Guinea.gjson",
       "ISOCode": "GIN",
-      "Area": 94926
+      "Area": 94926,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Guinea-Bissau",
       "CompactName": "Guinea-Bissau.gjson",
       "ISOCode": "GNB",
-      "Area": 13948
+      "Area": 13948,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Guyana",
       "CompactName": "Guyana.gjson",
       "ISOCode": "GUY",
-      "Area": 83012
+      "Area": 83012,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Haiti",
       "CompactName": "Haiti.gjson",
       "ISOCode": "HTI",
-      "Area": 10714
+      "Area": 10714,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Honduras",
       "CompactName": "Honduras.gjson",
       "ISOCode": "HND",
-      "Area": 43433
+      "Area": 43433,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Hungary",
       "CompactName": "Hungary.gjson",
       "ISOCode": "HUN",
-      "Area": 35917
+      "Area": 35917,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Iceland",
       "CompactName": "Iceland.gjson",
       "ISOCode": "ISL",
-      "Area": 40000
+      "Area": 40000,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "India",
       "CompactName": "India.gjson",
       "ISOCode": "IND",
-      "Area": 1269219
+      "Area": 1269219,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Indonesia",
       "CompactName": "Indonesia.gjson",
       "ISOCode": "IDN",
-      "Area": 735358
+      "Area": 735358,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Iran",
       "CompactName": "Iran.gjson",
       "ISOCode": "IRN",
-      "Area": 636371
+      "Area": 636371,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Iraq",
       "CompactName": "Iraq.gjson",
       "ISOCode": "IRQ",
-      "Area": 169235
+      "Area": 169235,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Ireland",
       "CompactName": "Ireland.gjson",
       "ISOCode": "IRL",
-      "Area": 27133
+      "Area": 27133,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Israel",
       "CompactName": "Israel.gjson",
       "ISOCode": "ISR",
-      "Area": 8019
+      "Area": 8019,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Italy",
       "CompactName": "Italy.gjson",
       "ISOCode": "ITA",
-      "Area": 116587
+      "Area": 116587,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Jamaica",
       "CompactName": "Jamaica.gjson",
       "ISOCode": "JAM",
-      "Area": 4244
+      "Area": 4244,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Japan",
       "CompactName": "Japan.gjson",
       "ISOCode": "JPN",
-      "Area": 145920
+      "Area": 145920,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Jordan",
       "CompactName": "Jordan.gjson",
       "ISOCode": "JOR",
-      "Area": 34284
+      "Area": 34284,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Kazakhstan",
       "CompactName": "Kazakhstan.gjson",
       "ISOCode": "KAZ",
-      "Area": 1052090
+      "Area": 1052090,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Kenya",
       "CompactName": "Kenya.gjson",
       "ISOCode": "KEN",
-      "Area": 224081
+      "Area": 224081,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Kiribati",
       "CompactName": "Kiribati.gjson",
       "ISOCode": "KIR",
-      "Area": 313
+      "Area": 313,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Korea (North)",
       "CompactName": "Korea(North).gjson",
       "ISOCode": "PRK",
-      "Area": 46490
+      "Area": 46490,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Korea (South)",
       "CompactName": "Korea(South).gjson",
       "ISOCode": "KOR",
-      "Area": 38696
+      "Area": 38696,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Kuwait",
       "CompactName": "Kuwait.gjson",
       "ISOCode": "KWT",
-      "Area": 6880
+      "Area": 6880,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Kyrgyzstan",
       "CompactName": "Kyrgyzstan.gjson",
       "ISOCode": "KGZ",
-      "Area": 77199
+      "Area": 77199,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Laos",
       "CompactName": "Laos.gjson",
       "ISOCode": "LAO",
-      "Area": 91429
+      "Area": 91429,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Latvia",
       "CompactName": "Latvia.gjson",
       "ISOCode": "LVA",
-      "Area": 24940
+      "Area": 24940,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Lebanon",
       "CompactName": "Lebanon.gjson",
       "ISOCode": "LBN",
-      "Area": 4015
+      "Area": 4015,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Lesotho",
       "CompactName": "Lesotho.gjson",
       "ISOCode": "LSO",
-      "Area": 11720
+      "Area": 11720,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Liberia",
       "CompactName": "Liberia.gjson",
       "ISOCode": "LBR",
-      "Area": 37420
+      "Area": 37420,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Libya",
       "CompactName": "Libya.gjson",
       "ISOCode": "LBY",
-      "Area": 679362
+      "Area": 679362,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Liechtenstein",
       "CompactName": "Liechtenstein.gjson",
       "ISOCode": "LIE",
-      "Area": 62
+      "Area": 62,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Lithuania",
       "CompactName": "Lithuania.gjson",
       "ISOCode": "LTU",
-      "Area": 25207
+      "Area": 25207,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Luxembourg",
       "CompactName": "Luxembourg.gjson",
       "ISOCode": "LUX",
-      "Area": 998
+      "Area": 998,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Madagascar",
       "CompactName": "Madagascar.gjson",
       "ISOCode": "MDG",
-      "Area": 226658
+      "Area": 226658,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Malawi",
       "CompactName": "Malawi.gjson",
       "ISOCode": "MWI",
-      "Area": 45745
+      "Area": 45745,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Malaysia",
       "CompactName": "Malaysia.gjson",
       "ISOCode": "MYS",
-      "Area": 127724
+      "Area": 127724,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Maldives",
       "CompactName": "Maldives.gjson",
       "ISOCode": "MDV",
-      "Area": 115
+      "Area": 115,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Mali",
       "CompactName": "Mali.gjson",
       "ISOCode": "MLI",
-      "Area": 478841
+      "Area": 478841,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Malta",
       "CompactName": "Malta.gjson",
       "ISOCode": "MLT",
-      "Area": 122
+      "Area": 122,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Marshall Islands",
       "CompactName": "MarshallIslands.gjson",
       "ISOCode": "MHL",
-      "Area": 70
+      "Area": 70,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Mauritania",
       "CompactName": "Mauritania.gjson",
       "ISOCode": "MRT",
-      "Area": 397960
+      "Area": 397960,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Mauritius",
       "CompactName": "Mauritius.gjson",
       "ISOCode": "MUS",
-      "Area": 790
+      "Area": 790,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Mexico",
       "CompactName": "Mexico.gjson",
       "ISOCode": "MEX",
-      "Area": 758449
+      "Area": 758449,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Micronesia",
       "CompactName": "Micronesia.gjson",
       "ISOCode": "FSM",
-      "Area": 271
+      "Area": 271,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Moldova",
       "CompactName": "Moldova.gjson",
       "ISOCode": "MDA",
-      "Area": 130668
+      "Area": 130668,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Monaco",
       "CompactName": "Monaco.gjson",
       "ISOCode": "MCO",
-      "Area": 0.77
+      "Area": 0.77,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Mongolia",
       "CompactName": "Mongolia.gjson",
       "ISOCode": "MNG",
-      "Area": 603908
+      "Area": 603908,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Montenegro",
       "CompactName": "Montenegro.gjson",
       "ISOCode": "MNE",
-      "Area": 5333
+      "Area": 5333,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Morocco",
       "CompactName": "Morocco.gjson",
       "ISOCode": "MAR",
-      "Area": 172414
+      "Area": 172414,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Mozambique",
       "CompactName": "Mozambique.gjson",
       "ISOCode": "MOZ",
-      "Area": 308640
+      "Area": 308640,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Myanmar",
       "CompactName": "Myanmar.gjson",
       "ISOCode": "MMR",
-      "Area": 261228
+      "Area": 261228,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Namibia",
       "CompactName": "Namibia.gjson",
       "ISOCode": "NAM",
-      "Area": 318261
+      "Area": 318261,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Nauru",
       "CompactName": "Nauru.gjson",
       "ISOCode": "NRU",
-      "Area": 8.1
+      "Area": 8.1,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Nepal",
       "CompactName": "Nepal.gjson",
       "ISOCode": "NPL",
-      "Area": 56827
+      "Area": 56827,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Netherlands",
       "CompactName": "Netherlands.gjson",
       "ISOCode": "NLD",
-      "Area": 16040
+      "Area": 16040,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Nevis and Saint Kitts",
       "CompactName": "NevisandSaintKitts.gjson",
       "ISOCode": "KNA",
-      "Area": 101
+      "Area": 101,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "New Zealand",
       "CompactName": "NewZealand.gjson",
       "ISOCode": "NZL",
-      "Area": 103481
+      "Area": 103481,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Nicaragua",
       "CompactName": "Nicaragua.gjson",
       "ISOCode": "NIC",
-      "Area": 50337
+      "Area": 50337,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Niger",
       "CompactName": "Niger.gjson",
       "ISOCode": "NER",
-      "Area": 489200
+      "Area": 489200,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Nigeria",
       "CompactName": "Nigeria.gjson",
       "ISOCode": "NGA",
-      "Area": 356669
+      "Area": 356669,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "North Macedonia",
       "CompactName": "NorthMacedonia.gjson",
       "ISOCode": "MKD",
-      "Area": 9928
+      "Area": 9928,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Norway",
       "CompactName": "Norway.gjson",
       "ISOCode": "NOR",
-      "Area": 124756
+      "Area": 124756,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Oman",
       "CompactName": "Oman.gjson",
       "ISOCode": "OMN",
-      "Area": 119499
+      "Area": 119499,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Pakistan",
       "CompactName": "Pakistan.gjson",
       "ISOCode": "PAK",
-      "Area": 340682
+      "Area": 340682,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Palau",
       "CompactName": "Palau.gjson",
       "ISOCode": "PLW",
-      "Area": 177
+      "Area": 177,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Palestine State",
       "CompactName": "PalestineState.gjson",
       "ISOCode": "PSE",
-      "Area": 2402
+      "Area": 2402,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Panama",
       "CompactName": "Panama.gjson",
       "ISOCode": "PAN",
-      "Area": 29157
+      "Area": 29157,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Papua New Guinea",
       "CompactName": "PapuaNewGuinea.gjson",
       "ISOCode": "PNG",
-      "Area": 178703
+      "Area": 178703,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Paraguay",
       "CompactName": "Paraguay.gjson",
       "ISOCode": "PRY",
-      "Area": 157048
+      "Area": 157048,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Peru",
       "CompactName": "Peru.gjson",
       "ISOCode": "PER",
-      "Area": 496224
+      "Area": 496224,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Philippines",
       "CompactName": "Philippines.gjson",
       "ISOCode": "PHL",
-      "Area": 132183
+      "Area": 132183,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Poland",
       "CompactName": "Poland.gjson",
       "ISOCode": "POL",
-      "Area": 120726
+      "Area": 120726,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Portugal",
       "CompactName": "Portugal.gjson",
       "ISOCode": "PRT",
-      "Area": 35608
+      "Area": 35608,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Principe and Sao Tome",
       "CompactName": "PrincipeandSaoTome.gjson",
       "ISOCode": "STP",
-      "Area": 372
+      "Area": 372,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Qatar",
       "CompactName": "Qatar.gjson",
       "ISOCode": "QAT",
-      "Area": 4468
+      "Area": 4468,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Romania",
       "CompactName": "Romania.gjson",
       "ISOCode": "ROU",
-      "Area": 92046
+      "Area": 92046,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Russia",
       "CompactName": "Russia.gjson",
       "ISOCode": "RUS",
-      "Area": 6601667
+      "Area": 6601667,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Rwanda",
       "CompactName": "Rwanda.gjson",
       "ISOCode": "RWA",
-      "Area": 10169
+      "Area": 10169,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Saint Kitts and Nevis",
       "CompactName": "SaintKittsandNevis.gjson",
       "ISOCode": "KNA",
-      "Area": 101
+      "Area": 101,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Saint Lucia",
       "CompactName": "SaintLucia.gjson",
       "ISOCode": "LCA",
-      "Area": 238
+      "Area": 238,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Saint Vincent and the Grenadines",
       "CompactName": "SaintVincentandtheGrenadines.gjson",
       "ISOCode": "VCT",
-      "Area": 150
+      "Area": 150,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Samoa",
       "CompactName": "Samoa.gjson",
       "ISOCode": "WSM",
-      "Area": 1093
+      "Area": 1093,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "San Marino",
       "CompactName": "SanMarino.gjson",
       "ISOCode": "SMR",
-      "Area": 24
+      "Area": 24,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Sao Tome and Principe",
       "CompactName": "SaoTomeandPrincipe.gjson",
       "ISOCode": "STP",
-      "Area": 372
+      "Area": 372,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Saudi Arabia",
       "CompactName": "SaudiArabia.gjson",
       "ISOCode": "SAU",
-      "Area": 830000
+      "Area": 830000,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Senegal",
       "CompactName": "Senegal.gjson",
       "ISOCode": "SEN",
-      "Area": 75973
+      "Area": 75973,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Serbia",
       "CompactName": "Serbia.gjson",
       "ISOCode": "SRB",
-      "Area": 29957
+      "Area": 29957,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Seychelles",
       "CompactName": "Seychelles.gjson",
       "ISOCode": "SYC",
-      "Area": 175
+      "Area": 175,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Sierra Leone",
       "CompactName": "SierraLeone.gjson",
       "ISOCode": "SLE",
-      "Area": 27699
+      "Area": 27699,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Singapore",
       "CompactName": "Singapore.gjson",
       "ISOCode": "SGP",
-      "Area": 278
+      "Area": 278,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Slovakia",
       "CompactName": "Slovakia.gjson",
       "ISOCode": "SVK",
-      "Area": 18933
+      "Area": 18933,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Slovenia",
       "CompactName": "Slovenia.gjson",
       "ISOCode": "SVN",
-      "Area": 7827
+      "Area": 7827,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Solomon Islands",
       "CompactName": "SolomonIslands.gjson",
       "ISOCode": "SLB",
-      "Area": 11157
+      "Area": 11157,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Somalia",
       "CompactName": "Somalia.gjson",
       "ISOCode": "SOM",
-      "Area": 246201
+      "Area": 246201,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "South Africa",
       "CompactName": "SouthAfrica.gjson",
       "ISOCode": "ZAF",
-      "Area": 470693
+      "Area": 470693,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "South Sudan",
       "CompactName": "SouthSudan.gjson",
       "ISOCode": "SSD",
-      "Area": 248777
+      "Area": 248777,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Spain",
       "CompactName": "Spain.gjson",
       "ISOCode": "ESP",
-      "Area": 195120
+      "Area": 195120,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Sri Lanka",
       "CompactName": "SriLanka.gjson",
       "ISOCode": "LKA",
-      "Area": 25332
+      "Area": 25332,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Sudan",
       "CompactName": "Sudan.gjson",
       "ISOCode": "SDN",
-      "Area": 725100
+      "Area": 725100,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Suriname",
       "CompactName": "Suriname.gjson",
       "ISOCode": "SUR",
-      "Area": 63251
+      "Area": 63251,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Sweden",
       "CompactName": "Sweden.gjson",
       "ISOCode": "SWE",
-      "Area": 173860
+      "Area": 173860,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Switzerland",
       "CompactName": "Switzerland.gjson",
       "ISOCode": "CHE",
-      "Area": 15940
+      "Area": 15940,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Syria",
       "CompactName": "Syria.gjson",
       "ISOCode": "SYR",
-      "Area": 71498
+      "Area": 71498,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Taiwan",
       "CompactName": "Taiwan.gjson",
       "ISOCode": "TWN",
-      "Area": 13974
+      "Area": 13974,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Tajikistan",
       "CompactName": "Tajikistan.gjson",
       "ISOCode": "TJK",
-      "Area": 54595
+      "Area": 54595,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Tanzania",
       "CompactName": "Tanzania.gjson",
       "ISOCode": "TZA",
-      "Area": 365756
+      "Area": 365756,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Thailand",
       "CompactName": "Thailand.gjson",
       "ISOCode": "THA",
-      "Area": 198120
+      "Area": 198120,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "the Grenadines and Saint Vincent",
       "CompactName": "theGrenadinesandSaintVincent.gjson",
       "ISOCode": "VCT",
-      "Area": 150
+      "Area": 150,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Timor-Leste",
       "CompactName": "Timor-Leste.gjson",
       "ISOCode": "TLS",
-      "Area": 5741
+      "Area": 5741,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Tobago and Trinidad",
       "CompactName": "TobagoandTrinidad.gjson",
       "ISOCode": "TTO",
-      "Area": 1980
+      "Area": 1980,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Togo",
       "CompactName": "Togo.gjson",
       "ISOCode": "TGO",
-      "Area": 21925
+      "Area": 21925,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Tonga",
       "CompactName": "Tonga.gjson",
       "ISOCode": "TON",
-      "Area": 288
+      "Area": 288,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Trinidad and Tobago",
       "CompactName": "TrinidadandTobago.gjson",
       "ISOCode": "TTO",
-      "Area": 1980
+      "Area": 1980,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Tunisia",
       "CompactName": "Tunisia.gjson",
       "ISOCode": "TUN",
-      "Area": 63170
+      "Area": 63170,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Turkey",
       "CompactName": "Turkey.gjson",
       "ISOCode": "TUR",
-      "Area": 302535
+      "Area": 302535,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Turkmenistan",
       "CompactName": "Turkmenistan.gjson",
       "ISOCode": "TKM",
-      "Area": 188500
+      "Area": 188500,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Tuvalu",
       "CompactName": "Tuvalu.gjson",
       "ISOCode": "TUV",
-      "Area": 10
+      "Area": 10,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Uganda",
       "CompactName": "Uganda.gjson",
       "ISOCode": "UGA",
-      "Area": 93264
+      "Area": 93264,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Ukraine",
       "CompactName": "Ukraine.gjson",
       "ISOCode": "UKR",
-      "Area": 233030
+      "Area": 233030,
+      "flip_y": true,
+      "rotate": -90
     },
     {
       "Name": "United Arab Emirates",
       "CompactName": "UnitedArabEmirates.gjson",
       "ISOCode": "ARE",
-      "Area": 32300
+      "Area": 32300,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "United Kingdom",
       "CompactName": "UnitedKingdom.gjson",
       "ISOCode": "GBR",
-      "Area": 93723
+      "Area": 93723,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "United States",
       "CompactName": "UnitedStates.gjson",
       "ISOCode": "USA",
-      "Area": 3677647
+      "Area": 3677647,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Uruguay",
       "CompactName": "Uruguay.gjson",
       "ISOCode": "URY",
-      "Area": 68037
+      "Area": 68037,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Uzbekistan",
       "CompactName": "Uzbekistan.gjson",
       "ISOCode": "UZB",
-      "Area": 172742
+      "Area": 172742,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Vanuatu",
       "CompactName": "Vanuatu.gjson",
       "ISOCode": "VUT",
-      "Area": 4728
+      "Area": 4728,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Vatican City",
       "CompactName": "VaticanCity.gjson",
       "ISOCode": "VAT",
-      "Area": 0.17
+      "Area": 0.17,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Venezuela",
       "CompactName": "Venezuela.gjson",
       "ISOCode": "VEN",
-      "Area": 352140
+      "Area": 352140,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Vietnam",
       "CompactName": "Vietnam.gjson",
       "ISOCode": "VNM",
-      "Area": 127882
+      "Area": 127882,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Yemen",
       "CompactName": "Yemen.gjson",
       "ISOCode": "YEM",
-      "Area": 203850
+      "Area": 203850,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Zambia",
       "CompactName": "Zambia.gjson",
       "ISOCode": "ZMB",
-      "Area": 290585
+      "Area": 290585,
+      "flip_y": false,
+      "rotate": 0
     },
     {
       "Name": "Zimbabwe",
       "CompactName": "Zimbabwe.gjson",
       "ISOCode": "ZWE",
-      "Area": 150872
+      "Area": 150872,
+      "flip_y": false,
+      "rotate": 0
     }
   ]
 }
