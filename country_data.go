@@ -8,12 +8,13 @@ import (
 
 // CountryInfo holds basic information about a country.
 type CountryInfo struct {
-	Name        string  `json:"Name"`
-	CompactName string  `json:"CompactName"`
-	ISOCode     string  `json:"ISOCode"`
-	Area        float64 `json:"Area"`
-	Flip_Y      bool    `json:"flip_y"`
-	Rotate      int     `json:"rotate"`
+	Name          string  `json:"Name"`
+	CompactName   string  `json:"CompactName"`
+	ISOCode       string  `json:"ISOCode"`
+	Area          float64 `json:"Area"`
+	Flip_Y        bool    `json:"flip_y"`
+	Rotate        int     `json:"rotate"`
+	VerticalScale float64 `json:"vertical_scale"`
 }
 
 // CountryCollection holds a collection of CountryInfo objects.
