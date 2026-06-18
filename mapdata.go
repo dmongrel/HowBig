@@ -5,55 +5,29 @@ package main
 
 import (
 	"encoding/json"
-	"math"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
 
 	"fyne.io/fyne/v2"
 )
 
+// geoCache stores parsed geoJSON paths for efficient retrieval.
+// cacheMu ensures thread-safe access to geoCache.
 var (
 	geoCache = make(map[string][][]fyne.Position)
 	cacheMu  sync.RWMutex
 )
 
 // getCachedGeoJSON loads and caches parsed geoJSON from the mapdata directory.
-func getCachedGeoJSON(country string, allowDownsampling bool, skipSmall bool, minSize int, drawBiggest bool, singlePolyline bool, fpSize int) ([][]fyne.Position, error) {
+func getCachedGeoJSON(country string, singlePolyline bool) ([][]fyne.Position, error) {
 	fileName := getFileName(country)
 	filePath := filepath.Join("mapdata", fileName)
 
-	skipFactor := 1
-	if allowDownsampling {
-		fileInfo, err := os.Stat(filePath)
-		if err == nil {
-			sizeMB := fileInfo.Size() / (1024 * 1024)
-			if sizeMB >= 100 {
-				skipFactor = (2 + int((sizeMB-100)/50)) * 2
-			}
-		}
-	}
-
 	cacheKey := country
-	if skipFactor > 1 {
-		cacheKey += "_skip" + strconv.Itoa(skipFactor)
-	}
-	if skipSmall {
-		cacheKey += "_small"
-	}
-	if minSize > 0 {
-		cacheKey += "_min" + strconv.Itoa(minSize)
-	}
-	if drawBiggest {
-		cacheKey += "_biggest"
-	}
 	if singlePolyline {
 		cacheKey += "_single"
-	}
-	if fpSize > 0 {
-		cacheKey += "_fp" + strconv.Itoa(fpSize)
 	}
 
 	cacheMu.RLock()
@@ -68,7 +42,7 @@ func getCachedGeoJSON(country string, allowDownsampling bool, skipSmall bool, mi
 		return nil, err
 	}
 
-	paths, err = convertGeoJSONToDisplayFormat(data, skipFactor, skipSmall, minSize, drawBiggest, singlePolyline, fpSize)
+	paths, err = convertGeoJSONToDisplayFormat(data, singlePolyline)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +66,7 @@ func fetchGeoJSON(country string) ([]byte, error) {
 }
 
 // convertGeoJSONToDisplayFormat converts raw JSON into a format suitable for displaying.
-func convertGeoJSONToDisplayFormat(data []byte, skipFactor int, skipSmall bool, minSize int, drawBiggest bool, singlePolyline bool, fpSize int) ([][]fyne.Position, error) {
+func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool) ([][]fyne.Position, error) {
 	var fc struct {
 		Features []struct {
 			Geometry struct {
@@ -117,18 +91,8 @@ func convertGeoJSONToDisplayFormat(data []byte, skipFactor int, skipSmall bool, 
 					continue
 				}
 				var path []fyne.Position
-				for i, point := range ring {
-					if skipFactor > 1 && i%skipFactor != 0 {
-						continue
-					}
-					p0 := point[0]
-					p1 := point[1]
-					if fpSize > 0 {
-						shift := math.Pow(10, float64(fpSize))
-						p0 = math.Round(p0*shift) / shift
-						p1 = math.Round(p1*shift) / shift
-					}
-					path = append(path, fyne.NewPos(float32(p0), float32(p1)))
+				for _, point := range ring {
+					path = append(path, fyne.NewPos(float32(point[0]), float32(point[1])))
 				}
 				allPaths = append(allPaths, path)
 			}
@@ -138,52 +102,14 @@ func convertGeoJSONToDisplayFormat(data []byte, skipFactor int, skipSmall bool, 
 				continue
 			}
 
-			polygonsToProcess := coords
-			if drawBiggest && len(coords) > 0 {
-				maxPoints := -1
-				var largestPolygon [][][]float64
-				for _, polygon := range coords {
-					totalPoints := 0
-					for _, ring := range polygon {
-						totalPoints += len(ring)
-					}
-					if totalPoints > maxPoints {
-						maxPoints = totalPoints
-						largestPolygon = polygon
-					}
-				}
-				polygonsToProcess = [][][][]float64{largestPolygon}
-			}
-
-			for _, polygon := range polygonsToProcess {
-				totalPoints := 0
-				for _, ring := range polygon {
-					totalPoints += len(ring)
-				}
-				threshold := 50
-				if minSize > 0 {
-					threshold = minSize
-				}
-				if skipSmall && totalPoints < threshold {
-					continue
-				}
+			for _, polygon := range coords {
 				for i, ring := range polygon {
 					if singlePolyline && i > 0 {
 						continue
 					}
 					var path []fyne.Position
-					for i, point := range ring {
-						if skipFactor > 1 && i%skipFactor != 0 {
-							continue
-						}
-						p0 := point[0]
-						p1 := point[1]
-						if fpSize > 0 {
-							shift := math.Pow(10, float64(fpSize))
-							p0 = math.Round(p0*shift) / shift
-							p1 = math.Round(p1*shift) / shift
-						}
-						path = append(path, fyne.NewPos(float32(p1), float32(p0)))
+					for _, point := range ring {
+						path = append(path, fyne.NewPos(float32(point[1]), float32(point[0])))
 					}
 					allPaths = append(allPaths, path)
 				}
@@ -222,7 +148,7 @@ func GetBoundingBox(country string) (BoundingBox, error) {
 		}
 	}
 
-	paths, err := getCachedGeoJSON(country, false, false, 0, false, true, 0)
+	paths, err := getCachedGeoJSON(country, true)
 	if err != nil {
 		return BoundingBox{}, err
 	}
