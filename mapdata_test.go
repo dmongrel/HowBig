@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+// TestGetBoundingBox validates that GetBoundingBox returns a valid bounding box.
 func TestGetBoundingBox(t *testing.T) {
 	// Use a country that we know exists
 	bbox, err := GetBoundingBox("Afghanistan")
