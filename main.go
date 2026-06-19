@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -18,6 +19,12 @@ import (
 )
 
 // CountryData holds the global collection of country information.
+// cCenter is the central container for the application.
+// cMap is the custom widget that renders the map.
+// headerContainer holds the header elements for area display.
+// leftBar and rightBar are containers for the side information panels.
+// leftSelectedCountry and rightSelectedCountry manage the selection state.
+// AppSettings stores global application configuration.
 var (
 	CountryData          *CountryCollection
 	cCenter              *fyne.Container
@@ -92,29 +99,35 @@ func loadSettings() {
 
 // createList creates a scrollable list of countries with a selection callback.
 func createList(width float32, onSelected func(string)) fyne.CanvasObject {
+	filteredIndices := make([]int, len(CountryData.Countries))
+	for i := range CountryData.Countries {
+		filteredIndices[i] = i
+	}
+
 	list := widget.NewList(
-		func() int { return len(CountryData.Countries) },
+		func() int { return len(filteredIndices) },
 		func() fyne.CanvasObject {
 			text := canvas.NewText("", color.White)
-			text.TextSize = 28
+			text.TextSize = 18
 			return container.NewPadded(text)
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
 			padded := obj.(*fyne.Container)
 			text := padded.Objects[0].(*canvas.Text)
-			text.Text = CountryData.Countries[id].Name
+			text.Text = CountryData.Countries[filteredIndices[id]].Name
 			text.Refresh()
 		},
 	)
-	var selectedID widget.ListItemID = -1
+	var selectedID = -1
 	list.OnSelected = func(id widget.ListItemID) {
-		if id == selectedID {
+		realID := filteredIndices[id]
+		if realID == selectedID {
 			list.Unselect(id)
 			selectedID = -1
 			onSelected("")
 		} else {
-			selectedID = id
-			onSelected(CountryData.Countries[id].Name)
+			selectedID = realID
+			onSelected(CountryData.Countries[realID].Name)
 		}
 	}
 
@@ -128,7 +141,25 @@ func createList(width float32, onSelected func(string)) fyne.CanvasObject {
 		onSelected("")
 	})
 
-	return container.NewBorder(nil, button, nil, nil, container.NewStack(bg, scroll))
+	entry := widget.NewEntry()
+	entry.SetPlaceHolder("Search...")
+	entry.OnChanged = func(s string) {
+		filteredIndices = []int{}
+		for i, c := range CountryData.Countries {
+			if strings.Contains(strings.ToLower(c.Name), strings.ToLower(s)) {
+				filteredIndices = append(filteredIndices, i)
+			}
+		}
+		list.Refresh()
+	}
+
+	clearBtn := widget.NewButton("X", func() {
+		entry.SetText("")
+	})
+
+	searchBar := container.NewBorder(nil, nil, nil, clearBtn, entry)
+
+	return container.NewBorder(searchBar, button, nil, nil, container.NewStack(bg, scroll))
 }
 
 // addBorder adds a border to a Fyne canvas object.
@@ -344,12 +375,12 @@ func main() {
 
 	var maxWidth float32
 	for _, country := range CountryData.Countries {
-		size := fyne.MeasureText(country.Name, 28, fyne.TextStyle{})
+		size := fyne.MeasureText(country.Name, 18, fyne.TextStyle{})
 		if size.Width > maxWidth {
 			maxWidth = size.Width
 		}
 	}
-	maxWidth += 6
+	maxWidth += 2
 
 	cMap = NewMapWidget()
 	headerContainer = container.NewHBox()
@@ -362,55 +393,31 @@ func main() {
 	rightBarWrapper := container.NewScroll(rightBar)
 	rightBarWrapper.SetMinSize(fyne.NewSize(50, 0))
 
+	listener := &selectionListener{}
+	leftSelectedCountry.AddListener(listener)
+	rightSelectedCountry.AddListener(listener)
+
 	innerBorder := container.NewBorder(nil, nil, leftBarWrapper, rightBarWrapper, cCenter)
 
 	left := addBorder(createList(maxWidth, func(c string) {
-		err := leftSelectedCountry.Set(c)
-		if err != nil {
-			return
-		}
-		clearAll()
-		updateHeader()
-
-		rightStr, _ := rightSelectedCountry.Get()
-		scale := getTargetScale(c, rightStr)
-
-		if c != "" {
-			drawBar(leftBar, getArea(c), color.NRGBA{G: 255, A: 255})
-			drawCountry(cMap, c, scale, true, color.NRGBA{G: 255, A: 255})
-		}
-		if rightStr != "" {
-			drawBar(rightBar, getArea(rightStr), color.NRGBA{G: 255, B: 255, A: 255})
-			drawCountry(cMap, rightStr, scale, false, color.NRGBA{G: 255, B: 255, A: 255})
-		}
+		leftSelectedCountry.Set(c)
 	}))
 	right := addBorder(createList(maxWidth, func(c string) {
-		err := rightSelectedCountry.Set(c)
-		if err != nil {
-			return
-		}
-		clearAll()
-		updateHeader()
-
-		leftStr, _ := leftSelectedCountry.Get()
-		scale := getTargetScale(c, leftStr)
-		var doClear = true
-
-		if leftStr != "" {
-			drawBar(leftBar, getArea(leftStr), color.NRGBA{G: 255, A: 255})
-			drawCountry(cMap, leftStr, scale, doClear, color.NRGBA{G: 255, A: 255})
-			doClear = false
-		}
-		if c != "" {
-			drawBar(rightBar, getArea(c), color.NRGBA{G: 255, B: 255, A: 255})
-			drawCountry(cMap, c, scale, doClear, color.NRGBA{G: 255, B: 255, A: 255})
-		}
+		rightSelectedCountry.Set(c)
 	}))
 	center := addBorder(innerBorder)
 
 	w.SetContent(container.NewBorder(nil, nil, left, right, center))
 
 	w.ShowAndRun()
+}
+
+// selectionListener implements binding.DataListener to react to country selection changes.
+type selectionListener struct{}
+
+func (s *selectionListener) DataChanged() {
+	updateHeader()
+	updateMapDisplay()
 }
 
 // drawBar draws a bar representing the area of a country.
@@ -459,6 +466,7 @@ func getArea(name string) float64 {
 	return 0
 }
 
+// getCountryInfo retrieves country information by its name.
 func getCountryInfo(name string) *CountryInfo {
 	for i := range CountryData.Countries {
 		if CountryData.Countries[i].Name == name {
