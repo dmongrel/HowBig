@@ -1,3 +1,5 @@
 {
-  "debug_show_boundary": false
+  "debug_show_boundary": false,
+  "left_color": "#00FF00",
+  "right_color": "#FF0000"
 }

@@ -42,6 +42,8 @@ type Settings struct {
 	MinScale          float32 `json:"minScale"`
 	MaxScale          float32 `json:"maxScale"`
 	DebugShowBoundary bool    `json:"debug_show_boundary"`
+	LeftColor         string  `json:"left_color"`
+	RightColor        string  `json:"right_color"`
 }
 
 // MapWidget is a custom widget that provides a map interface.
@@ -88,13 +90,28 @@ func loadSettings() {
 	data, err := os.ReadFile("settings.json")
 	if err != nil {
 		log.Println("Error reading settings.json, using defaults:", err)
-		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false}
+		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000"}
 		return
 	}
 	if err := json.Unmarshal(data, &AppSettings); err != nil {
 		log.Println("Error unmarshaling settings.json:", err)
-		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false}
+		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000"}
 	}
+	if AppSettings.LeftColor == "" {
+		AppSettings.LeftColor = "#00FF00"
+	}
+	if AppSettings.RightColor == "" {
+		AppSettings.RightColor = "#FF0000"
+	}
+}
+
+// ParseHexColor parses a hex color string (e.g., "#RRGGBB") to color.NRGBA.
+func ParseHexColor(s string) color.NRGBA {
+	var r, g, b uint8
+	if len(s) == 7 && s[0] == '#' {
+		fmt.Sscanf(s[1:], "%02x%02x%02x", &r, &g, &b)
+	}
+	return color.NRGBA{R: r, G: g, B: b, A: 255}
 }
 
 // createList creates a scrollable list of countries with a selection callback.
@@ -283,7 +300,7 @@ func updateHeader() {
 
 	headerContainer.Objects = nil
 	if leftPart != "" {
-		t := canvas.NewText(leftPart, color.NRGBA{G: 255, A: 255})
+		t := canvas.NewText(leftPart, ParseHexColor(AppSettings.LeftColor))
 		t.TextSize = 36
 		headerContainer.Add(t)
 	}
@@ -293,7 +310,7 @@ func updateHeader() {
 		headerContainer.Add(t)
 	}
 	if rightPart != "" {
-		t := canvas.NewText(rightPart, color.NRGBA{G: 255, B: 255, A: 255})
+		t := canvas.NewText(rightPart, ParseHexColor(AppSettings.RightColor))
 		t.TextSize = 36
 		headerContainer.Add(t)
 	}
@@ -306,13 +323,15 @@ func updateMapDisplay() {
 	left, _ := leftSelectedCountry.Get()
 	right, _ := rightSelectedCountry.Get()
 	scale := getTargetScale(left, right)
+	leftColor := ParseHexColor(AppSettings.LeftColor)
+	rightColor := ParseHexColor(AppSettings.RightColor)
 	if left != "" {
-		drawBar(leftBar, getArea(left), color.NRGBA{G: 255, A: 255})
-		drawCountry(cMap, left, scale, false, color.NRGBA{G: 255, A: 255})
+		drawBar(leftBar, getArea(left), leftColor)
+		drawCountry(cMap, left, scale, false, leftColor)
 	}
 	if right != "" {
-		drawBar(rightBar, getArea(right), color.NRGBA{G: 255, B: 255, A: 255})
-		drawCountry(cMap, right, scale, false, color.NRGBA{G: 255, B: 255, A: 255})
+		drawBar(rightBar, getArea(right), rightColor)
+		drawCountry(cMap, right, scale, false, rightColor)
 	}
 }
 
