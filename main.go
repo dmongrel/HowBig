@@ -37,22 +37,23 @@ var (
 	AppSettings          Settings
 )
 
-// Settings define the scaling limits for the application.
+// Settings define the scaling limits and UI configuration for the application.
 type Settings struct {
-	MinScale          float32 `json:"minScale"`
-	MaxScale          float32 `json:"maxScale"`
-	DebugShowBoundary bool    `json:"debug_show_boundary"`
-	LeftColor         string  `json:"left_color"`
-	RightColor        string  `json:"right_color"`
+	MinScale          float32 `json:"minScale"`            // MinScale is the minimum allowed zoom scale.
+	MaxScale          float32 `json:"maxScale"`            // MaxScale is the maximum allowed zoom scale.
+	DebugShowBoundary bool    `json:"debug_show_boundary"` // DebugShowBoundary determines if the bounding box is rendered.
+	LeftColor         string  `json:"left_color"`          // LeftColor is the hex color for the left map.
+	RightColor        string  `json:"right_color"`         // RightColor is the hex color for the right map.
+	LargeSpanAdjust   float64 `json:"large_span_adjust"`   // LargeSpanAdjust is the value used to adjust longitude for countries spanning the 180-degree meridian.
 }
 
 // MapWidget is a custom widget that provides a map interface.
 type MapWidget struct {
 	widget.BaseWidget
-	Container *fyne.Container
+	Container *fyne.Container // Container holds the map canvas objects.
 }
 
-// NewMapWidget creates and initializes a new MapWidget.
+// NewMapWidget creates and initializes a new MapWidget instance with a container.
 func NewMapWidget() *MapWidget {
 	zm := &MapWidget{
 		Container: container.NewWithoutLayout(),
@@ -61,12 +62,12 @@ func NewMapWidget() *MapWidget {
 	return zm
 }
 
-// CreateRenderer creates a renderer for the MapWidget.
+// CreateRenderer creates and returns a renderer for the MapWidget.
 func (zm *MapWidget) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(zm.Container)
 }
 
-// Resize handles resizing of the MapWidget and redraws the map.
+// Resize handles the resizing of the MapWidget and triggers a map redraw if necessary.
 func (zm *MapWidget) Resize(s fyne.Size) {
 	zm.BaseWidget.Resize(s)
 	if cMap != nil && leftBar != nil && rightBar != nil && headerContainer != nil {
@@ -74,7 +75,7 @@ func (zm *MapWidget) Resize(s fyne.Size) {
 	}
 }
 
-// init initializes the country collection and application settings.
+// init initializes the global country collection and loads application settings.
 func init() {
 	cc := NewCountryCollection()
 	//path := filepath.Join("mapdata", "country_data.json")
@@ -85,17 +86,17 @@ func init() {
 	loadSettings()
 }
 
-// loadSettings reads application settings from settings.json.
+// loadSettings reads application configuration from settings.json, applying default values if the file is missing or invalid.
 func loadSettings() {
 	data, err := os.ReadFile("settings.json")
 	if err != nil {
 		log.Println("Error reading settings.json, using defaults:", err)
-		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000"}
+		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", LargeSpanAdjust: 400.0}
 		return
 	}
 	if err := json.Unmarshal(data, &AppSettings); err != nil {
 		log.Println("Error unmarshaling settings.json:", err)
-		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000"}
+		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", LargeSpanAdjust: 400.0}
 	}
 	if AppSettings.LeftColor == "" {
 		AppSettings.LeftColor = "#00FF00"
@@ -103,9 +104,12 @@ func loadSettings() {
 	if AppSettings.RightColor == "" {
 		AppSettings.RightColor = "#FF0000"
 	}
+	if AppSettings.LargeSpanAdjust == 0 {
+		AppSettings.LargeSpanAdjust = 400.0
+	}
 }
 
-// ParseHexColor parses a hex color string (e.g., "#RRGGBB") to color.NRGBA.
+// ParseHexColor parses a hexadecimal color string (e.g., "#RRGGBB") and returns its color.NRGBA representation.
 func ParseHexColor(s string) color.NRGBA {
 	var r, g, b uint8
 	if len(s) == 7 && s[0] == '#' {
@@ -114,7 +118,8 @@ func ParseHexColor(s string) color.NRGBA {
 	return color.NRGBA{R: r, G: g, B: b, A: 255}
 }
 
-// createList creates a scrollable list of countries with a selection callback.
+// createList creates a scrollable list of countries with search functionality and a selection callback.
+// The width parameter sets the minimum width of the list.
 func createList(width float32, onSelected func(string)) fyne.CanvasObject {
 	filteredIndices := make([]int, len(CountryData.Countries))
 	for i := range CountryData.Countries {
@@ -179,7 +184,7 @@ func createList(width float32, onSelected func(string)) fyne.CanvasObject {
 	return container.NewBorder(searchBar, button, nil, nil, container.NewStack(bg, scroll))
 }
 
-// addBorder adds a border to a Fyne canvas object.
+// addBorder applies a visual border to a Fyne canvas object using a stack container.
 func addBorder(obj fyne.CanvasObject) fyne.CanvasObject {
 	border := canvas.NewRectangle(color.Transparent)
 	border.StrokeColor = color.White
@@ -187,7 +192,7 @@ func addBorder(obj fyne.CanvasObject) fyne.CanvasObject {
 	return container.NewStack(obj, border)
 }
 
-// formatNumber formats a float as a string with thousands separators.
+// formatNumber formats a float as a string with comma-separated thousands.
 func formatNumber(n float64) string {
 	s := fmt.Sprintf("%.0f", n)
 	var res []byte
@@ -200,7 +205,7 @@ func formatNumber(n float64) string {
 	return string(res)
 }
 
-// getFitScale returns the scale needed to fit the bounding box of a country.
+// getFitScale calculates the scale factor required to fit the bounding box of a country within the available display area.
 func getFitScale(country string) float32 {
 	minX, minY, maxX, maxY, err := GetMercatorBoundingBox(country)
 	if err != nil {
@@ -230,7 +235,8 @@ func getFitScale(country string) float32 {
 	return min(scaleX, scaleY)
 }
 
-// getTargetScale calculates the appropriate scale for displaying selected countries.
+// getTargetScale determines the appropriate scale for displaying selected countries.
+// It uses the larger of the two bounding box areas to ensure both are visible and fit the screen.
 func getTargetScale(active, other string) float32 {
 	if active == "" && other == "" {
 		return 1.0
@@ -271,7 +277,7 @@ func getTargetScale(active, other string) float32 {
 	return getFitScale(other)
 }
 
-// updateHeader updates the header displaying area information for selected countries.
+// updateHeader updates the header to display the surface area information for the selected countries.
 func updateHeader() {
 	const sqMiToSqKm = 2.58998811
 	left, _ := leftSelectedCountry.Get()
@@ -317,7 +323,7 @@ func updateHeader() {
 	headerContainer.Refresh()
 }
 
-// updateMapDisplay clears and redraws the map based on current selections.
+// updateMapDisplay clears the map canvas and redraws the selected countries based on the calculated target scale.
 func updateMapDisplay() {
 	clearAll()
 	left, _ := leftSelectedCountry.Get()
@@ -335,7 +341,7 @@ func updateMapDisplay() {
 	}
 }
 
-// clearAll clears all containers on the map.
+// clearAll removes all canvas objects from the map container and refreshes it.
 func clearAll() {
 	leftBar.Objects = nil
 	leftBar.Refresh()
@@ -345,8 +351,9 @@ func clearAll() {
 	cMap.Container.Refresh()
 }
 
+// customTheme is a custom Fyne theme to override default styling.
 type customTheme struct {
-	base fyne.Theme
+	base fyne.Theme // base is the default theme being overridden.
 }
 
 // Color returns the color for a given theme color name and variant.
@@ -372,7 +379,7 @@ func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
 	return c.base.Size(name)
 }
 
-// main is the application entry point.
+// main is the application entry point, setting up the GUI and initializing components.
 func main() {
 	a := app.New()
 	leftSelectedCountry = binding.NewString()
@@ -434,12 +441,13 @@ func main() {
 // selectionListener implements binding.DataListener to react to country selection changes.
 type selectionListener struct{}
 
+// DataChanged reacts to country selection changes and updates the UI.
 func (s *selectionListener) DataChanged() {
 	updateHeader()
 	updateMapDisplay()
 }
 
-// drawBar draws a bar representing the area of a country.
+// drawBar draws a vertical bar representing the relative area of a country on a given container.
 func drawBar(c *fyne.Container, area float64, barColor color.Color) {
 	size := c.Size()
 	if size.Width == 0 || size.Height == 0 {
@@ -475,7 +483,7 @@ func drawBar(c *fyne.Container, area float64, barColor color.Color) {
 	c.Refresh()
 }
 
-// getArea retrieves the area of a country by its name.
+// getArea retrieves the surface area of a country by its name from the global CountryData.
 func getArea(name string) float64 {
 	for _, country := range CountryData.Countries {
 		if country.Name == name {
@@ -485,19 +493,10 @@ func getArea(name string) float64 {
 	return 0
 }
 
-// getCountryInfo retrieves country information by its name.
-func getCountryInfo(name string) *CountryInfo {
-	for i := range CountryData.Countries {
-		if CountryData.Countries[i].Name == name {
-			return &CountryData.Countries[i]
-		}
-	}
-	return nil
-}
-
-// drawCountry draws the geoJSON paths of a country on the map.
+// drawCountry draws the GeoJSON paths of a country on the provided MapWidget.
+// It applies scaling, centering, and optionally renders the bounding box for debugging purposes.
 func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineColor color.Color) {
-	paths, err := GetCachedGeoJSON(country, true)
+	paths, err := FetchAndCacheGeoJSON(country, true)
 	if err != nil {
 		log.Printf("Error loading %s: %v", country, err)
 		return
@@ -524,15 +523,11 @@ func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineC
 		}
 	}
 
-	minX, minY, maxX, maxY, err := GetMercatorBoundingBox(country)
+	_, _, _, _, err = GetMercatorBoundingBox(country)
 	if err != nil {
 		log.Printf("Error getting bbox for %s: %v", country, err)
 		return
 	}
-
-	info := getCountryInfo(country)
-	centerX := (minX + maxX) / 2
-	centerY := (minY + maxY) / 2
 
 	var objects []fyne.CanvasObject
 	if clear {
@@ -554,30 +549,6 @@ func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineC
 		transformedPaths[i] = make([]fyne.Position, len(path))
 		for j, pos := range path {
 			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
-
-			if info != nil {
-				if info.Rotate != 0 {
-					angle := float64(info.Rotate) * math.Pi / 180.0
-					cosTheta := math.Cos(angle)
-					sinTheta := math.Sin(angle)
-
-					// Shift to origin
-					tx := mx - centerX
-					ty := my - centerY
-
-					// Rotate
-					nx := tx*cosTheta - ty*sinTheta
-					ny := tx*sinTheta + ty*cosTheta
-
-					// Shift back
-					mx = nx + centerX
-					my = ny + centerY
-				}
-
-				if info.Flip_Y {
-					my = (minY + maxY) - my
-				}
-			}
 
 			if mx < transformedMinX {
 				transformedMinX = mx
@@ -604,7 +575,6 @@ func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineC
 	pixelMinY := offsetY
 	pixelMaxX := offsetX + float32(transformedMaxX-transformedMinX)*scale
 	pixelMaxY := offsetY + float32(transformedMaxY-transformedMinY)*scale
-	log.Printf("Logging info for %s: Screen size: %+v, Bounding box in pixels: minX=%f, minY=%f, maxX=%f, maxY=%f", country, size, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY)
 
 	// Draw bounding box
 	if AppSettings.DebugShowBoundary {
