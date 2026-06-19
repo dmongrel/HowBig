@@ -158,6 +158,7 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool) ([][]fyne.P
 	return allPaths, nil
 }
 
+// singlePolyLine keeps only the outer ring of a polygon structure.
 func singlePolyLine(rings [][][]float64) [][][]float64 {
 	if len(rings) > 0 {
 		return rings[0:1]
