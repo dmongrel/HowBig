@@ -8,13 +8,13 @@ import (
 
 // CountryInfo holds basic information about a country.
 type CountryInfo struct {
-	Name          string  `json:"Name"`
-	CompactName   string  `json:"CompactName"`
-	ISOCode       string  `json:"ISOCode"`
-	Area          float64 `json:"Area"`
-	Flip_Y        bool    `json:"flip_y"`
-	Rotate        int     `json:"rotate"`
-	VerticalScale float64 `json:"vertical_scale"`
+	Name          string  `json:"Name"`           // Name is the official name of the country.
+	CompactName   string  `json:"CompactName"`    // CompactName is the filename for the country's GeoJSON.
+	ISOCode       string  `json:"ISOCode"`        // ISOCode is the ISO 3166-1 alpha-3 code of the country.
+	Area          float64 `json:"Area"`           // Area is the surface area of the country in square miles.
+	Flip_Y        bool    `json:"flip_y"`         // Flip_Y indicates if the country's geometry should be flipped vertically.
+	Rotate        int     `json:"rotate"`         // Rotate is the rotation angle in degrees for the country's geometry.
+	VerticalScale float64 `json:"vertical_scale"` // VerticalScale is the vertical scaling factor for the country's geometry.
 }
 
 // CountryCollection holds a collection of CountryInfo objects.

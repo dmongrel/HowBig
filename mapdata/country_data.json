@@ -1705,7 +1705,7 @@
       "Name": "United States (Continental)",
       "CompactName": "UnitedStatesContinental.gjson",
       "ISOCode": "USAC",
-      "Area": 3677647,
+      "Area": 3536278,
       "flip_y": false,
       "rotate": 0,
       "vertical_scale": 1
@@ -1714,7 +1714,7 @@
       "Name": "United States (Lower 48)",
       "CompactName": "UnitedStates48.gjson",
       "ISOCode": "USA48",
-      "Area": 3677647,
+      "Area": 3119885,
       "flip_y": false,
       "rotate": 0,
       "vertical_scale": 1
