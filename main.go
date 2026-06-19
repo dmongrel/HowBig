@@ -76,10 +76,6 @@ func (zm *MapWidget) Resize(s fyne.Size) {
 // init initializes the global country collection and loads application settings.
 func init() {
 	cc := NewCountryCollection()
-	//path := filepath.Join("mapdata", "country_data.json")
-	//if err := cc.SaveToJSON(path); err != nil {
-	//	log.Println("Error saving country_data.json:", err)
-	//}
 	CountryData = cc
 	loadSettings()
 }
