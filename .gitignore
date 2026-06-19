@@ -14,6 +14,7 @@
 vendor/
 /mapdata_bak/
 /mapdata_orig/
+/mapdata_simp/
 /util/
 
 # Go module cache
