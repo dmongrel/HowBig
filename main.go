@@ -7,7 +7,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"path/filepath"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -22,109 +21,57 @@ import (
 var (
 	CountryData          *CountryCollection
 	cCenter              *fyne.Container
-	cMap                 *ZoomableMap
+	cMap                 *MapWidget
 	headerContainer      *fyne.Container
 	leftBar              *fyne.Container
 	rightBar             *fyne.Container
 	leftSelectedCountry  binding.String
 	rightSelectedCountry binding.String
 	AppSettings          Settings
-	zoomSlider           *widget.Slider
 )
 
-// Settings defines the scaling limits for the application.
+// Settings define the scaling limits for the application.
 type Settings struct {
-	MinScale float32 `json:"minScale"`
-	MaxScale float32 `json:"maxScale"`
+	MinScale          float32 `json:"minScale"`
+	MaxScale          float32 `json:"maxScale"`
+	DebugShowBoundary bool    `json:"debug_show_boundary"`
 }
 
-// ZoomableMap is a custom widget that provides a zoomable map interface.
-type ZoomableMap struct {
+// MapWidget is a custom widget that provides a map interface.
+type MapWidget struct {
 	widget.BaseWidget
 	Container *fyne.Container
-	ZoomScale binding.Float
-	ZoomLevel binding.Int // 0 to 19
-	Slider    *widget.Slider
 }
 
-// NewZoomableMap creates and initializes a new ZoomableMap.
-func NewZoomableMap() *ZoomableMap {
-	zm := &ZoomableMap{
+// NewMapWidget creates and initializes a new MapWidget.
+func NewMapWidget() *MapWidget {
+	zm := &MapWidget{
 		Container: container.NewWithoutLayout(),
-		ZoomScale: binding.NewFloat(),
-		ZoomLevel: binding.NewInt(),
 	}
-	zm.ZoomScale.Set(float64(AppSettings.MinScale))
-	zm.ZoomLevel.Set(0)
 	zm.ExtendBaseWidget(zm)
 	return zm
 }
 
-// Scrolled handles scroll events to adjust the zoom level and scale.
-func (zm *ZoomableMap) Scrolled(e *fyne.ScrollEvent) {
-	zoomLevel, _ := zm.ZoomLevel.Get()
-	if e.Scrolled.DY > 0 {
-		if zoomLevel < 19 {
-			zoomLevel++
-		}
-	} else if e.Scrolled.DY < 0 {
-		if zoomLevel > 0 {
-			zoomLevel--
-		}
-	}
-	zm.ZoomLevel.Set(zoomLevel)
-
-	minScale := AppSettings.MinScale
-	maxScale := AppSettings.MaxScale
-	newScale := minScale * float32(math.Pow(float64(maxScale/minScale), float64(zoomLevel)/19.0))
-	zm.ZoomScale.Set(float64(newScale))
-
-	if zm.Slider != nil {
-		zm.Slider.SetValue(float64(zoomLevel))
-	}
-	updateMapDisplay()
+// CreateRenderer creates a renderer for the MapWidget.
+func (zm *MapWidget) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(zm.Container)
 }
 
-// createFooter creates the zoom slider footer component.
-func createFooter() fyne.CanvasObject {
-	minText := canvas.NewText("0", color.White)
-	minText.TextSize = 26
-	maxText := canvas.NewText("19", color.White)
-	maxText.TextSize = 26
-	zoomSlider = widget.NewSlider(0, 19)
-	// Force slider height by adding a transparent rectangle to a stack
-	spacer := canvas.NewRectangle(color.Transparent)
-	spacer.Resize(fyne.NewSize(1, 80))
-	sliderWrapper := container.NewStack(spacer, zoomSlider)
-
-	zoomSlider.OnChanged = func(val float64) {
-		currentLevel, _ := cMap.ZoomLevel.Get()
-		if int(val) == currentLevel {
-			return
-		}
-		newLevel := int(val)
-		cMap.ZoomLevel.Set(newLevel)
-		minScale := AppSettings.MinScale
-		maxScale := AppSettings.MaxScale
-		newScale := minScale * float32(math.Pow(float64(maxScale/minScale), float64(newLevel)/19.0))
-		cMap.ZoomScale.Set(float64(newScale))
+// Resize handles resizing of the MapWidget and redraws the map.
+func (zm *MapWidget) Resize(s fyne.Size) {
+	zm.BaseWidget.Resize(s)
+	if cMap != nil && leftBar != nil && rightBar != nil && headerContainer != nil {
 		updateMapDisplay()
 	}
-	return container.NewBorder(nil, nil, container.NewPadded(minText), container.NewPadded(maxText), sliderWrapper)
-}
-
-// CreateRenderer creates a renderer for the ZoomableMap.
-func (zm *ZoomableMap) CreateRenderer() fyne.WidgetRenderer {
-	return widget.NewSimpleRenderer(zm.Container)
 }
 
 // init initializes the country collection and application settings.
 func init() {
 	cc := NewCountryCollection()
-	path := filepath.Join("mapdata", "country_data.json")
-	if err := cc.SaveToJSON(path); err != nil {
-		log.Println("Error saving country_data.json:", err)
-	}
+	//path := filepath.Join("mapdata", "country_data.json")
+	//if err := cc.SaveToJSON(path); err != nil {
+	//	log.Println("Error saving country_data.json:", err)
+	//}
 	CountryData = cc
 	loadSettings()
 }
@@ -134,12 +81,12 @@ func loadSettings() {
 	data, err := os.ReadFile("settings.json")
 	if err != nil {
 		log.Println("Error reading settings.json, using defaults:", err)
-		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0}
+		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false}
 		return
 	}
 	if err := json.Unmarshal(data, &AppSettings); err != nil {
 		log.Println("Error unmarshaling settings.json:", err)
-		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0}
+		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false}
 	}
 }
 
@@ -175,7 +122,13 @@ func createList(width float32, onSelected func(string)) fyne.CanvasObject {
 	// Set a reasonable width for the lists
 	scroll := container.NewScroll(list)
 	scroll.SetMinSize(fyne.NewSize(width, 0))
-	return container.NewStack(bg, scroll)
+
+	button := widget.NewButton("Deselect All", func() {
+		list.UnselectAll()
+		onSelected("")
+	})
+
+	return container.NewBorder(nil, button, nil, nil, container.NewStack(bg, scroll))
 }
 
 // addBorder adds a border to a Fyne canvas object.
@@ -199,100 +152,75 @@ func formatNumber(n float64) string {
 	return string(res)
 }
 
-// calculateZoomLimits determines min and max scale for zoom based on selected countries.
-func calculateZoomLimits() (float32, float32) {
-	left, _ := leftSelectedCountry.Get()
-	right, _ := rightSelectedCountry.Get()
-	var selected []string
-	if left != "" {
-		selected = append(selected, left)
-	}
-	if right != "" {
-		selected = append(selected, right)
-	}
-
-	if len(selected) == 0 {
-		return 0.1, 10.0
-	}
-
-	var scales []float32
-	for _, c := range selected {
-		scales = append(scales, getFitScale(c))
-	}
-
-	minScale := scales[0]
-	maxScale := scales[0]
-	for _, s := range scales {
-		if s < minScale {
-			minScale = s
-		}
-		if s > maxScale {
-			maxScale = s
-		}
-	}
-	return minScale * 0.5, maxScale * 2.0
-}
-
 // getFitScale returns the scale needed to fit the bounding box of a country.
 func getFitScale(country string) float32 {
-	bbox, err := GetBoundingBox(country)
+	minX, minY, maxX, maxY, err := GetMercatorBoundingBox(country)
 	if err != nil {
 		return 1.0
 	}
-	width := bbox.MaxX - bbox.MinX
-	height := bbox.MaxY - bbox.MinY
-	if width == 0 || height == 0 {
+	mercWidth := maxX - minX
+	mercHeight := maxY - minY
+	if mercWidth == 0 || mercHeight == 0 {
 		return 1.0
 	}
 
 	size := cMap.Container.Size()
-	scaleX := size.Width / width
-	scaleY := size.Height / height
+	if headerContainer != nil {
+		h := headerContainer.MinSize().Height
+		if size.Height > h {
+			size.Height -= h
+		} else {
+			size.Height = 0
+		}
+	}
+	if size.Width < 4 || size.Height < 4 {
+		return 1.0
+	}
+
+	scaleX := (size.Width - 4) / float32(mercWidth)
+	scaleY := (size.Height - 4) / float32(mercHeight)
 	return min(scaleX, scaleY)
 }
 
-// getTargetScale calculates the appropriate scale and zoom level for displaying selected countries.
-func getTargetScale() (float32, int) {
-	left, _ := leftSelectedCountry.Get()
-	right, _ := rightSelectedCountry.Get()
-
-	areaLeft := 0.0
-	if left != "" {
-		areaLeft = getArea(left)
+// getTargetScale calculates the appropriate scale for displaying selected countries.
+func getTargetScale(active, other string) float32 {
+	if active == "" && other == "" {
+		return 1.0
 	}
-	areaRight := 0.0
-	if right != "" {
-		areaRight = getArea(right)
+	if active == "" {
+		return getFitScale(other)
+	}
+	if other == "" {
+		return getFitScale(active)
 	}
 
-	larger := ""
-	if areaLeft >= areaRight {
-		larger = left
-	} else {
-		larger = right
+	minXActive, minYActive, maxXActive, maxYActive, errActive := GetMercatorBoundingBox(active)
+	minXOther, minYOther, maxXOther, maxYOther, errOther := GetMercatorBoundingBox(other)
+
+	if errActive != nil && errOther != nil {
+		return 1.0
+	}
+	if errActive != nil {
+		return getFitScale(other)
+	}
+	if errOther != nil {
+		return getFitScale(active)
 	}
 
-	if larger == "" {
-		return AppSettings.MinScale, 0
+	if cMap == nil {
+		return 1.0
 	}
+	size := cMap.Container.Size()
+	width := float64(size.Width)
+	height := float64(size.Height)
 
-	targetScale := getFitScale(larger) / 20.0
+	areaActive := (maxXActive - minXActive) * width * (maxYActive - minYActive) * height
+	areaOther := (maxXOther - minXOther) * width * (maxYOther - minYOther) * height
 
-	minScale := AppSettings.MinScale
-	maxScale := AppSettings.MaxScale
-
-	level := int(19.0 * math.Log(float64(targetScale/minScale)) / math.Log(float64(maxScale/minScale)))
-	if level < 0 {
-		level = 0
+	if areaActive > areaOther {
+		return getFitScale(active)
 	}
-	if level > 19 {
-		level = 19
-	}
-
-	// Recalculate scale from level to ensure consistency
-	actualScale := minScale * float32(math.Pow(float64(maxScale/minScale), float64(level)/19.0))
-
-	return actualScale, level
+	return getFitScale(other)
 }
 
 // updateHeader updates the header displaying area information for selected countries.
@@ -346,13 +274,14 @@ func updateMapDisplay() {
 	clearAll()
 	left, _ := leftSelectedCountry.Get()
 	right, _ := rightSelectedCountry.Get()
+	scale := getTargetScale(left, right)
 	if left != "" {
 		drawBar(leftBar, getArea(left), color.NRGBA{G: 255, A: 255})
-		drawCountry(cMap, left, false, color.NRGBA{G: 255, A: 255})
+		drawCountry(cMap, left, scale, false, color.NRGBA{G: 255, A: 255})
 	}
 	if right != "" {
 		drawBar(rightBar, getArea(right), color.NRGBA{G: 255, B: 255, A: 255})
-		drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255})
+		drawCountry(cMap, right, scale, false, color.NRGBA{G: 255, B: 255, A: 255})
 	}
 }
 
@@ -422,11 +351,9 @@ func main() {
 	}
 	maxWidth += 6
 
-	cMap = NewZoomableMap()
-	zoomControl := createFooter()
-	cMap.Slider = zoomSlider
+	cMap = NewMapWidget()
 	headerContainer = container.NewHBox()
-	cCenter = container.NewBorder(container.NewCenter(headerContainer), zoomControl, nil, nil, cMap)
+	cCenter = container.NewBorder(container.NewCenter(headerContainer), nil, nil, nil, cMap)
 
 	leftBar = container.NewWithoutLayout()
 	leftBarWrapper := container.NewScroll(leftBar)
@@ -438,45 +365,45 @@ func main() {
 	innerBorder := container.NewBorder(nil, nil, leftBarWrapper, rightBarWrapper, cCenter)
 
 	left := addBorder(createList(maxWidth, func(c string) {
-		leftSelectedCountry.Set(c)
-		newScale, newLevel := getTargetScale()
-		cMap.ZoomScale.Set(float64(newScale))
-		cMap.ZoomLevel.Set(newLevel)
-		if cMap.Slider != nil {
-			cMap.Slider.SetValue(float64(newLevel))
+		err := leftSelectedCountry.Set(c)
+		if err != nil {
+			return
 		}
 		clearAll()
 		updateHeader()
+
+		rightStr, _ := rightSelectedCountry.Get()
+		scale := getTargetScale(c, rightStr)
+
 		if c != "" {
 			drawBar(leftBar, getArea(c), color.NRGBA{G: 255, A: 255})
-			drawCountry(cMap, c, true, color.NRGBA{G: 255, A: 255})
+			drawCountry(cMap, c, scale, true, color.NRGBA{G: 255, A: 255})
 		}
-		right, _ := rightSelectedCountry.Get()
-		if right != "" {
-			drawBar(rightBar, getArea(right), color.NRGBA{G: 255, B: 255, A: 255})
-			drawCountry(cMap, right, false, color.NRGBA{G: 255, B: 255, A: 255})
+		if rightStr != "" {
+			drawBar(rightBar, getArea(rightStr), color.NRGBA{G: 255, B: 255, A: 255})
+			drawCountry(cMap, rightStr, scale, false, color.NRGBA{G: 255, B: 255, A: 255})
 		}
 	}))
 	right := addBorder(createList(maxWidth, func(c string) {
-		rightSelectedCountry.Set(c)
-		newScale, newLevel := getTargetScale()
-		cMap.ZoomScale.Set(float64(newScale))
-		cMap.ZoomLevel.Set(newLevel)
-		if cMap.Slider != nil {
-			cMap.Slider.SetValue(float64(newLevel))
+		err := rightSelectedCountry.Set(c)
+		if err != nil {
+			return
 		}
 		clearAll()
 		updateHeader()
-		var clear = true
-		left, _ := leftSelectedCountry.Get()
-		if left != "" {
-			drawBar(leftBar, getArea(left), color.NRGBA{G: 255, A: 255})
-			drawCountry(cMap, left, clear, color.NRGBA{G: 255, A: 255})
-			clear = false
+
+		leftStr, _ := leftSelectedCountry.Get()
+		scale := getTargetScale(c, leftStr)
+		var doClear = true
+
+		if leftStr != "" {
+			drawBar(leftBar, getArea(leftStr), color.NRGBA{G: 255, A: 255})
+			drawCountry(cMap, leftStr, scale, doClear, color.NRGBA{G: 255, A: 255})
+			doClear = false
 		}
 		if c != "" {
 			drawBar(rightBar, getArea(c), color.NRGBA{G: 255, B: 255, A: 255})
-			drawCountry(cMap, c, clear, color.NRGBA{G: 255, B: 255, A: 255})
+			drawCountry(cMap, c, scale, doClear, color.NRGBA{G: 255, B: 255, A: 255})
 		}
 	}))
 	center := addBorder(innerBorder)
@@ -532,9 +459,18 @@ func getArea(name string) float64 {
 	return 0
 }
 
+func getCountryInfo(name string) *CountryInfo {
+	for i := range CountryData.Countries {
+		if CountryData.Countries[i].Name == name {
+			return &CountryData.Countries[i]
+		}
+	}
+	return nil
+}
+
 // drawCountry draws the geoJSON paths of a country on the map.
-func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Color) {
-	paths, err := getCachedGeoJSON(country, true)
+func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineColor color.Color) {
+	paths, err := GetCachedGeoJSON(country, true)
 	if err != nil {
 		log.Printf("Error loading %s: %v", country, err)
 		return
@@ -552,42 +488,24 @@ func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Co
 	if size.Width == 0 || size.Height == 0 {
 		size = fyne.NewSize(500, 500)
 	}
-
-	zScale, _ := zm.ZoomScale.Get()
-	fixedScale := float32(20.0) * float32(zScale)
-
-	var countryInfo CountryInfo
-	for _, c := range CountryData.Countries {
-		if c.Name == country {
-			countryInfo = c
-			break
+	if headerContainer != nil {
+		h := headerContainer.MinSize().Height
+		if size.Height > h {
+			size.Height -= h
+		} else {
+			size.Height = 0
 		}
 	}
 
-	transformedPaths := make([][]fyne.Position, len(paths))
-	var totalLat, totalLon float32
-	var numPoints int
-	for i, path := range paths {
-		transformedPaths[i] = make([]fyne.Position, len(path))
-		for j, pos := range path {
-			pX, pY := pos.X, pos.Y
-			if countryInfo.Flip_Y {
-				pX = -pX
-			}
-			if countryInfo.Rotate == -90 {
-				pX, pY = pY, -pX
-			}
-			transformedPaths[i][j] = fyne.NewPos(pX, pY)
-			totalLat += pX
-			totalLon += pY
-			numPoints++
-		}
+	minX, minY, maxX, maxY, err := GetMercatorBoundingBox(country)
+	if err != nil {
+		log.Printf("Error getting bbox for %s: %v", country, err)
+		return
 	}
-	centroidLat := totalLat / float32(numPoints)
-	centroidLon := totalLon / float32(numPoints)
 
-	canvasCenterX := size.Width / 2
-	canvasCenterY := size.Height / 2
+	info := getCountryInfo(country)
+	centerX := (minX + maxX) / 2
+	centerY := (minY + maxY) / 2
 
 	var objects []fyne.CanvasObject
 	if clear {
@@ -600,21 +518,96 @@ func drawCountry(zm *ZoomableMap, country string, clear bool, lineColor color.Co
 		}
 	}
 
+	// Pass 1: Transform and find bounds
+	transformedPaths := make([][]fyne.Position, len(paths))
+	transformedMinX, transformedMinY := math.MaxFloat64, math.MaxFloat64
+	transformedMaxX, transformedMaxY := -math.MaxFloat64, -math.MaxFloat64
+
+	for i, path := range paths {
+		transformedPaths[i] = make([]fyne.Position, len(path))
+		for j, pos := range path {
+			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
+
+			if info != nil {
+				if info.Rotate != 0 {
+					angle := float64(info.Rotate) * math.Pi / 180.0
+					cosTheta := math.Cos(angle)
+					sinTheta := math.Sin(angle)
+
+					// Shift to origin
+					tx := mx - centerX
+					ty := my - centerY
+
+					// Rotate
+					nx := tx*cosTheta - ty*sinTheta
+					ny := tx*sinTheta + ty*cosTheta
+
+					// Shift back
+					mx = nx + centerX
+					my = ny + centerY
+				}
+
+				if info.Flip_Y {
+					my = (minY + maxY) - my
+				}
+			}
+
+			if mx < transformedMinX {
+				transformedMinX = mx
+			}
+			if mx > transformedMaxX {
+				transformedMaxX = mx
+			}
+			if my < transformedMinY {
+				transformedMinY = my
+			}
+			if my > transformedMaxY {
+				transformedMaxY = my
+			}
+			transformedPaths[i][j] = fyne.NewPos(float32(mx), float32(my))
+		}
+	}
+
+	transformedWidth := transformedMaxX - transformedMinX
+	transformedHeight := transformedMaxY - transformedMinY
+	offsetX := (size.Width - float32(transformedWidth)*scale) / 2
+	offsetY := (size.Height - float32(transformedHeight)*scale) / 2
+
+	pixelMinX := offsetX
+	pixelMinY := offsetY
+	pixelMaxX := offsetX + float32(transformedMaxX-transformedMinX)*scale
+	pixelMaxY := offsetY + float32(transformedMaxY-transformedMinY)*scale
+	log.Printf("Logging info for %s: Screen size: %+v, Bounding box in pixels: minX=%f, minY=%f, maxX=%f, maxY=%f", country, size, pixelMinX, pixelMinY, pixelMaxX, pixelMaxY)
+
+	// Draw bounding box
+	if AppSettings.DebugShowBoundary {
+		rect := canvas.NewRectangle(color.Transparent)
+		rect.StrokeColor = color.NRGBA{R: 255, A: 255}
+		rect.StrokeWidth = 1
+		rect.Resize(fyne.NewSize(pixelMaxX-pixelMinX, pixelMaxY-pixelMinY))
+		rect.Move(fyne.NewPos(pixelMinX, pixelMinY))
+		objects = append(objects, rect)
+	}
+
+	// Pass 2: Draw the transformed paths
 	for _, path := range transformedPaths {
-		var points []fyne.Position
-		vScale := float32(countryInfo.VerticalScale)
-		if vScale == 0 {
-			vScale = 1.5
-		}
-		for _, p := range path {
-			points = append(points, fyne.NewPos(
-				(p.Y-centroidLon)*fixedScale+canvasCenterX,
-				(centroidLat-p.X)*fixedScale*vScale+canvasCenterY,
-			))
-		}
-		for i := 0; i < len(points)-1; i++ {
-			l := &canvas.Line{Position1: points[i], Position2: points[i+1], StrokeColor: lineColor, StrokeWidth: 1}
-			objects = append(objects, l)
+		var prevPoint fyne.Position
+		for i, p := range path {
+			// Screen space
+			screenX := float32(float64(p.X)-transformedMinX) * scale
+			screenY := float32(float64(p.Y)-transformedMinY) * scale
+
+			// Apply centering
+			pPos := fyne.NewPos(screenX+offsetX, screenY+offsetY)
+
+			if i > 0 {
+				line := canvas.NewLine(lineColor)
+				line.StrokeWidth = 1
+				line.Position1 = prevPoint
+				line.Position2 = pPos
+				objects = append(objects, line)
+			}
+			prevPoint = pPos
 		}
 	}
 	zm.Container.Objects = objects
