@@ -12,8 +12,7 @@
 
 # Dependency directories
 vendor/
-
-/mapdata_lastgood/
+/mapdata_bak/
 /mapdata_orig/
 /util/
 
