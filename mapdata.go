@@ -139,9 +139,6 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool) ([][]fyne.P
 				var path []fyne.Position
 				for _, point := range ring {
 					x := point[0]
-					if x >= -200 && x <= -150 {
-						x += AppSettings.LargeSpanAdjust
-					}
 					path = append(path, fyne.NewPos(float32(x), float32(point[1])))
 				}
 				allPaths = append(allPaths, path)
@@ -160,9 +157,6 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool) ([][]fyne.P
 					var path []fyne.Position
 					for _, point := range ring {
 						x := point[0]
-						if x >= -200 && x <= -150 {
-							x += AppSettings.LargeSpanAdjust
-						}
 						path = append(path, fyne.NewPos(float32(x), float32(point[1])))
 					}
 					allPaths = append(allPaths, path)

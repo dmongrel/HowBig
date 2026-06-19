@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 	"image/color"
 	"log"
 	"math"
 	"os"
+	"sort"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -231,34 +233,34 @@ func getFitScale(country string) float32 {
 	return min(scaleX, scaleY)
 }
 
-// getTargetScale determines the appropriate scale for displaying selected countries.
+// getScaleAndOrder determines the appropriate scale and drawing order for selected countries.
 // It uses the larger of the two bounding box areas to ensure both are visible and fit the screen.
-func getTargetScale(active, other string) float32 {
+func getScaleAndOrder(active, other string) (float32, string, string) {
 	if active == "" && other == "" {
-		return 1.0
+		return 1.0, "", ""
 	}
 	if active == "" {
-		return getFitScale(other)
+		return getFitScale(other), other, ""
 	}
 	if other == "" {
-		return getFitScale(active)
+		return getFitScale(active), active, ""
 	}
 
 	minXActive, minYActive, maxXActive, maxYActive, errActive := GetMercatorBoundingBox(active)
 	minXOther, minYOther, maxXOther, maxYOther, errOther := GetMercatorBoundingBox(other)
 
 	if errActive != nil && errOther != nil {
-		return 1.0
+		return 1.0, active, other
 	}
 	if errActive != nil {
-		return getFitScale(other)
+		return getFitScale(other), other, active
 	}
 	if errOther != nil {
-		return getFitScale(active)
+		return getFitScale(active), active, other
 	}
 
 	if cMap == nil {
-		return 1.0
+		return 1.0, active, other
 	}
 	size := cMap.Container.Size()
 	width := float64(size.Width)
@@ -268,9 +270,9 @@ func getTargetScale(active, other string) float32 {
 	areaOther := (maxXOther - minXOther) * width * (maxYOther - minYOther) * height
 
 	if areaActive > areaOther {
-		return getFitScale(active)
+		return getFitScale(active), active, other
 	}
-	return getFitScale(other)
+	return getFitScale(other), other, active
 }
 
 // updateHeader updates the header to display the surface area information for the selected countries.
@@ -324,16 +326,36 @@ func updateMapDisplay() {
 	clearAll()
 	left, _ := leftSelectedCountry.Get()
 	right, _ := rightSelectedCountry.Get()
-	scale := getTargetScale(left, right)
+
+	scale, large, small := getScaleAndOrder(left, right)
 	leftColor := ParseHexColor(AppSettings.LeftColor)
 	rightColor := ParseHexColor(AppSettings.RightColor)
+
 	if left != "" {
 		drawBar(leftBar, getArea(left), leftColor)
-		drawCountry(cMap, left, scale, false, leftColor)
 	}
 	if right != "" {
 		drawBar(rightBar, getArea(right), rightColor)
-		drawCountry(cMap, right, scale, false, rightColor)
+	}
+
+	var largeColor, smallColor color.Color
+	if large == left {
+		largeColor = leftColor
+	} else {
+		largeColor = rightColor
+	}
+
+	if small == right {
+		smallColor = rightColor
+	} else {
+		smallColor = leftColor
+	}
+
+	if large != "" {
+		drawCountry(cMap, large, scale, false, largeColor)
+	}
+	if small != "" {
+		drawCountry(cMap, small, scale, false, smallColor)
 	}
 }
 
@@ -493,6 +515,80 @@ func getArea(name string) float64 {
 	return 0
 }
 
+// fillPolygonIntoImage implements a scanline fill algorithm to color the polygon.
+func fillPolygonIntoImage(img *image.RGBA, polyPoints []fyne.Position, fillColor color.Color) {
+	if len(polyPoints) < 3 {
+		return
+	}
+	minY, maxY := polyPoints[0].Y, polyPoints[0].Y
+	for _, p := range polyPoints {
+		if p.Y < minY {
+			minY = p.Y
+		}
+		if p.Y > maxY {
+			maxY = p.Y
+		}
+	}
+
+	for y := int(minY); y <= int(maxY); y++ {
+		var intersections []float32
+		for i := 0; i < len(polyPoints); i++ {
+			p1 := polyPoints[i]
+			p2 := polyPoints[(i+1)%len(polyPoints)]
+
+			if (p1.Y <= float32(y) && p2.Y > float32(y)) || (p2.Y <= float32(y) && p1.Y > float32(y)) {
+				x := p1.X + (float32(y)-p1.Y)*(p2.X-p1.X)/(p2.Y-p1.Y)
+				intersections = append(intersections, x)
+			}
+		}
+		sort.Slice(intersections, func(i, j int) bool { return intersections[i] < intersections[j] })
+
+		for i := 0; i < len(intersections); i += 2 {
+			xStart := int(intersections[i])
+			xEnd := int(intersections[i+1])
+			for x := xStart; x <= xEnd; x++ {
+				img.Set(x, y, fillColor)
+			}
+		}
+	}
+}
+
+// drawFilledPolygon creates a Raster canvas object representing the filled polygon.
+func drawFilledPolygon(polyPoints []fyne.Position, fillColor color.Color) fyne.CanvasObject {
+	minX, maxX := polyPoints[0].X, polyPoints[0].X
+	minY, maxY := polyPoints[0].Y, polyPoints[0].Y
+	for _, p := range polyPoints {
+		if p.X < minX {
+			minX = p.X
+		}
+		if p.X > maxX {
+			maxX = p.X
+		}
+		if p.Y < minY {
+			minY = p.Y
+		}
+		if p.Y > maxY {
+			maxY = p.Y
+		}
+	}
+
+	w := int(maxX-minX) + 1
+	h := int(maxY-minY) + 1
+
+	raster := canvas.NewRaster(func(width, height int) image.Image {
+		img := image.NewRGBA(image.Rect(0, 0, width, height))
+		relativePoints := make([]fyne.Position, len(polyPoints))
+		for i, p := range polyPoints {
+			relativePoints[i] = fyne.NewPos(p.X-minX, p.Y-minY)
+		}
+		fillPolygonIntoImage(img, relativePoints, fillColor)
+		return img
+	})
+	raster.Resize(fyne.NewSize(float32(w), float32(h)))
+	raster.Move(fyne.NewPos(minX, minY))
+	return raster
+}
+
 // drawCountry draws the GeoJSON paths of a country on the provided MapWidget.
 // It applies scaling, centering, and optionally renders the bounding box for debugging purposes.
 func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineColor color.Color) {
@@ -588,24 +684,22 @@ func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineC
 
 	// Pass 2: Draw the transformed paths
 	for _, path := range transformedPaths {
-		var prevPoint fyne.Position
-		for i, p := range path {
+		var polyPoints []fyne.Position
+		for _, p := range path {
 			// Screen space
 			screenX := float32(float64(p.X)-transformedMinX) * scale
 			screenY := float32(float64(p.Y)-transformedMinY) * scale
 
 			// Apply centering
 			pPos := fyne.NewPos(screenX+offsetX, screenY+offsetY)
-
-			if i > 0 {
-				line := canvas.NewLine(lineColor)
-				line.StrokeWidth = 1
-				line.Position1 = prevPoint
-				line.Position2 = pPos
-				objects = append(objects, line)
-			}
-			prevPoint = pPos
+			polyPoints = append(polyPoints, pPos)
 		}
+
+		if len(polyPoints) < 3 {
+			continue
+		}
+
+		objects = append(objects, drawFilledPolygon(polyPoints, lineColor))
 	}
 	zm.Container.Objects = objects
 	zm.Container.Refresh()
