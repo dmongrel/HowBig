@@ -1,4 +1,5 @@
 {
   "minScale": 0.13888888,
-  "maxScale": 3914.9343
+  "maxScale": 3914.9343,
+  "debug_show_boundary": false
 }
