@@ -58,7 +58,7 @@ var (
 )
 
 // FetchAndCacheGeoJSON loads and caches parsed GeoJSON paths from the mapdata directory.
-// The country parameter specifies the country name, and singlePolyline indicates if only the outer ring should be kept.
+// The country parameter specifies the country name, and the singlePolyline parameter indicates if only the outer ring should be kept.
 // It returns a slice of paths for each polygon, or an error if the file cannot be read or parsed.
 func FetchAndCacheGeoJSON(country string, singlePolyline bool) ([][]fyne.Position, error) {
 
