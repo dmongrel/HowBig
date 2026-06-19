@@ -37,10 +37,8 @@ var (
 	AppSettings          Settings
 )
 
-// Settings define the scaling limits and UI configuration for the application.
+// Settings define the UI configuration for the application.
 type Settings struct {
-	MinScale          float32 `json:"minScale"`            // MinScale is the minimum allowed zoom scale.
-	MaxScale          float32 `json:"maxScale"`            // MaxScale is the maximum allowed zoom scale.
 	DebugShowBoundary bool    `json:"debug_show_boundary"` // DebugShowBoundary determines if the bounding box is rendered.
 	LeftColor         string  `json:"left_color"`          // LeftColor is the hex color for the left map.
 	RightColor        string  `json:"right_color"`         // RightColor is the hex color for the right map.
@@ -91,12 +89,12 @@ func loadSettings() {
 	data, err := os.ReadFile("settings.json")
 	if err != nil {
 		log.Println("Error reading settings.json, using defaults:", err)
-		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", LargeSpanAdjust: 400.0}
+		AppSettings = Settings{DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", LargeSpanAdjust: 400.0}
 		return
 	}
 	if err := json.Unmarshal(data, &AppSettings); err != nil {
 		log.Println("Error unmarshaling settings.json:", err)
-		AppSettings = Settings{MinScale: 0.1, MaxScale: 10.0, DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", LargeSpanAdjust: 400.0}
+		AppSettings = Settings{DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", LargeSpanAdjust: 400.0}
 	}
 	if AppSettings.LeftColor == "" {
 		AppSettings.LeftColor = "#00FF00"
@@ -105,7 +103,7 @@ func loadSettings() {
 		AppSettings.RightColor = "#FF0000"
 	}
 	if AppSettings.LargeSpanAdjust == 0 {
-		AppSettings.LargeSpanAdjust = 400.0
+		AppSettings.LargeSpanAdjust = 360.0
 	}
 }
 
@@ -113,9 +111,11 @@ func loadSettings() {
 func ParseHexColor(s string) color.NRGBA {
 	var r, g, b uint8
 	if len(s) == 7 && s[0] == '#' {
-		fmt.Sscanf(s[1:], "%02x%02x%02x", &r, &g, &b)
+		if _, err := fmt.Sscanf(s[1:], "%02x%02x%02x", &r, &g, &b); err == nil {
+			return color.NRGBA{R: r, G: g, B: b, A: 255}
+		}
 	}
-	return color.NRGBA{R: r, G: g, B: b, A: 255}
+	return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
 }
 
 // createList creates a scrollable list of countries with search functionality and a selection callback.
@@ -426,10 +426,14 @@ func main() {
 	innerBorder := container.NewBorder(nil, nil, leftBarWrapper, rightBarWrapper, cCenter)
 
 	left := addBorder(createList(maxWidth, func(c string) {
-		leftSelectedCountry.Set(c)
+		if err := leftSelectedCountry.Set(c); err != nil {
+			log.Printf("Error setting left country: %v", err)
+		}
 	}))
 	right := addBorder(createList(maxWidth, func(c string) {
-		rightSelectedCountry.Set(c)
+		if err := rightSelectedCountry.Set(c); err != nil {
+			log.Printf("Error setting right country: %v", err)
+		}
 	}))
 	center := addBorder(innerBorder)
 
