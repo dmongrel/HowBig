@@ -33,18 +33,10 @@ func GetMercatorBoundingBox(country string) (minX, minY, maxX, maxY float64, err
 	for _, path := range paths {
 		for _, pos := range path {
 			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
-			if mx < minX {
-				minX = mx
-			}
-			if mx > maxX {
-				maxX = mx
-			}
-			if my < minY {
-				minY = my
-			}
-			if my > maxY {
-				maxY = my
-			}
+			minX = min(minX, mx)
+			maxX = max(maxX, mx)
+			minY = min(minY, my)
+			maxY = max(maxY, my)
 		}
 	}
 	return minX, minY, maxX, maxY, nil
