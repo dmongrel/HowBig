@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-
-	"fyne.io/fyne/v2"
 )
 
 const (
@@ -24,16 +22,65 @@ type Coordinate struct {
 	Lat float64
 }
 
+// Point represents a 2D point with float64 precision.
+type Point struct {
+	X, Y float64
+}
+
 // BoundingBox represents a geographic or pixel-space bounding box.
 type BoundingBox struct {
-	MinX, MaxX float64
-	MinY, MaxY float64
+	MinX, MaxX    float64
+	MinY, MaxY    float64
+	Width, Height float64
 }
 
 // Geometry represents a GeoJSON geometry object.
 type Geometry struct {
 	Type        string
 	Coordinates [][][][]float64
+}
+
+// GeoData holds the parsed geographic paths and the overall bounding box for a country.
+type GeoData struct {
+	Paths       [][]Point
+	BoundingBox BoundingBox
+}
+
+// UpdateBoundingBox recalculates the bounding box based on the current Paths and a scale factor.
+// This ensures the bounding box exactly matches the pixel coordinates used for drawing at the given scale.
+func (gd *GeoData) UpdateBoundingBox(scale float64) {
+	if len(gd.Paths) == 0 {
+		return
+	}
+
+	minX, maxX := math.MaxFloat64, -math.MaxFloat64
+	minY, maxY := math.MaxFloat64, -math.MaxFloat64
+	found := false
+
+	for _, path := range gd.Paths {
+		for _, p := range path {
+			x, y := p.X*scale, p.Y*scale
+			minX = min(minX, x)
+			maxX = max(maxX, x)
+			minY = min(minY, y)
+			maxY = max(maxY, y)
+			found = true
+		}
+	}
+
+	if !found {
+		gd.BoundingBox = BoundingBox{}
+		return
+	}
+
+	gd.BoundingBox = BoundingBox{
+		MinX:   minX,
+		MaxX:   maxX,
+		MinY:   minY,
+		MaxY:   maxY,
+		Width:  maxX - minX,
+		Height: maxY - minY,
+	}
 }
 
 // NeedsPacificCentering checks if a MultiPolygon spans across the anti-meridian
@@ -106,12 +153,6 @@ func LatLonToMercator(lon, lat float64) (x, y float64) {
 	ny := (MaxMercator - my) / (2.0 * MaxMercator) // Invert Y for screen space
 
 	return nx, ny
-}
-
-// GeoData holds the parsed geographic paths and the overall bounding box for a country.
-type GeoData struct {
-	Paths       [][]fyne.Position
-	BoundingBox BoundingBox
 }
 
 var (
@@ -197,10 +238,7 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool, skipSmall i
 		return nil, err
 	}
 
-	var allPaths [][]fyne.Position
-	overallMinX, overallMaxX := math.MaxFloat64, -math.MaxFloat64
-	overallMinY, overallMaxY := math.MaxFloat64, -math.MaxFloat64
-	bboxInitialized := false
+	var allPaths [][]Point
 
 	for _, f := range fc.Features {
 		var g Geometry
@@ -228,43 +266,6 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool, skipSmall i
 			g = ApplyPacificCentering(g)
 		}
 
-		// Calculate bounding box for the current geometry in Mercator space
-		minX, maxX := math.MaxFloat64, -math.MaxFloat64
-		minY, maxY := math.MaxFloat64, -math.MaxFloat64
-		geometryHasCoords := false
-
-		if len(g.Coordinates) > 0 {
-			for _, polygon := range g.Coordinates {
-				for _, ring := range polygon {
-					for _, coord := range ring {
-						lon := coord[0]
-						lat := coord[1]
-
-						mx, my := LatLonToMercator(lon, lat)
-
-						minX = min(minX, mx)
-						maxX = max(maxX, mx)
-						minY = min(minY, my)
-						maxY = max(maxY, my)
-						geometryHasCoords = true
-					}
-				}
-			}
-			if geometryHasCoords {
-				// Update overall bounding box
-				if !bboxInitialized {
-					overallMinX, overallMaxX = minX, maxX
-					overallMinY, overallMaxY = minY, maxY
-					bboxInitialized = true
-				} else {
-					overallMinX = min(overallMinX, minX)
-					overallMaxX = max(overallMaxX, maxX)
-					overallMinY = min(overallMinY, minY)
-					overallMaxY = max(overallMaxY, maxY)
-				}
-			}
-		}
-
 		for _, polygon := range g.Coordinates {
 			polyToProcess := polygon
 			if singlePolyline {
@@ -275,32 +276,23 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool, skipSmall i
 					continue
 				}
 
-				var path []fyne.Position
+				var path []Point
 				for _, pt := range ring {
 					mx, my := LatLonToMercator(pt[0], pt[1])
-					path = append(path, fyne.NewPos(float32(mx), float32(my)))
+					path = append(path, Point{X: mx, Y: my})
 				}
 				allPaths = append(allPaths, path)
 			}
 		}
 	}
 
-	// Calculation of overall bounding box:
-	overallBBox := BoundingBox{}
-	if bboxInitialized {
-		overallBBox = BoundingBox{
-			MinX: overallMinX,
-			MaxX: overallMaxX,
-			MinY: overallMinY,
-			MaxY: overallMaxY,
-		}
+	geoData := &GeoData{
+		Paths: allPaths,
 	}
-	log.Printf("Overall BBox set: %+v", overallBBox)
+	geoData.UpdateBoundingBox(1.0)
+	log.Printf("Overall BBox set: %+v", geoData.BoundingBox)
 
-	return &GeoData{
-		Paths:       allPaths,
-		BoundingBox: overallBBox,
-	}, nil
+	return geoData, nil
 }
 
 // singlePolyLine processes polygon rings and keeps only the outer ring, discarding holes or interior polygons.
@@ -311,42 +303,3 @@ func singlePolyLine(rings [][][]float64) [][][]float64 {
 	}
 	return rings
 }
-
-// LogSouthernmostPixels calculates and logs the southernmost and easternmost drawn country coordinate and
-// the southernmost and easternmost bounding box coordinate in pixel values.
-func LogSouthernmostPixels(country string, paths [][]fyne.Position, scale float32, offsetX, offsetY float32, transformedBBox BoundingBox) {
-	pixelMinY := float64(offsetY) + (transformedBBox.MinY-transformedBBox.MinY)*float64(scale) // This is just offsetY
-	pixelMaxY := float64(offsetY) + (transformedBBox.MaxY-transformedBBox.MinY)*float64(scale)
-	pixelMinX := float64(offsetX) + (transformedBBox.MinX-transformedBBox.MinX)*float64(scale) // This is just offsetX
-	pixelMaxX := float64(offsetX) + (transformedBBox.MaxX-transformedBBox.MinX)*float64(scale)
-
-	width := pixelMaxX - pixelMinX
-	height := pixelMaxY - pixelMinY
-
-	maxDrawnY := -math.MaxFloat64
-	maxDrawnX := -math.MaxFloat64
-	for _, path := range paths {
-		for _, pos := range path {
-			drawnY := (float64(pos.Y)-transformedBBox.MinY)*float64(scale) + float64(offsetY)
-			if drawnY > maxDrawnY {
-				maxDrawnY = drawnY
-			}
-			drawnX := (float64(pos.X)-transformedBBox.MinX)*float64(scale) + float64(offsetX)
-			if drawnX > maxDrawnX {
-				maxDrawnX = drawnX
-			}
-		}
-	}
-
-	// Only log if country changed
-	if country != lastLoggedCountry {
-		log.Printf("Country: %s, BBox Pixel Size: W=%.2f, H=%.2f", country, width, height)
-		log.Printf("Southernmost Drawn Pixel: %f, BBox: %f", maxDrawnY, pixelMaxY)
-		log.Printf("Easternmost Drawn Pixel: %f, BBox: %f", maxDrawnX, pixelMaxX)
-		lastLoggedCountry = country
-	}
-}
-
-var (
-	lastLoggedCountry string
-)
