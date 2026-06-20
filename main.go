@@ -41,10 +41,11 @@ var (
 
 // Settings define the UI configuration for the application.
 type Settings struct {
-	DebugShowBoundary bool    `json:"debug_show_boundary"` // DebugShowBoundary determines if the bounding box is rendered.
-	LeftColor         string  `json:"left_color"`          // LeftColor is the hex color for the left map.
-	RightColor        string  `json:"right_color"`         // RightColor is the hex color for the right map.
-	LargeSpanAdjust   float64 `json:"large_span_adjust"`   // LargeSpanAdjust is the value used to adjust longitude for countries spanning the 180-degree meridian.
+	DebugShowBoundary   bool   `json:"debug_show_boundary"`   // DebugShowBoundary determines if the bounding box is rendered.
+	LeftColor           string `json:"left_color"`            // LeftColor is the hex color for the left map.
+	RightColor          string `json:"right_color"`           // RightColor is the hex color for the right map.
+	EnablePacificCenter bool   `json:"enable_pacific_center"` // EnablePacificCenter determines if the map is centered on the Pacific Ocean for countries spanning the 180-degree meridian.
+	SkipSmall           int    `json:"skip_small"`            // SkipSmall determines if polygons with few points are skipped.
 }
 
 // MapWidget is a custom widget that provides a map interface.
@@ -87,21 +88,18 @@ func loadSettings() {
 	data, err := os.ReadFile("settings.json")
 	if err != nil {
 		log.Println("Error reading settings.json, using defaults:", err)
-		AppSettings = Settings{DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", LargeSpanAdjust: 400.0}
+		AppSettings = Settings{DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", EnablePacificCenter: true, SkipSmall: 0}
 		return
 	}
 	if err := json.Unmarshal(data, &AppSettings); err != nil {
 		log.Println("Error unmarshaling settings.json:", err)
-		AppSettings = Settings{DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", LargeSpanAdjust: 400.0}
+		AppSettings = Settings{DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", EnablePacificCenter: true, SkipSmall: 0}
 	}
 	if AppSettings.LeftColor == "" {
 		AppSettings.LeftColor = "#00FF00"
 	}
 	if AppSettings.RightColor == "" {
 		AppSettings.RightColor = "#FF0000"
-	}
-	if AppSettings.LargeSpanAdjust == 0 {
-		AppSettings.LargeSpanAdjust = 360.0
 	}
 }
 
@@ -205,9 +203,20 @@ func formatNumber(n float64) string {
 
 // getFitScale calculates the scale factor required to fit the bounding box of a country within the available display area.
 func getFitScale(country string) float32 {
-	minX, minY, maxX, maxY, err := GetMercatorBoundingBox(country)
+	paths, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
 	if err != nil {
 		return 1.0
+	}
+	minX, minY := math.MaxFloat64, math.MaxFloat64
+	maxX, maxY := -math.MaxFloat64, -math.MaxFloat64
+	for _, path := range paths {
+		for _, pos := range path {
+			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
+			minX = min(minX, mx)
+			maxX = max(maxX, mx)
+			minY = min(minY, my)
+			maxY = max(maxY, my)
+		}
 	}
 	mercWidth := maxX - minX
 	mercHeight := maxY - minY
@@ -246,8 +255,8 @@ func getScaleAndOrder(active, other string) (float32, string, string) {
 		return getFitScale(active), active, ""
 	}
 
-	minXActive, minYActive, maxXActive, maxYActive, errActive := GetMercatorBoundingBox(active)
-	minXOther, minYOther, maxXOther, maxYOther, errOther := GetMercatorBoundingBox(other)
+	pathsActive, errActive := FetchAndCacheGeoJSON(active, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
+	pathsOther, errOther := FetchAndCacheGeoJSON(other, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
 
 	if errActive != nil && errOther != nil {
 		return 1.0, active, other
@@ -259,15 +268,40 @@ func getScaleAndOrder(active, other string) (float32, string, string) {
 		return getFitScale(active), active, other
 	}
 
+	minXActive, minYActive := math.MaxFloat64, math.MaxFloat64
+	maxXActive, maxYActive := -math.MaxFloat64, -math.MaxFloat64
+	for _, path := range pathsActive {
+		for _, pos := range path {
+			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
+			minXActive = min(minXActive, mx)
+			maxXActive = max(maxXActive, mx)
+			minYActive = min(minYActive, my)
+			maxYActive = max(maxYActive, my)
+		}
+	}
+
+	minXOther, minYOther := math.MaxFloat64, math.MaxFloat64
+	maxXOther, maxYOther := -math.MaxFloat64, -math.MaxFloat64
+	for _, path := range pathsOther {
+		for _, pos := range path {
+			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
+			minXOther = min(minXOther, mx)
+			maxXOther = max(maxXOther, mx)
+			minYOther = min(minYOther, my)
+			maxYOther = max(maxYOther, my)
+		}
+	}
+
 	if cMap == nil {
 		return 1.0, active, other
 	}
 	size := cMap.Container.Size()
-	width := float64(size.Width)
-	height := float64(size.Height)
+	if size.Width < 4 || size.Height < 4 {
+		return 1.0, active, other
+	}
 
-	areaActive := (maxXActive - minXActive) * width * (maxYActive - minYActive) * height
-	areaOther := (maxXOther - minXOther) * width * (maxYOther - minYOther) * height
+	areaActive := (maxXActive - minXActive) * (maxYActive - minYActive)
+	areaOther := (maxXOther - minXOther) * (maxYOther - minYOther)
 
 	if areaActive > areaOther {
 		return getFitScale(active), active, other
@@ -530,7 +564,7 @@ func fillPolygonIntoImage(img *image.RGBA, polyPoints []fyne.Position, fillColor
 		}
 	}
 
-	for y := int(minY); y <= int(maxY); y++ {
+	for y := int(math.Floor(float64(minY))); y <= int(math.Ceil(float64(maxY))); y++ {
 		var intersections []float32
 		for i := 0; i < len(polyPoints); i++ {
 			p1 := polyPoints[i]
@@ -543,10 +577,11 @@ func fillPolygonIntoImage(img *image.RGBA, polyPoints []fyne.Position, fillColor
 		}
 		sort.Slice(intersections, func(i, j int) bool { return intersections[i] < intersections[j] })
 
-		for i := 0; i < len(intersections); i += 2 {
-			xStart := int(intersections[i])
-			xEnd := int(intersections[i+1])
-			for x := xStart; x <= xEnd; x++ {
+		for i := 0; i < len(intersections)-1; i += 2 {
+			xStart := intersections[i]
+			xEnd := intersections[i+1]
+			// Use exact range for scanline to avoid 1-pixel bloat
+			for x := int(math.Round(float64(xStart))); x <= int(math.Round(float64(xEnd))); x++ {
 				img.Set(x, y, fillColor)
 			}
 		}
@@ -572,27 +607,27 @@ func drawFilledPolygon(polyPoints []fyne.Position, fillColor color.Color) fyne.C
 		}
 	}
 
-	w := int(maxX-minX) + 1
-	h := int(maxY-minY) + 1
+	w := int(math.Round(float64(maxX))) - int(math.Round(float64(minX))) + 1
+	h := int(math.Round(float64(maxY))) - int(math.Round(float64(minY))) + 1
 
 	raster := canvas.NewRaster(func(width, height int) image.Image {
 		img := image.NewRGBA(image.Rect(0, 0, width, height))
 		relativePoints := make([]fyne.Position, len(polyPoints))
 		for i, p := range polyPoints {
-			relativePoints[i] = fyne.NewPos(p.X-minX, p.Y-minY)
+			relativePoints[i] = fyne.NewPos(p.X-float32(math.Round(float64(minX))), p.Y-float32(math.Round(float64(minY))))
 		}
 		fillPolygonIntoImage(img, relativePoints, fillColor)
 		return img
 	})
 	raster.Resize(fyne.NewSize(float32(w), float32(h)))
-	raster.Move(fyne.NewPos(minX, minY))
+	raster.Move(fyne.NewPos(float32(math.Round(float64(minX))), float32(math.Round(float64(minY)))))
 	return raster
 }
 
 // drawCountry draws the GeoJSON paths of a country on the provided MapWidget.
 // It applies scaling, centering, and optionally renders the bounding box for debugging purposes.
 func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineColor color.Color) {
-	paths, err := FetchAndCacheGeoJSON(country, true)
+	paths, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
 	if err != nil {
 		log.Printf("Error loading %s: %v", country, err)
 		return
@@ -619,12 +654,6 @@ func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineC
 		}
 	}
 
-	_, _, _, _, err = GetMercatorBoundingBox(country)
-	if err != nil {
-		log.Printf("Error getting bbox for %s: %v", country, err)
-		return
-	}
-
 	var objects []fyne.CanvasObject
 	if clear {
 		objects = []fyne.CanvasObject{canvas.NewRectangle(color.Black)}
@@ -638,47 +667,43 @@ func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineC
 
 	// Pass 1: Transform and find bounds
 	transformedPaths := make([][]fyne.Position, len(paths))
-	transformedMinX, transformedMinY := math.MaxFloat64, math.MaxFloat64
-	transformedMaxX, transformedMaxY := -math.MaxFloat64, -math.MaxFloat64
-
+	minXLocal, minYLocal := math.MaxFloat64, math.MaxFloat64
+	maxXLocal, maxYLocal := -math.MaxFloat64, -math.MaxFloat64
 	for i, path := range paths {
 		transformedPaths[i] = make([]fyne.Position, len(path))
 		for j, pos := range path {
 			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
-
-			if mx < transformedMinX {
-				transformedMinX = mx
-			}
-			if mx > transformedMaxX {
-				transformedMaxX = mx
-			}
-			if my < transformedMinY {
-				transformedMinY = my
-			}
-			if my > transformedMaxY {
-				transformedMaxY = my
-			}
 			transformedPaths[i][j] = fyne.NewPos(float32(mx), float32(my))
+			minXLocal = min(minXLocal, mx)
+			maxXLocal = max(maxXLocal, mx)
+			minYLocal = min(minYLocal, my)
+			maxYLocal = max(maxYLocal, my)
 		}
 	}
+
+	transformedMinX, transformedMinY := minXLocal, minYLocal
+	transformedMaxX, transformedMaxY := maxXLocal, maxYLocal
 
 	transformedWidth := transformedMaxX - transformedMinX
 	transformedHeight := transformedMaxY - transformedMinY
 	offsetX := (size.Width - float32(transformedWidth)*scale) / 2
 	offsetY := (size.Height - float32(transformedHeight)*scale) / 2
 
-	pixelMinX := offsetX
-	pixelMinY := offsetY
-	pixelMaxX := offsetX + float32(transformedMaxX-transformedMinX)*scale
-	pixelMaxY := offsetY + float32(transformedMaxY-transformedMinY)*scale
+	pixelMinX, pixelMinY, pixelMaxX, pixelMaxY, err := GetBoundingBox(country, scale, offsetX, offsetY, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
+	if err != nil {
+		log.Printf("Error getting pixel bbox for %s: %v", country, err)
+		return
+	}
+
+	LogSouthernmostPixels(country, paths, scale, offsetX, offsetY, transformedMinX, transformedMaxX, transformedMinY, transformedMaxY)
 
 	// Draw bounding box
 	if AppSettings.DebugShowBoundary {
 		rect := canvas.NewRectangle(color.Transparent)
 		rect.StrokeColor = color.NRGBA{R: 255, A: 255}
 		rect.StrokeWidth = 1
-		rect.Resize(fyne.NewSize(pixelMaxX-pixelMinX, pixelMaxY-pixelMinY))
-		rect.Move(fyne.NewPos(pixelMinX, pixelMinY))
+		rect.Resize(fyne.NewSize(float32(pixelMaxX-pixelMinX), float32(pixelMaxY-pixelMinY)))
+		rect.Move(fyne.NewPos(float32(pixelMinX), float32(pixelMinY)))
 		objects = append(objects, rect)
 	}
 
@@ -687,11 +712,11 @@ func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineC
 		var polyPoints []fyne.Position
 		for _, p := range path {
 			// Screen space
-			screenX := float32(float64(p.X)-transformedMinX) * scale
-			screenY := float32(float64(p.Y)-transformedMinY) * scale
+			screenX := (float64(p.X) - transformedMinX) * float64(scale)
+			screenY := (float64(p.Y) - transformedMinY) * float64(scale)
 
 			// Apply centering
-			pPos := fyne.NewPos(screenX+offsetX, screenY+offsetY)
+			pPos := fyne.NewPos(float32(screenX)+offsetX, float32(screenY)+offsetY)
 			polyPoints = append(polyPoints, pPos)
 		}
 

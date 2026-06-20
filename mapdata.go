@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"math"
 	"os"
 	"path/filepath"
@@ -11,20 +13,107 @@ import (
 	"fyne.io/fyne/v2"
 )
 
+const (
+	EarthRadius = 6378137.0
+	MaxMercator = EarthRadius * math.Pi
+)
+
+// Coordinate represents a standard lat/lon point.
+type Coordinate struct {
+	Lon float64
+	Lat float64
+}
+
+// BoundingBox represents a geographic or pixel-space bounding box.
+type BoundingBox struct {
+	MinX, MaxX float64
+	MinY, MaxY float64
+}
+
+// Geometry represents a GeoJSON geometry object.
+type Geometry struct {
+	Type        string
+	Coordinates [][][][]float64
+	BoundingBox BoundingBox
+}
+
+// NeedsPacificCentering checks if a MultiPolygon spans across the anti-meridian
+func NeedsPacificCentering(g Geometry) bool {
+	var hasFarEast, hasFarWest bool
+
+	for _, polygon := range g.Coordinates {
+		for _, ring := range polygon {
+			for _, coord := range ring {
+				lng := coord[0]
+
+				// Check if the coordinates exist significantly deep in both hemispheres
+				if lng > 90.0 {
+					hasFarEast = true
+				}
+				if lng < -90.0 {
+					hasFarWest = true
+				}
+
+				// Early exit condition met
+				if hasFarEast && hasFarWest {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// ApplyPacificCentering shifts negative longitudes to create a seamless 0 to 360 map
+func ApplyPacificCentering(g Geometry) Geometry {
+	if !NeedsPacificCentering(g) {
+		return g
+	}
+
+	// Deep copy and transform coordinates
+	newCoords := make([][][][]float64, len(g.Coordinates))
+	for i, polygon := range g.Coordinates {
+		newCoords[i] = make([][][]float64, len(polygon))
+		for j, ring := range polygon {
+			newCoords[i][j] = make([][]float64, len(ring))
+			for k, coord := range ring {
+				lng := coord[0]
+				lat := coord[1]
+
+				// Shift negative longitudes to the 180-360 range
+				if lng < 0 {
+					lng += 360.0
+				}
+				newCoords[i][j][k] = []float64{lng, lat}
+			}
+		}
+	}
+
+	return Geometry{
+		Type:        g.Type,
+		Coordinates: newCoords,
+		BoundingBox: g.BoundingBox,
+	}
+}
+
 // LatLonToMercator converts geographic (longitude, latitude) coordinates into Mercator projection coordinates.
 // It returns (x, y) coordinates normalized in the range [0.0, 1.0].
 func LatLonToMercator(lon, lat float64) (x, y float64) {
-	x = (lon + 180.0) / 360.0
-	latRad := lat * math.Pi / 180.0
-	mercN := math.Log(math.Tan((math.Pi / 4.0) + (latRad / 2.0)))
-	y = 0.5 - (mercN / (2.0 * math.Pi)) // Y down for screen coordinates
-	return x, y
+	// 1. Project to Mercator meters
+	mx := EarthRadius * (lon * math.Pi / 180.0)
+	my := EarthRadius * math.Log(math.Tan((math.Pi/4.0)+(lat*math.Pi/360.0)))
+
+	// 2. Normalize Mercator coordinates to [0, 1]
+	nx := (mx + MaxMercator) / (2.0 * MaxMercator)
+	ny := (MaxMercator - my) / (2.0 * MaxMercator) // Invert Y for screen space
+
+	return nx, ny
 }
 
-// GetMercatorBoundingBox calculates the bounding box of a country in Mercator coordinates.
-// It returns the min/max X and Y values, or an error if the data cannot be retrieved.
-func GetMercatorBoundingBox(country string) (minX, minY, maxX, maxY float64, err error) {
-	paths, err := FetchAndCacheGeoJSON(country, true)
+/*
+// GetMercatorBounds calculates the bounding box of a country in normalized Mercator coordinates [0, 1].
+func GetMercatorBounds(country string, skipSmall int, enablePacificCenter bool) (minX, minY, maxX, maxY float64, err error) {
+	paths, err := FetchAndCacheGeoJSON(country, true, skipSmall, enablePacificCenter)
 	if err != nil {
 		return 0, 0, 0, 0, err
 	}
@@ -41,6 +130,56 @@ func GetMercatorBoundingBox(country string) (minX, minY, maxX, maxY float64, err
 	}
 	return minX, minY, maxX, maxY, nil
 }
+*/
+
+/*
+// GetBoundingBox calculates the bounding box of a country in pixel coordinates.
+// It returns the min/max X and Y values in screen space.
+func GetBoundingBox(country string, scale float32, offsetX, offsetY float32, skipSmall int, enablePacificCenter bool) (minX, minY, maxX, maxY float64, err error) {
+	mercMinX, mercMinY, mercMaxX, mercMaxY, err := GetMercatorBounds(country, skipSmall, enablePacificCenter)
+	if err != nil {
+		return 0, 0, 0, 0, err
+	}
+
+	minX = float64(offsetX)
+	minY = float64(offsetY)
+	maxX = minX + (mercMaxX-mercMinX)*float64(scale)
+	maxY = minY + (mercMaxY-mercMinY)*float64(scale)
+
+	return minX, minY, maxX, maxY, nil
+}
+*/
+
+// GetBoundingBox calculates the bounding box of a country in pixel coordinates.
+// It returns the min/max X and Y values in screen space.
+func GetBoundingBox(country string, scale float32, offsetX, offsetY float32, skipSmall int, enablePacificCenter bool) (minX, minY, maxX, maxY float64, err error) {
+	paths, err := FetchAndCacheGeoJSON(country, true, skipSmall, enablePacificCenter)
+	if err != nil {
+		return 0, 0, 0, 0, err
+	}
+
+	minX, minY = math.MaxFloat64, math.MaxFloat64
+	maxX, maxY = -math.MaxFloat64, -math.MaxFloat64
+
+	for _, path := range paths {
+		for _, pos := range path {
+			// 1. Project Lon/Lat to normalized Mercator [0, 1]
+			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
+
+			// 2. Transform to pixel space
+			px := float64(offsetX) + mx*float64(scale)
+			py := float64(offsetY) + my*float64(scale)
+
+			// 3. Update bounds
+			minX = min(minX, px)
+			maxX = max(maxX, px)
+			minY = min(minY, py)
+			maxY = max(maxY, py)
+		}
+	}
+
+	return minX, minY, maxX, maxY, nil
+}
 
 // geoCache stores parsed geoJSON paths for efficient retrieval.
 // cacheMu ensures thread-safe access to geoCache.
@@ -51,8 +190,10 @@ var (
 
 // FetchAndCacheGeoJSON loads and caches parsed GeoJSON paths from the mapdata directory.
 // The country parameter specifies the country name, and the singlePolyline parameter indicates if only the outer ring should be kept.
+// The skipSmall parameter indicates the maximum number of coordinates a polygon ring can have to be skipped.
+// The enablePacificCenter parameter indicates if the coordinates should be normalized to Pacific-centering if IDL crossing is detected.
 // It returns a slice of paths for each polygon, or an error if the file cannot be read or parsed.
-func FetchAndCacheGeoJSON(country string, singlePolyline bool) ([][]fyne.Position, error) {
+func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, enablePacificCenter bool) ([][]fyne.Position, error) {
 
 	fileName := getFileName(country)
 	filePath := filepath.Join("mapdata", fileName)
@@ -63,6 +204,12 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool) ([][]fyne.Positio
 	cacheKey := country
 	if singlePolyline {
 		cacheKey += "_single"
+	}
+	if skipSmall > 0 {
+		cacheKey += "_skip" + fmt.Sprint(skipSmall)
+	}
+	if enablePacificCenter {
+		cacheKey += "_pacific"
 	}
 
 	cacheMu.RLock()
@@ -77,7 +224,7 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool) ([][]fyne.Positio
 		return nil, err
 	}
 
-	paths, err = convertGeoJSONToDisplayFormat(data, singlePolyline)
+	paths, err = convertGeoJSONToDisplayFormat(data, singlePolyline, skipSmall, enablePacificCenter)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +250,9 @@ func getFileName(name string) string {
 
 // convertGeoJSONToDisplayFormat parses raw GeoJSON bytes into a format suitable for drawing on the Fyne canvas.
 // The singlePolyline flag indicates if polygon simplification (keeping only the outer ring) should be applied.
-// It returns a slice of paths for each polygon, or an error if the parsing fails.
-func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool) ([][]fyne.Position, error) {
+// The skipSmall parameter indicates if polygons with skipSmall or fewer coordinates should be skipped.
+// It returns a slice of paths for each polygon, or an error if the file cannot be read or parsed.
+func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool, skipSmall int, enablePacificCenter bool) ([][]fyne.Position, error) {
 	var fc struct {
 		Features []struct {
 			Geometry struct {
@@ -119,40 +267,46 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool) ([][]fyne.P
 
 	var allPaths [][]fyne.Position
 	for _, f := range fc.Features {
-		if f.Geometry.Type == "Polygon" {
+		var g Geometry
+		g.Type = f.Geometry.Type
+
+		if g.Type == "Polygon" {
 			var coords [][][]float64
 			if err := json.Unmarshal(f.Geometry.Coordinates, &coords); err != nil {
 				continue
 			}
-			if singlePolyline {
-				coords = singlePolyLine(coords)
-			}
-			for _, ring := range coords {
-				var path []fyne.Position
-				for _, point := range ring {
-					x := point[0]
-					path = append(path, fyne.NewPos(float32(x), float32(point[1])))
-				}
-				allPaths = append(allPaths, path)
-			}
-		} else if f.Geometry.Type == "MultiPolygon" {
-			var coords [][][][]float64
-			if err := json.Unmarshal(f.Geometry.Coordinates, &coords); err != nil {
+			// Wrap Polygon coordinates into MultiPolygon-like structure for unified processing
+			g.Coordinates = [][][][]float64{coords}
+		} else if g.Type == "MultiPolygon" {
+			if err := json.Unmarshal(f.Geometry.Coordinates, &g.Coordinates); err != nil {
 				continue
 			}
+		} else {
+			continue
+		}
 
-			for i, polygon := range coords {
-				if singlePolyline {
-					coords[i] = singlePolyLine(polygon)
+		needsCentering := NeedsPacificCentering(g)
+		log.Printf("Geometry (%s) needs Pacific centering: %v", g.Type, needsCentering)
+
+		if enablePacificCenter && needsCentering {
+			g = ApplyPacificCentering(g)
+		}
+
+		for _, polygon := range g.Coordinates {
+			polyToProcess := polygon
+			if singlePolyline {
+				polyToProcess = singlePolyLine(polygon)
+			}
+			for _, ring := range polyToProcess {
+				if len(ring) <= skipSmall {
+					continue
 				}
-				for _, ring := range coords[i] {
-					var path []fyne.Position
-					for _, point := range ring {
-						x := point[0]
-						path = append(path, fyne.NewPos(float32(x), float32(point[1])))
-					}
-					allPaths = append(allPaths, path)
+
+				var path []fyne.Position
+				for _, pt := range ring {
+					path = append(path, fyne.NewPos(float32(pt[0]), float32(pt[1])))
 				}
+				allPaths = append(allPaths, path)
 			}
 		}
 	}
@@ -167,3 +321,37 @@ func singlePolyLine(rings [][][]float64) [][][]float64 {
 	}
 	return rings
 }
+
+// LogSouthernmostPixels calculates and logs the southernmost and easternmost drawn country coordinate and
+// the southernmost and easternmost bounding box coordinate in pixel values.
+func LogSouthernmostPixels(country string, paths [][]fyne.Position, scale float32, offsetX, offsetY float32, transformedMinX, transformedMaxX, transformedMinY, transformedMaxY float64) {
+	pixelMaxY := float64(offsetY) + (transformedMaxY-transformedMinY)*float64(scale)
+	pixelMaxX := float64(offsetX) + (transformedMaxX-transformedMinX)*float64(scale)
+
+	maxDrawnY := -math.MaxFloat64
+	maxDrawnX := -math.MaxFloat64
+	for _, path := range paths {
+		for _, pos := range path {
+			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
+			drawnY := (my-transformedMinY)*float64(scale) + float64(offsetY)
+			if drawnY > maxDrawnY {
+				maxDrawnY = drawnY
+			}
+			drawnX := (mx-transformedMinX)*float64(scale) + float64(offsetX)
+			if drawnX > maxDrawnX {
+				maxDrawnX = drawnX
+			}
+		}
+	}
+
+	// Only log if country changed
+	if country != lastLoggedCountry {
+		log.Printf("Southernmost Drawn Pixel: %f, BBox: %f", maxDrawnY, pixelMaxY)
+		log.Printf("Easternmost Drawn Pixel: %f, BBox: %f", maxDrawnX, pixelMaxX)
+		lastLoggedCountry = country
+	}
+}
+
+var (
+	lastLoggedCountry string
+)
