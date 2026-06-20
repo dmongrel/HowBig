@@ -2,1201 +2,1201 @@
   "Countries": [
     {
       "Area": 252072,
-      "CompactName": "Afghanistan.gjson",
+      "CompactName": "Afghanistan.geojson",
       "ISOCode": "AFG",
       "Name": "Afghanistan"
     },
     {
       "Area": 11100,
-      "CompactName": "Albania.gjson",
+      "CompactName": "Albania.geojson",
       "ISOCode": "ALB",
       "Name": "Albania"
     },
     {
       "Area": 919595,
-      "CompactName": "Algeria.gjson",
+      "CompactName": "Algeria.geojson",
       "ISOCode": "DZA",
       "Name": "Algeria"
     },
     {
       "Area": 181,
-      "CompactName": "Andorra.gjson",
+      "CompactName": "Andorra.geojson",
       "ISOCode": "AND",
       "Name": "Andorra"
     },
     {
       "Area": 481350,
-      "CompactName": "Angola.gjson",
+      "CompactName": "Angola.geojson",
       "ISOCode": "AGO",
       "Name": "Angola"
     },
     {
       "Area": 170,
-      "CompactName": "AntiguaandBarbuda.gjson",
+      "CompactName": "AntiguaandBarbuda.geojson",
       "ISOCode": "ATG",
       "Name": "Antigua and Barbuda"
     },
     {
       "Area": 1073500,
-      "CompactName": "Argentina.gjson",
+      "CompactName": "Argentina.geojson",
       "ISOCode": "ARG",
       "Name": "Argentina"
     },
     {
       "Area": 11484,
-      "CompactName": "Armenia.gjson",
+      "CompactName": "Armenia.geojson",
       "ISOCode": "ARM",
       "Name": "Armenia"
     },
     {
       "Area": 2988900,
-      "CompactName": "Australia.gjson",
+      "CompactName": "Australia.geojson",
       "ISOCode": "AUS",
       "Name": "Australia"
     },
     {
       "Area": 32385,
-      "CompactName": "Austria.gjson",
+      "CompactName": "Austria.geojson",
       "ISOCode": "AUT",
       "Name": "Austria"
     },
     {
       "Area": 33436,
-      "CompactName": "Azerbaijan.gjson",
+      "CompactName": "Azerbaijan.geojson",
       "ISOCode": "AZE",
       "Name": "Azerbaijan"
     },
     {
       "Area": 5358,
-      "CompactName": "Bahamas.gjson",
+      "CompactName": "Bahamas.geojson",
       "ISOCode": "BHS",
       "Name": "Bahamas"
     },
     {
       "Area": 293,
-      "CompactName": "Bahrain.gjson",
+      "CompactName": "Bahrain.geojson",
       "ISOCode": "BHR",
       "Name": "Bahrain"
     },
     {
       "Area": 56977,
-      "CompactName": "Bangladesh.gjson",
+      "CompactName": "Bangladesh.geojson",
       "ISOCode": "BGD",
       "Name": "Bangladesh"
     },
     {
       "Area": 167,
-      "CompactName": "Barbados.gjson",
+      "CompactName": "Barbados.geojson",
       "ISOCode": "BRB",
       "Name": "Barbados"
     },
     {
       "Area": 80166,
-      "CompactName": "Belarus.gjson",
+      "CompactName": "Belarus.geojson",
       "ISOCode": "BLR",
       "Name": "Belarus"
     },
     {
       "Area": 11787,
-      "CompactName": "Belgium.gjson",
+      "CompactName": "Belgium.geojson",
       "ISOCode": "BEL",
       "Name": "Belgium"
     },
     {
       "Area": 8867,
-      "CompactName": "Belize.gjson",
+      "CompactName": "Belize.geojson",
       "ISOCode": "BLZ",
       "Name": "Belize"
     },
     {
       "Area": 44310,
-      "CompactName": "Benin.gjson",
+      "CompactName": "Benin.geojson",
       "ISOCode": "BEN",
       "Name": "Benin"
     },
     {
       "Area": 14824,
-      "CompactName": "Bhutan.gjson",
+      "CompactName": "Bhutan.geojson",
       "ISOCode": "BTN",
       "Name": "Bhutan"
     },
     {
       "Area": 424164,
-      "CompactName": "Bolivia.gjson",
+      "CompactName": "Bolivia.geojson",
       "ISOCode": "BOL",
       "Name": "Bolivia"
     },
     {
       "Area": 19772,
-      "CompactName": "BosniaandHerzegovina.gjson",
+      "CompactName": "BosniaandHerzegovina.geojson",
       "ISOCode": "BIH",
       "Name": "Bosnia and Herzegovina"
     },
     {
       "Area": 225000,
-      "CompactName": "Botswana.gjson",
+      "CompactName": "Botswana.geojson",
       "ISOCode": "BWA",
       "Name": "Botswana"
     },
     {
       "Area": 3285862,
-      "CompactName": "Brazil.gjson",
+      "CompactName": "Brazil.geojson",
       "ISOCode": "BRA",
       "Name": "Brazil"
     },
     {
       "Area": 2226,
-      "CompactName": "Brunei.gjson",
+      "CompactName": "Brunei.geojson",
       "ISOCode": "BRN",
       "Name": "Brunei"
     },
     {
       "Area": 42855,
-      "CompactName": "Bulgaria.gjson",
+      "CompactName": "Bulgaria.geojson",
       "ISOCode": "BGR",
       "Name": "Bulgaria"
     },
     {
       "Area": 104543,
-      "CompactName": "BurkinaFaso.gjson",
+      "CompactName": "BurkinaFaso.geojson",
       "ISOCode": "BFA",
       "Name": "Burkina Faso"
     },
     {
       "Area": 10745,
-      "CompactName": "Burundi.gjson",
+      "CompactName": "Burundi.geojson",
       "ISOCode": "BDI",
       "Name": "Burundi"
     },
     {
       "Area": 1557,
-      "CompactName": "CaboVerde.gjson",
+      "CompactName": "CaboVerde.geojson",
       "ISOCode": "CPV",
       "Name": "Cabo Verde"
     },
     {
       "Area": 71056,
-      "CompactName": "Cambodia.gjson",
+      "CompactName": "Cambodia.geojson",
       "ISOCode": "KHM",
       "Name": "Cambodia"
     },
     {
       "Area": 183569,
-      "CompactName": "Cameroon.gjson",
+      "CompactName": "Cameroon.geojson",
       "ISOCode": "CMR",
       "Name": "Cameroon"
     },
     {
       "Area": 3855100,
-      "CompactName": "Canada.gjson",
+      "CompactName": "Canada.geojson",
       "ISOCode": "CAN",
       "Name": "Canada"
     },
     {
       "Area": 240535,
-      "CompactName": "CentralAfricanRepublic.gjson",
+      "CompactName": "CentralAfricanRepublic.geojson",
       "ISOCode": "CAF",
       "Name": "Central African Republic"
     },
     {
       "Area": 495800,
-      "CompactName": "Chad.gjson",
+      "CompactName": "Chad.geojson",
       "ISOCode": "TCD",
       "Name": "Chad"
     },
     {
       "Area": 291932,
-      "CompactName": "Chile.gjson",
+      "CompactName": "Chile.geojson",
       "ISOCode": "CHL",
       "Name": "Chile"
     },
     {
       "Area": 3705410,
-      "CompactName": "China.gjson",
+      "CompactName": "China.geojson",
       "ISOCode": "CHN",
       "Name": "China"
     },
     {
       "Area": 439735,
-      "CompactName": "Colombia.gjson",
+      "CompactName": "Colombia.geojson",
       "ISOCode": "COL",
       "Name": "Colombia"
     },
     {
       "Area": 719,
-      "CompactName": "Comoros.gjson",
+      "CompactName": "Comoros.geojson",
       "ISOCode": "COM",
       "Name": "Comoros"
     },
     {
       "Area": 132047,
-      "CompactName": "Congo(Congo-Brazzaville).gjson",
+      "CompactName": "Congo(Congo-Brazzaville).geojson",
       "ISOCode": "COG",
       "Name": "Congo (Congo-Brazzaville)"
     },
     {
       "Area": 19730,
-      "CompactName": "CostaRica.gjson",
+      "CompactName": "CostaRica.geojson",
       "ISOCode": "CRI",
       "Name": "Costa Rica"
     },
     {
       "Area": 21851,
-      "CompactName": "Croatia.gjson",
+      "CompactName": "Croatia.geojson",
       "ISOCode": "HRV",
       "Name": "Croatia"
     },
     {
       "Area": 42426,
-      "CompactName": "Cuba.gjson",
+      "CompactName": "Cuba.geojson",
       "ISOCode": "CUB",
       "Name": "Cuba"
     },
     {
       "Area": 3572,
-      "CompactName": "Cyprus.gjson",
+      "CompactName": "Cyprus.geojson",
       "ISOCode": "CYP",
       "Name": "Cyprus"
     },
     {
       "Area": 30452,
-      "CompactName": "Czechia.gjson",
+      "CompactName": "Czechia.geojson",
       "ISOCode": "CZE",
       "Name": "Czechia"
     },
     {
       "Area": 16573,
-      "CompactName": "Denmark.gjson",
+      "CompactName": "Denmark.geojson",
       "ISOCode": "DNK",
       "Name": "Denmark"
     },
     {
       "Area": 8958,
-      "CompactName": "Djibouti.gjson",
+      "CompactName": "Djibouti.geojson",
       "ISOCode": "DJI",
       "Name": "Djibouti"
     },
     {
       "Area": 290,
-      "CompactName": "Dominica.gjson",
+      "CompactName": "Dominica.geojson",
       "ISOCode": "DMA",
       "Name": "Dominica"
     },
     {
       "Area": 18704,
-      "CompactName": "DominicanRepublic.gjson",
+      "CompactName": "DominicanRepublic.geojson",
       "ISOCode": "DOM",
       "Name": "Dominican Republic"
     },
     {
       "Area": 100224,
-      "CompactName": "Ecuador.gjson",
+      "CompactName": "Ecuador.geojson",
       "ISOCode": "ECU",
       "Name": "Ecuador"
     },
     {
       "Area": 386662,
-      "CompactName": "Egypt.gjson",
+      "CompactName": "Egypt.geojson",
       "ISOCode": "EGY",
       "Name": "Egypt"
     },
     {
       "Area": 8124,
-      "CompactName": "ElSalvador.gjson",
+      "CompactName": "ElSalvador.geojson",
       "ISOCode": "SLV",
       "Name": "El Salvador"
     },
     {
       "Area": 10830,
-      "CompactName": "EquatorialGuinea.gjson",
+      "CompactName": "EquatorialGuinea.geojson",
       "ISOCode": "GNQ",
       "Name": "Equatorial Guinea"
     },
     {
       "Area": 45406,
-      "CompactName": "Eritrea.gjson",
+      "CompactName": "Eritrea.geojson",
       "ISOCode": "ERI",
       "Name": "Eritrea"
     },
     {
       "Area": 17529,
-      "CompactName": "Estonia.gjson",
+      "CompactName": "Estonia.geojson",
       "ISOCode": "EST",
       "Name": "Estonia"
     },
     {
       "Area": 6704,
-      "CompactName": "Eswatini.gjson",
+      "CompactName": "Eswatini.geojson",
       "ISOCode": "SWZ",
       "Name": "Eswatini"
     },
     {
       "Area": 426370,
-      "CompactName": "Ethiopia.gjson",
+      "CompactName": "Ethiopia.geojson",
       "ISOCode": "ETH",
       "Name": "Ethiopia"
     },
     {
       "Area": 7055,
-      "CompactName": "Fiji.gjson",
+      "CompactName": "Fiji.geojson",
       "ISOCode": "FJI",
       "Name": "Fiji"
     },
     {
       "Area": 130666,
-      "CompactName": "Finland.gjson",
+      "CompactName": "Finland.geojson",
       "ISOCode": "FIN",
       "Name": "Finland"
     },
     {
       "Area": 248573,
-      "CompactName": "France.gjson",
+      "CompactName": "France.geojson",
       "ISOCode": "FRA",
       "Name": "France"
     },
     {
       "Area": 103347,
-      "CompactName": "Gabon.gjson",
+      "CompactName": "Gabon.geojson",
       "ISOCode": "GAB",
       "Name": "Gabon"
     },
     {
       "Area": 4361,
-      "CompactName": "Gambia.gjson",
+      "CompactName": "Gambia.geojson",
       "ISOCode": "GMB",
       "Name": "Gambia"
     },
     {
       "Area": 26911,
-      "CompactName": "Georgia.gjson",
+      "CompactName": "Georgia.geojson",
       "ISOCode": "GEO",
       "Name": "Georgia"
     },
     {
       "Area": 137882,
-      "CompactName": "Germany.gjson",
+      "CompactName": "Germany.geojson",
       "ISOCode": "DEU",
       "Name": "Germany"
     },
     {
       "Area": 92098,
-      "CompactName": "Ghana.gjson",
+      "CompactName": "Ghana.geojson",
       "ISOCode": "GHA",
       "Name": "Ghana"
     },
     {
       "Area": 50949,
-      "CompactName": "Greece.gjson",
+      "CompactName": "Greece.geojson",
       "ISOCode": "GRC",
       "Name": "Greece"
     },
     {
       "Area": 133,
-      "CompactName": "Grenada.gjson",
+      "CompactName": "Grenada.geojson",
       "ISOCode": "GRD",
       "Name": "Grenada"
     },
     {
       "Area": 42042,
-      "CompactName": "Guatemala.gjson",
+      "CompactName": "Guatemala.geojson",
       "ISOCode": "GTM",
       "Name": "Guatemala"
     },
     {
       "Area": 94926,
-      "CompactName": "Guinea.gjson",
+      "CompactName": "Guinea.geojson",
       "ISOCode": "GIN",
       "Name": "Guinea"
     },
     {
       "Area": 13948,
-      "CompactName": "Guinea-Bissau.gjson",
+      "CompactName": "Guinea-Bissau.geojson",
       "ISOCode": "GNB",
       "Name": "Guinea-Bissau"
     },
     {
       "Area": 83012,
-      "CompactName": "Guyana.gjson",
+      "CompactName": "Guyana.geojson",
       "ISOCode": "GUY",
       "Name": "Guyana"
     },
     {
       "Area": 10714,
-      "CompactName": "Haiti.gjson",
+      "CompactName": "Haiti.geojson",
       "ISOCode": "HTI",
       "Name": "Haiti"
     },
     {
       "Area": 43433,
-      "CompactName": "Honduras.gjson",
+      "CompactName": "Honduras.geojson",
       "ISOCode": "HND",
       "Name": "Honduras"
     },
     {
       "Area": 35917,
-      "CompactName": "Hungary.gjson",
+      "CompactName": "Hungary.geojson",
       "ISOCode": "HUN",
       "Name": "Hungary"
     },
     {
       "Area": 40000,
-      "CompactName": "Iceland.gjson",
+      "CompactName": "Iceland.geojson",
       "ISOCode": "ISL",
       "Name": "Iceland"
     },
     {
       "Area": 1269219,
-      "CompactName": "India.gjson",
+      "CompactName": "India.geojson",
       "ISOCode": "IND",
       "Name": "India"
     },
     {
       "Area": 735358,
-      "CompactName": "Indonesia.gjson",
+      "CompactName": "Indonesia.geojson",
       "ISOCode": "IDN",
       "Name": "Indonesia"
     },
     {
       "Area": 636371,
-      "CompactName": "Iran.gjson",
+      "CompactName": "Iran.geojson",
       "ISOCode": "IRN",
       "Name": "Iran"
     },
     {
       "Area": 169235,
-      "CompactName": "Iraq.gjson",
+      "CompactName": "Iraq.geojson",
       "ISOCode": "IRQ",
       "Name": "Iraq"
     },
     {
       "Area": 27133,
-      "CompactName": "Ireland.gjson",
+      "CompactName": "Ireland.geojson",
       "ISOCode": "IRL",
       "Name": "Ireland"
     },
     {
       "Area": 8019,
-      "CompactName": "Israel.gjson",
+      "CompactName": "Israel.geojson",
       "ISOCode": "ISR",
       "Name": "Israel"
     },
     {
       "Area": 116587,
-      "CompactName": "Italy.gjson",
+      "CompactName": "Italy.geojson",
       "ISOCode": "ITA",
       "Name": "Italy"
     },
     {
       "Area": 4244,
-      "CompactName": "Jamaica.gjson",
+      "CompactName": "Jamaica.geojson",
       "ISOCode": "JAM",
       "Name": "Jamaica"
     },
     {
       "Area": 145920,
-      "CompactName": "Japan.gjson",
+      "CompactName": "Japan.geojson",
       "ISOCode": "JPN",
       "Name": "Japan"
     },
     {
       "Area": 34284,
-      "CompactName": "Jordan.gjson",
+      "CompactName": "Jordan.geojson",
       "ISOCode": "JOR",
       "Name": "Jordan"
     },
     {
       "Area": 1052090,
-      "CompactName": "Kazakhstan.gjson",
+      "CompactName": "Kazakhstan.geojson",
       "ISOCode": "KAZ",
       "Name": "Kazakhstan"
     },
     {
       "Area": 224081,
-      "CompactName": "Kenya.gjson",
+      "CompactName": "Kenya.geojson",
       "ISOCode": "KEN",
       "Name": "Kenya"
     },
     {
       "Area": 313,
-      "CompactName": "Kiribati.gjson",
+      "CompactName": "Kiribati.geojson",
       "ISOCode": "KIR",
       "Name": "Kiribati"
     },
     {
       "Area": 46490,
-      "CompactName": "Korea(North).gjson",
+      "CompactName": "Korea(North).geojson",
       "ISOCode": "PRK",
       "Name": "Korea (North)"
     },
     {
       "Area": 38696,
-      "CompactName": "Korea(South).gjson",
+      "CompactName": "Korea(South).geojson",
       "ISOCode": "KOR",
       "Name": "Korea (South)"
     },
     {
       "Area": 6880,
-      "CompactName": "Kuwait.gjson",
+      "CompactName": "Kuwait.geojson",
       "ISOCode": "KWT",
       "Name": "Kuwait"
     },
     {
       "Area": 77199,
-      "CompactName": "Kyrgyzstan.gjson",
+      "CompactName": "Kyrgyzstan.geojson",
       "ISOCode": "KGZ",
       "Name": "Kyrgyzstan"
     },
     {
       "Area": 91429,
-      "CompactName": "Laos.gjson",
+      "CompactName": "Laos.geojson",
       "ISOCode": "LAO",
       "Name": "Laos"
     },
     {
       "Area": 24940,
-      "CompactName": "Latvia.gjson",
+      "CompactName": "Latvia.geojson",
       "ISOCode": "LVA",
       "Name": "Latvia"
     },
     {
       "Area": 4015,
-      "CompactName": "Lebanon.gjson",
+      "CompactName": "Lebanon.geojson",
       "ISOCode": "LBN",
       "Name": "Lebanon"
     },
     {
       "Area": 11720,
-      "CompactName": "Lesotho.gjson",
+      "CompactName": "Lesotho.geojson",
       "ISOCode": "LSO",
       "Name": "Lesotho"
     },
     {
       "Area": 37420,
-      "CompactName": "Liberia.gjson",
+      "CompactName": "Liberia.geojson",
       "ISOCode": "LBR",
       "Name": "Liberia"
     },
     {
       "Area": 679362,
-      "CompactName": "Libya.gjson",
+      "CompactName": "Libya.geojson",
       "ISOCode": "LBY",
       "Name": "Libya"
     },
     {
       "Area": 62,
-      "CompactName": "Liechtenstein.gjson",
+      "CompactName": "Liechtenstein.geojson",
       "ISOCode": "LIE",
       "Name": "Liechtenstein"
     },
     {
       "Area": 25207,
-      "CompactName": "Lithuania.gjson",
+      "CompactName": "Lithuania.geojson",
       "ISOCode": "LTU",
       "Name": "Lithuania"
     },
     {
       "Area": 998,
-      "CompactName": "Luxembourg.gjson",
+      "CompactName": "Luxembourg.geojson",
       "ISOCode": "LUX",
       "Name": "Luxembourg"
     },
     {
       "Area": 226658,
-      "CompactName": "Madagascar.gjson",
+      "CompactName": "Madagascar.geojson",
       "ISOCode": "MDG",
       "Name": "Madagascar"
     },
     {
       "Area": 45745,
-      "CompactName": "Malawi.gjson",
+      "CompactName": "Malawi.geojson",
       "ISOCode": "MWI",
       "Name": "Malawi"
     },
     {
       "Area": 127724,
-      "CompactName": "Malaysia.gjson",
+      "CompactName": "Malaysia.geojson",
       "ISOCode": "MYS",
       "Name": "Malaysia"
     },
     {
       "Area": 115,
-      "CompactName": "Maldives.gjson",
+      "CompactName": "Maldives.geojson",
       "ISOCode": "MDV",
       "Name": "Maldives"
     },
     {
       "Area": 478841,
-      "CompactName": "Mali.gjson",
+      "CompactName": "Mali.geojson",
       "ISOCode": "MLI",
       "Name": "Mali"
     },
     {
       "Area": 122,
-      "CompactName": "Malta.gjson",
+      "CompactName": "Malta.geojson",
       "ISOCode": "MLT",
       "Name": "Malta"
     },
     {
       "Area": 70,
-      "CompactName": "MarshallIslands.gjson",
+      "CompactName": "MarshallIslands.geojson",
       "ISOCode": "MHL",
       "Name": "Marshall Islands"
     },
     {
       "Area": 397960,
-      "CompactName": "Mauritania.gjson",
+      "CompactName": "Mauritania.geojson",
       "ISOCode": "MRT",
       "Name": "Mauritania"
     },
     {
       "Area": 790,
-      "CompactName": "Mauritius.gjson",
+      "CompactName": "Mauritius.geojson",
       "ISOCode": "MUS",
       "Name": "Mauritius"
     },
     {
       "Area": 758449,
-      "CompactName": "Mexico.gjson",
+      "CompactName": "Mexico.geojson",
       "ISOCode": "MEX",
       "Name": "Mexico"
     },
     {
       "Area": 271,
-      "CompactName": "Micronesia.gjson",
+      "CompactName": "Micronesia.geojson",
       "ISOCode": "FSM",
       "Name": "Micronesia"
     },
     {
       "Area": 130668,
-      "CompactName": "Moldova.gjson",
+      "CompactName": "Moldova.geojson",
       "ISOCode": "MDA",
       "Name": "Moldova"
     },
     {
       "Area": 0.77,
-      "CompactName": "Monaco.gjson",
+      "CompactName": "Monaco.geojson",
       "ISOCode": "MCO",
       "Name": "Monaco"
     },
     {
       "Area": 603908,
-      "CompactName": "Mongolia.gjson",
+      "CompactName": "Mongolia.geojson",
       "ISOCode": "MNG",
       "Name": "Mongolia"
     },
     {
       "Area": 5333,
-      "CompactName": "Montenegro.gjson",
+      "CompactName": "Montenegro.geojson",
       "ISOCode": "MNE",
       "Name": "Montenegro"
     },
     {
       "Area": 172414,
-      "CompactName": "Morocco.gjson",
+      "CompactName": "Morocco.geojson",
       "ISOCode": "MAR",
       "Name": "Morocco"
     },
     {
       "Area": 308640,
-      "CompactName": "Mozambique.gjson",
+      "CompactName": "Mozambique.geojson",
       "ISOCode": "MOZ",
       "Name": "Mozambique"
     },
     {
       "Area": 261228,
-      "CompactName": "Myanmar.gjson",
+      "CompactName": "Myanmar.geojson",
       "ISOCode": "MMR",
       "Name": "Myanmar"
     },
     {
       "Area": 318261,
-      "CompactName": "Namibia.gjson",
+      "CompactName": "Namibia.geojson",
       "ISOCode": "NAM",
       "Name": "Namibia"
     },
     {
       "Area": 8.1,
-      "CompactName": "Nauru.gjson",
+      "CompactName": "Nauru.geojson",
       "ISOCode": "NRU",
       "Name": "Nauru"
     },
     {
       "Area": 56827,
-      "CompactName": "Nepal.gjson",
+      "CompactName": "Nepal.geojson",
       "ISOCode": "NPL",
       "Name": "Nepal"
     },
     {
       "Area": 16040,
-      "CompactName": "Netherlands.gjson",
+      "CompactName": "Netherlands.geojson",
       "ISOCode": "NLD",
       "Name": "Netherlands"
     },
     {
       "Area": 101,
-      "CompactName": "NevisandSaintKitts.gjson",
+      "CompactName": "NevisandSaintKitts.geojson",
       "ISOCode": "KNA",
       "Name": "Nevis and Saint Kitts"
     },
     {
       "Area": 103481,
-      "CompactName": "NewZealand.gjson",
+      "CompactName": "NewZealand.geojson",
       "ISOCode": "NZL",
       "Name": "New Zealand"
     },
     {
       "Area": 50337,
-      "CompactName": "Nicaragua.gjson",
+      "CompactName": "Nicaragua.geojson",
       "ISOCode": "NIC",
       "Name": "Nicaragua"
     },
     {
       "Area": 489200,
-      "CompactName": "Niger.gjson",
+      "CompactName": "Niger.geojson",
       "ISOCode": "NER",
       "Name": "Niger"
     },
     {
       "Area": 356669,
-      "CompactName": "Nigeria.gjson",
+      "CompactName": "Nigeria.geojson",
       "ISOCode": "NGA",
       "Name": "Nigeria"
     },
     {
       "Area": 9928,
-      "CompactName": "NorthMacedonia.gjson",
+      "CompactName": "NorthMacedonia.geojson",
       "ISOCode": "MKD",
       "Name": "North Macedonia"
     },
     {
       "Area": 124756,
-      "CompactName": "Norway.gjson",
+      "CompactName": "Norway.geojson",
       "ISOCode": "NOR",
       "Name": "Norway"
     },
     {
       "Area": 119499,
-      "CompactName": "Oman.gjson",
+      "CompactName": "Oman.geojson",
       "ISOCode": "OMN",
       "Name": "Oman"
     },
     {
       "Area": 340682,
-      "CompactName": "Pakistan.gjson",
+      "CompactName": "Pakistan.geojson",
       "ISOCode": "PAK",
       "Name": "Pakistan"
     },
     {
       "Area": 177,
-      "CompactName": "Palau.gjson",
+      "CompactName": "Palau.geojson",
       "ISOCode": "PLW",
       "Name": "Palau"
     },
     {
       "Area": 2402,
-      "CompactName": "PalestineState.gjson",
+      "CompactName": "PalestineState.geojson",
       "ISOCode": "PSE",
       "Name": "Palestine State"
     },
     {
       "Area": 29157,
-      "CompactName": "Panama.gjson",
+      "CompactName": "Panama.geojson",
       "ISOCode": "PAN",
       "Name": "Panama"
     },
     {
       "Area": 178703,
-      "CompactName": "PapuaNewGuinea.gjson",
+      "CompactName": "PapuaNewGuinea.geojson",
       "ISOCode": "PNG",
       "Name": "Papua New Guinea"
     },
     {
       "Area": 157048,
-      "CompactName": "Paraguay.gjson",
+      "CompactName": "Paraguay.geojson",
       "ISOCode": "PRY",
       "Name": "Paraguay"
     },
     {
       "Area": 496224,
-      "CompactName": "Peru.gjson",
+      "CompactName": "Peru.geojson",
       "ISOCode": "PER",
       "Name": "Peru"
     },
     {
       "Area": 132183,
-      "CompactName": "Philippines.gjson",
+      "CompactName": "Philippines.geojson",
       "ISOCode": "PHL",
       "Name": "Philippines"
     },
     {
       "Area": 120726,
-      "CompactName": "Poland.gjson",
+      "CompactName": "Poland.geojson",
       "ISOCode": "POL",
       "Name": "Poland"
     },
     {
       "Area": 35608,
-      "CompactName": "Portugal.gjson",
+      "CompactName": "Portugal.geojson",
       "ISOCode": "PRT",
       "Name": "Portugal"
     },
     {
       "Area": 372,
-      "CompactName": "PrincipeandSaoTome.gjson",
+      "CompactName": "PrincipeandSaoTome.geojson",
       "ISOCode": "STP",
       "Name": "Principe and Sao Tome"
     },
     {
       "Area": 4468,
-      "CompactName": "Qatar.gjson",
+      "CompactName": "Qatar.geojson",
       "ISOCode": "QAT",
       "Name": "Qatar"
     },
     {
       "Area": 92046,
-      "CompactName": "Romania.gjson",
+      "CompactName": "Romania.geojson",
       "ISOCode": "ROU",
       "Name": "Romania"
     },
     {
       "Area": 6601667,
-      "CompactName": "Russia.gjson",
+      "CompactName": "Russia.geojson",
       "ISOCode": "RUS",
       "Name": "Russia"
     },
     {
       "Area": 10169,
-      "CompactName": "Rwanda.gjson",
+      "CompactName": "Rwanda.geojson",
       "ISOCode": "RWA",
       "Name": "Rwanda"
     },
     {
       "Area": 101,
-      "CompactName": "SaintKittsandNevis.gjson",
+      "CompactName": "SaintKittsandNevis.geojson",
       "ISOCode": "KNA",
       "Name": "Saint Kitts and Nevis"
     },
     {
       "Area": 238,
-      "CompactName": "SaintLucia.gjson",
+      "CompactName": "SaintLucia.geojson",
       "ISOCode": "LCA",
       "Name": "Saint Lucia"
     },
     {
       "Area": 150,
-      "CompactName": "SaintVincentandtheGrenadines.gjson",
+      "CompactName": "SaintVincentandtheGrenadines.geojson",
       "ISOCode": "VCT",
       "Name": "Saint Vincent and the Grenadines"
     },
     {
       "Area": 1093,
-      "CompactName": "Samoa.gjson",
+      "CompactName": "Samoa.geojson",
       "ISOCode": "WSM",
       "Name": "Samoa"
     },
     {
       "Area": 24,
-      "CompactName": "SanMarino.gjson",
+      "CompactName": "SanMarino.geojson",
       "ISOCode": "SMR",
       "Name": "San Marino"
     },
     {
       "Area": 372,
-      "CompactName": "SaoTomeandPrincipe.gjson",
+      "CompactName": "SaoTomeandPrincipe.geojson",
       "ISOCode": "STP",
       "Name": "Sao Tome and Principe"
     },
     {
       "Area": 830000,
-      "CompactName": "SaudiArabia.gjson",
+      "CompactName": "SaudiArabia.geojson",
       "ISOCode": "SAU",
       "Name": "Saudi Arabia"
     },
     {
       "Area": 75973,
-      "CompactName": "Senegal.gjson",
+      "CompactName": "Senegal.geojson",
       "ISOCode": "SEN",
       "Name": "Senegal"
     },
     {
       "Area": 29957,
-      "CompactName": "Serbia.gjson",
+      "CompactName": "Serbia.geojson",
       "ISOCode": "SRB",
       "Name": "Serbia"
     },
     {
       "Area": 175,
-      "CompactName": "Seychelles.gjson",
+      "CompactName": "Seychelles.geojson",
       "ISOCode": "SYC",
       "Name": "Seychelles"
     },
     {
       "Area": 27699,
-      "CompactName": "SierraLeone.gjson",
+      "CompactName": "SierraLeone.geojson",
       "ISOCode": "SLE",
       "Name": "Sierra Leone"
     },
     {
       "Area": 278,
-      "CompactName": "Singapore.gjson",
+      "CompactName": "Singapore.geojson",
       "ISOCode": "SGP",
       "Name": "Singapore"
     },
     {
       "Area": 18933,
-      "CompactName": "Slovakia.gjson",
+      "CompactName": "Slovakia.geojson",
       "ISOCode": "SVK",
       "Name": "Slovakia"
     },
     {
       "Area": 7827,
-      "CompactName": "Slovenia.gjson",
+      "CompactName": "Slovenia.geojson",
       "ISOCode": "SVN",
       "Name": "Slovenia"
     },
     {
       "Area": 11157,
-      "CompactName": "SolomonIslands.gjson",
+      "CompactName": "SolomonIslands.geojson",
       "ISOCode": "SLB",
       "Name": "Solomon Islands"
     },
     {
       "Area": 246201,
-      "CompactName": "Somalia.gjson",
+      "CompactName": "Somalia.geojson",
       "ISOCode": "SOM",
       "Name": "Somalia"
     },
     {
       "Area": 470693,
-      "CompactName": "SouthAfrica.gjson",
+      "CompactName": "SouthAfrica.geojson",
       "ISOCode": "ZAF",
       "Name": "South Africa"
     },
     {
       "Area": 248777,
-      "CompactName": "SouthSudan.gjson",
+      "CompactName": "SouthSudan.geojson",
       "ISOCode": "SSD",
       "Name": "South Sudan"
     },
     {
       "Area": 195120,
-      "CompactName": "Spain.gjson",
+      "CompactName": "Spain.geojson",
       "ISOCode": "ESP",
       "Name": "Spain"
     },
     {
       "Area": 25332,
-      "CompactName": "SriLanka.gjson",
+      "CompactName": "SriLanka.geojson",
       "ISOCode": "LKA",
       "Name": "Sri Lanka"
     },
     {
       "Area": 725100,
-      "CompactName": "Sudan.gjson",
+      "CompactName": "Sudan.geojson",
       "ISOCode": "SDN",
       "Name": "Sudan"
     },
     {
       "Area": 63251,
-      "CompactName": "Suriname.gjson",
+      "CompactName": "Suriname.geojson",
       "ISOCode": "SUR",
       "Name": "Suriname"
     },
     {
       "Area": 173860,
-      "CompactName": "Sweden.gjson",
+      "CompactName": "Sweden.geojson",
       "ISOCode": "SWE",
       "Name": "Sweden"
     },
     {
       "Area": 15940,
-      "CompactName": "Switzerland.gjson",
+      "CompactName": "Switzerland.geojson",
       "ISOCode": "CHE",
       "Name": "Switzerland"
     },
     {
       "Area": 71498,
-      "CompactName": "Syria.gjson",
+      "CompactName": "Syria.geojson",
       "ISOCode": "SYR",
       "Name": "Syria"
     },
     {
       "Area": 13974,
-      "CompactName": "Taiwan.gjson",
+      "CompactName": "Taiwan.geojson",
       "ISOCode": "TWN",
       "Name": "Taiwan"
     },
     {
       "Area": 54595,
-      "CompactName": "Tajikistan.gjson",
+      "CompactName": "Tajikistan.geojson",
       "ISOCode": "TJK",
       "Name": "Tajikistan"
     },
     {
       "Area": 365756,
-      "CompactName": "Tanzania.gjson",
+      "CompactName": "Tanzania.geojson",
       "ISOCode": "TZA",
       "Name": "Tanzania"
     },
     {
       "Area": 198120,
-      "CompactName": "Thailand.gjson",
+      "CompactName": "Thailand.geojson",
       "ISOCode": "THA",
       "Name": "Thailand"
     },
     {
       "Area": 150,
-      "CompactName": "theGrenadinesandSaintVincent.gjson",
+      "CompactName": "theGrenadinesandSaintVincent.geojson",
       "ISOCode": "VCT",
       "Name": "the Grenadines and Saint Vincent"
     },
     {
       "Area": 5741,
-      "CompactName": "Timor-Leste.gjson",
+      "CompactName": "Timor-Leste.geojson",
       "ISOCode": "TLS",
       "Name": "Timor-Leste"
     },
     {
       "Area": 1980,
-      "CompactName": "TobagoandTrinidad.gjson",
+      "CompactName": "TobagoandTrinidad.geojson",
       "ISOCode": "TTO",
       "Name": "Tobago and Trinidad"
     },
     {
       "Area": 21925,
-      "CompactName": "Togo.gjson",
+      "CompactName": "Togo.geojson",
       "ISOCode": "TGO",
       "Name": "Togo"
     },
     {
       "Area": 288,
-      "CompactName": "Tonga.gjson",
+      "CompactName": "Tonga.geojson",
       "ISOCode": "TON",
       "Name": "Tonga"
     },
     {
       "Area": 1980,
-      "CompactName": "TrinidadandTobago.gjson",
+      "CompactName": "TrinidadandTobago.geojson",
       "ISOCode": "TTO",
       "Name": "Trinidad and Tobago"
     },
     {
       "Area": 63170,
-      "CompactName": "Tunisia.gjson",
+      "CompactName": "Tunisia.geojson",
       "ISOCode": "TUN",
       "Name": "Tunisia"
     },
     {
       "Area": 302535,
-      "CompactName": "Turkey.gjson",
+      "CompactName": "Turkey.geojson",
       "ISOCode": "TUR",
       "Name": "Turkey"
     },
     {
       "Area": 188500,
-      "CompactName": "Turkmenistan.gjson",
+      "CompactName": "Turkmenistan.geojson",
       "ISOCode": "TKM",
       "Name": "Turkmenistan"
     },
     {
       "Area": 10,
-      "CompactName": "Tuvalu.gjson",
+      "CompactName": "Tuvalu.geojson",
       "ISOCode": "TUV",
       "Name": "Tuvalu"
     },
     {
       "Area": 93264,
-      "CompactName": "Uganda.gjson",
+      "CompactName": "Uganda.geojson",
       "ISOCode": "UGA",
       "Name": "Uganda"
     },
     {
       "Area": 233030,
-      "CompactName": "Ukraine.gjson",
+      "CompactName": "Ukraine.geojson",
       "ISOCode": "UKR",
       "Name": "Ukraine"
     },
     {
       "Area": 32300,
-      "CompactName": "UnitedArabEmirates.gjson",
+      "CompactName": "UnitedArabEmirates.geojson",
       "ISOCode": "ARE",
       "Name": "United Arab Emirates"
     },
     {
       "Area": 93723,
-      "CompactName": "UnitedKingdom.gjson",
+      "CompactName": "UnitedKingdom.geojson",
       "ISOCode": "GBR",
       "Name": "United Kingdom"
     },
     {
       "Area": 3677647,
-      "CompactName": "UnitedStates.gjson",
+      "CompactName": "UnitedStates.geojson",
       "ISOCode": "USA",
       "Name": "United States"
     },
     {
       "Area": 3536278,
-      "CompactName": "UnitedStatesContinental.gjson",
+      "CompactName": "UnitedStatesContinental.geojson",
       "ISOCode": "USAC",
       "Name": "United States (Continental)"
     },
     {
       "Area": 3119885,
-      "CompactName": "UnitedStates48.gjson",
+      "CompactName": "UnitedStates48.geojson",
       "ISOCode": "USA48",
       "Name": "United States (Lower 48)"
     },
     {
       "Area": 68037,
-      "CompactName": "Uruguay.gjson",
+      "CompactName": "Uruguay.geojson",
       "ISOCode": "URY",
       "Name": "Uruguay"
     },
     {
       "Area": 172742,
-      "CompactName": "Uzbekistan.gjson",
+      "CompactName": "Uzbekistan.geojson",
       "ISOCode": "UZB",
       "Name": "Uzbekistan"
     },
     {
       "Area": 4728,
-      "CompactName": "Vanuatu.gjson",
+      "CompactName": "Vanuatu.geojson",
       "ISOCode": "VUT",
       "Name": "Vanuatu"
     },
     {
       "Area": 0.17,
-      "CompactName": "VaticanCity.gjson",
+      "CompactName": "VaticanCity.geojson",
       "ISOCode": "VAT",
       "Name": "Vatican City"
     },
     {
       "Area": 352140,
-      "CompactName": "Venezuela.gjson",
+      "CompactName": "Venezuela.geojson",
       "ISOCode": "VEN",
       "Name": "Venezuela"
     },
     {
       "Area": 127882,
-      "CompactName": "Vietnam.gjson",
+      "CompactName": "Vietnam.geojson",
       "ISOCode": "VNM",
       "Name": "Vietnam"
     },
     {
       "Area": 203850,
-      "CompactName": "Yemen.gjson",
+      "CompactName": "Yemen.geojson",
       "ISOCode": "YEM",
       "Name": "Yemen"
     },
     {
       "Area": 290585,
-      "CompactName": "Zambia.gjson",
+      "CompactName": "Zambia.geojson",
       "ISOCode": "ZMB",
       "Name": "Zambia"
     },
     {
       "Area": 150872,
-      "CompactName": "Zimbabwe.gjson",
+      "CompactName": "Zimbabwe.geojson",
       "ISOCode": "ZWE",
       "Name": "Zimbabwe"
     }
