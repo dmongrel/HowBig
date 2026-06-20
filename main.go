@@ -203,23 +203,13 @@ func formatNumber(n float64) string {
 
 // getFitScale calculates the scale factor required to fit the bounding box of a country within the available display area.
 func getFitScale(country string) float32 {
-	paths, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
+	data, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
 	if err != nil {
 		return 1.0
 	}
-	minX, minY := math.MaxFloat64, math.MaxFloat64
-	maxX, maxY := -math.MaxFloat64, -math.MaxFloat64
-	for _, path := range paths {
-		for _, pos := range path {
-			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
-			minX = min(minX, mx)
-			maxX = max(maxX, mx)
-			minY = min(minY, my)
-			maxY = max(maxY, my)
-		}
-	}
-	mercWidth := maxX - minX
-	mercHeight := maxY - minY
+
+	mercWidth := data.BoundingBox.MaxX - data.BoundingBox.MinX
+	mercHeight := data.BoundingBox.MaxY - data.BoundingBox.MinY
 	if mercWidth == 0 || mercHeight == 0 {
 		return 1.0
 	}
@@ -255,8 +245,8 @@ func getScaleAndOrder(active, other string) (float32, string, string) {
 		return getFitScale(active), active, ""
 	}
 
-	pathsActive, errActive := FetchAndCacheGeoJSON(active, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
-	pathsOther, errOther := FetchAndCacheGeoJSON(other, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
+	dataActive, errActive := FetchAndCacheGeoJSON(active, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
+	dataOther, errOther := FetchAndCacheGeoJSON(other, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
 
 	if errActive != nil && errOther != nil {
 		return 1.0, active, other
@@ -268,30 +258,6 @@ func getScaleAndOrder(active, other string) (float32, string, string) {
 		return getFitScale(active), active, other
 	}
 
-	minXActive, minYActive := math.MaxFloat64, math.MaxFloat64
-	maxXActive, maxYActive := -math.MaxFloat64, -math.MaxFloat64
-	for _, path := range pathsActive {
-		for _, pos := range path {
-			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
-			minXActive = min(minXActive, mx)
-			maxXActive = max(maxXActive, mx)
-			minYActive = min(minYActive, my)
-			maxYActive = max(maxYActive, my)
-		}
-	}
-
-	minXOther, minYOther := math.MaxFloat64, math.MaxFloat64
-	maxXOther, maxYOther := -math.MaxFloat64, -math.MaxFloat64
-	for _, path := range pathsOther {
-		for _, pos := range path {
-			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
-			minXOther = min(minXOther, mx)
-			maxXOther = max(maxXOther, mx)
-			minYOther = min(minYOther, my)
-			maxYOther = max(maxYOther, my)
-		}
-	}
-
 	if cMap == nil {
 		return 1.0, active, other
 	}
@@ -300,8 +266,8 @@ func getScaleAndOrder(active, other string) (float32, string, string) {
 		return 1.0, active, other
 	}
 
-	areaActive := (maxXActive - minXActive) * (maxYActive - minYActive)
-	areaOther := (maxXOther - minXOther) * (maxYOther - minYOther)
+	areaActive := (dataActive.BoundingBox.MaxX - dataActive.BoundingBox.MinX) * (dataActive.BoundingBox.MaxY - dataActive.BoundingBox.MinY)
+	areaOther := (dataOther.BoundingBox.MaxX - dataOther.BoundingBox.MinX) * (dataOther.BoundingBox.MaxY - dataOther.BoundingBox.MinY)
 
 	if areaActive > areaOther {
 		return getFitScale(active), active, other
@@ -486,6 +452,7 @@ func main() {
 		if err := rightSelectedCountry.Set(c); err != nil {
 			log.Printf("Error setting right country: %v", err)
 		}
+
 	}))
 	center := addBorder(innerBorder)
 
@@ -556,12 +523,8 @@ func fillPolygonIntoImage(img *image.RGBA, polyPoints []fyne.Position, fillColor
 	}
 	minY, maxY := polyPoints[0].Y, polyPoints[0].Y
 	for _, p := range polyPoints {
-		if p.Y < minY {
-			minY = p.Y
-		}
-		if p.Y > maxY {
-			maxY = p.Y
-		}
+		minY = min(minY, p.Y)
+		maxY = max(maxY, p.Y)
 	}
 
 	for y := int(math.Floor(float64(minY))); y <= int(math.Ceil(float64(maxY))); y++ {
@@ -593,18 +556,10 @@ func drawFilledPolygon(polyPoints []fyne.Position, fillColor color.Color) fyne.C
 	minX, maxX := polyPoints[0].X, polyPoints[0].X
 	minY, maxY := polyPoints[0].Y, polyPoints[0].Y
 	for _, p := range polyPoints {
-		if p.X < minX {
-			minX = p.X
-		}
-		if p.X > maxX {
-			maxX = p.X
-		}
-		if p.Y < minY {
-			minY = p.Y
-		}
-		if p.Y > maxY {
-			maxY = p.Y
-		}
+		minX = min(minX, p.X)
+		maxX = max(maxX, p.X)
+		minY = min(minY, p.Y)
+		maxY = max(maxY, p.Y)
 	}
 
 	w := int(math.Round(float64(maxX))) - int(math.Round(float64(minX))) + 1
@@ -627,13 +582,13 @@ func drawFilledPolygon(polyPoints []fyne.Position, fillColor color.Color) fyne.C
 // drawCountry draws the GeoJSON paths of a country on the provided MapWidget.
 // It applies scaling, centering, and optionally renders the bounding box for debugging purposes.
 func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineColor color.Color) {
-	paths, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
+	data, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
 	if err != nil {
 		log.Printf("Error loading %s: %v", country, err)
 		return
 	}
 
-	if len(paths) == 0 {
+	if len(data.Paths) == 0 {
 		if clear {
 			zm.Container.Objects = []fyne.CanvasObject{canvas.NewRectangle(color.Black)}
 			zm.Container.Refresh()
@@ -665,55 +620,37 @@ func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineC
 		}
 	}
 
-	// Pass 1: Transform and find bounds
-	transformedPaths := make([][]fyne.Position, len(paths))
-	minXLocal, minYLocal := math.MaxFloat64, math.MaxFloat64
-	maxXLocal, maxYLocal := -math.MaxFloat64, -math.MaxFloat64
-	for i, path := range paths {
-		transformedPaths[i] = make([]fyne.Position, len(path))
-		for j, pos := range path {
-			mx, my := LatLonToMercator(float64(pos.X), float64(pos.Y))
-			transformedPaths[i][j] = fyne.NewPos(float32(mx), float32(my))
-			minXLocal = min(minXLocal, mx)
-			maxXLocal = max(maxXLocal, mx)
-			minYLocal = min(minYLocal, my)
-			maxYLocal = max(maxYLocal, my)
-		}
-	}
+	// Use the pre-calculated Mercator bounding box
+	transformedBBox := data.BoundingBox
 
-	transformedMinX, transformedMinY := minXLocal, minYLocal
-	transformedMaxX, transformedMaxY := maxXLocal, maxYLocal
-
-	transformedWidth := transformedMaxX - transformedMinX
-	transformedHeight := transformedMaxY - transformedMinY
+	transformedWidth := transformedBBox.MaxX - transformedBBox.MinX
+	transformedHeight := transformedBBox.MaxY - transformedBBox.MinY
 	offsetX := (size.Width - float32(transformedWidth)*scale) / 2
 	offsetY := (size.Height - float32(transformedHeight)*scale) / 2
 
-	pixelMinX, pixelMinY, pixelMaxX, pixelMaxY, err := GetBoundingBox(country, scale, offsetX, offsetY, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
-	if err != nil {
-		log.Printf("Error getting pixel bbox for %s: %v", country, err)
-		return
-	}
+	// Calculate pixel space bounding box for drawing
+	pixelWidth := float32(transformedWidth) * scale
+	pixelHeight := float32(transformedHeight) * scale
 
-	LogSouthernmostPixels(country, paths, scale, offsetX, offsetY, transformedMinX, transformedMaxX, transformedMinY, transformedMaxY)
+	LogSouthernmostPixels(country, data.Paths, scale, offsetX, offsetY, transformedBBox)
 
 	// Draw bounding box
 	if AppSettings.DebugShowBoundary {
 		rect := canvas.NewRectangle(color.Transparent)
 		rect.StrokeColor = color.NRGBA{R: 255, A: 255}
 		rect.StrokeWidth = 1
-		rect.Resize(fyne.NewSize(float32(pixelMaxX-pixelMinX), float32(pixelMaxY-pixelMinY)))
-		rect.Move(fyne.NewPos(float32(pixelMinX), float32(pixelMinY)))
+		rect.Resize(fyne.NewSize(pixelWidth, pixelHeight))
+		rect.Move(fyne.NewPos(offsetX, offsetY))
 		objects = append(objects, rect)
 	}
 
 	// Pass 2: Draw the transformed paths
-	for _, path := range transformedPaths {
+	for _, path := range data.Paths { // Use original paths for drawing
 		var polyPoints []fyne.Position
 		for _, p := range path {
 			// Screen space
-			screenX := (float64(p.X) - transformedMinX) * float64(scale)
-			screenY := (float64(p.Y) - transformedMinY) * float64(scale)
+			screenX := (float64(p.X) - transformedBBox.MinX) * float64(scale)
+			screenY := (float64(p.Y) - transformedBBox.MinY) * float64(scale)
 
 			// Apply centering
 			pPos := fyne.NewPos(float32(screenX)+offsetX, float32(screenY)+offsetY)
@@ -724,7 +661,8 @@ func drawCountry(zm *MapWidget, country string, scale float32, clear bool, lineC
 			continue
 		}
 
-		objects = append(objects, drawFilledPolygon(polyPoints, lineColor))
+		poly := drawFilledPolygon(polyPoints, lineColor)
+		objects = append(objects, poly)
 	}
 	zm.Container.Objects = objects
 	zm.Container.Refresh()
