@@ -290,7 +290,6 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool, skipSmall i
 		Paths: allPaths,
 	}
 	geoData.UpdateBoundingBox(1.0)
-	log.Printf("Overall BBox set: %+v", geoData.BoundingBox)
 
 	return geoData, nil
 }

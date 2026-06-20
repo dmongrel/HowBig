@@ -372,6 +372,11 @@ func updateMapDisplay() {
 		drawCountry(cMap, large, scale, false, largeColor)
 	}
 	if small != "" {
+		// Draw the second country with 25% transparency (75% opacity)
+		if sc, ok := smallColor.(color.NRGBA); ok {
+			sc.A = 191
+			smallColor = sc
+		}
 		drawCountry(cMap, small, scale, false, smallColor)
 	}
 }
@@ -610,7 +615,6 @@ func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineC
 
 	// Update bounding box to pixel coordinates
 	data.UpdateBoundingBox(scale)
-	log.Printf("%s BBox Pixel Size: W=%.2f, H=%.2f", country, data.BoundingBox.Width, data.BoundingBox.Height)
 
 	size := zm.Container.Size()
 	if size.Width == 0 || size.Height == 0 {
