@@ -42,13 +42,13 @@ go run .
 
 The application can be configured via the `settings.json` file located in the project root.
 
-| Setting | Description | Default |
-| :--- | :--- | :--- |
-| `LineColor` | Hex color code for the primary selected country's outline and fill. | `#ff0000` |
-| `LineColor2` | Hex color code for the second selected country's outline and fill. | `#00ff00` |
-| `DebugShowBoundary` | If `true`, draws a red bounding box around the rendered country for debugging. | `false` |
-| `SkipSmall` | If `true`, ignores small polygons (islands) during rendering to improve performance. | `true` |
-| `EnablePacificCenter` | If `true`, applies special centering for countries that cross the anti-meridian. | `true` |
+| Setting               | Description                                                                          | Default   |
+|:----------------------|:-------------------------------------------------------------------------------------|:----------|
+| `LineColor`           | Hex color code for the primary selected country's outline and fill.                  | `#ff0000` |
+| `LineColor2`          | Hex color code for the second selected country's outline and fill.                   | `#00ff00` |
+| `DebugShowBoundary`   | If `true`, draws a red bounding box around the rendered country for debugging.       | `false`   |
+| `SkipSmall`           | If `true`, ignores small polygons (islands) during rendering to improve performance. | `true`    |
+| `EnablePacificCenter` | If `true`, applies special centering for countries that cross the anti-meridian.     | `true`    |
 
 Example `settings.json`:
 ```json

@@ -16,12 +16,6 @@ const (
 	MaxMercator = EarthRadius * math.Pi
 )
 
-// Coordinate represents a standard lat/lon point.
-type Coordinate struct {
-	Lon float64
-	Lat float64
-}
-
 // Point represents a 2D point with float64 precision.
 type Point struct {
 	X, Y float64
@@ -163,7 +157,7 @@ var (
 // FetchAndCacheGeoJSON loads and caches parsed GeoJSON paths and their overall geographic bounding box from the mapdata directory.
 // The country parameter specifies the country name, and the singlePolyline parameter indicates if only the outer ring should be kept.
 // The skipSmall parameter indicates the maximum number of coordinates a polygon ring can have to be skipped.
-// The enablePacificCenter parameter indicates if the coordinates should be normalized to Pacific-centering if IDL crossing is detected.
+// The enablePacificCenter parameter indicates if the coordinates should be normalized to Pacific centering if IDL crossing is detected.
 // It returns a GeoData struct containing the paths and the overall geographic bounding box, or an error if the file cannot be read or parsed.
 func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, enablePacificCenter bool) (*GeoData, error) {
 

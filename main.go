@@ -46,7 +46,7 @@ type selectionListener struct{}
 // CountryData holds the global collection of country information.
 // cCenter is the central container for the application.
 // cMap is the custom widget that renders the map.
-// headerContainer holds the header elements for area display.
+// headerContainer holds the header elements for displaying the area.
 // leftBar and rightBar are containers for the side information panels.
 // leftSelectedCountry and rightSelectedCountry manage the selection state.
 // AppSettings stores global application configuration.
