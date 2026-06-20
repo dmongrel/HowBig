@@ -176,7 +176,7 @@ func getFileName(name string) string {
 			}
 		}
 	}
-	return strings.ReplaceAll(name, " ", "") + ".gjson"
+	return strings.ReplaceAll(name, " ", "") + ".geojson"
 }
 
 // convertGeoJSONToDisplayFormat parses raw GeoJSON bytes into a format suitable for drawing on the Fyne canvas.
