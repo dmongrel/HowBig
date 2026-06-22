@@ -3,5 +3,6 @@
   "left_color": "#00FF00",
   "right_color": "#FF0000",
   "enable_pacific_center": true,
-  "skip_small": 25
+  "skip_small": 25,
+  "fill_countries": false
 }
