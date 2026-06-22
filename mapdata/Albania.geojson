@@ -1,6 +1,15 @@
 {
+  "type": "FeatureCollection",
   "features": [
     {
+      "type": "Feature",
+      "properties": {
+        "shapeGroup": "ALB",
+        "shapeID": "44221866B69788583743431",
+        "shapeISO": "ALB",
+        "shapeName": "Albania",
+        "shapeType": "ADM0"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [

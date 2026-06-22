@@ -1,6 +1,15 @@
 {
+  "type": "FeatureCollection",
   "features": [
     {
+      "type": "Feature",
+      "properties": {
+        "shapeGroup": "AFG",
+        "shapeID": "77858471B85949265405819",
+        "shapeISO": "AFG",
+        "shapeName": "Afghanistan",
+        "shapeType": "ADM0"
+      },
       "geometry": {
         "type": "Polygon",
         "coordinates": [
