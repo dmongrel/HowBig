@@ -122,7 +122,9 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, en
 // getFileName resolves the correct GeoJSON filename for a given country name.
 func getFileName(name string, cc *CountryCollection) string {
 	if cc != nil {
-		return cc.CompactNames[name]
+		if iso, ok := cc.ISOCodes[name]; ok {
+			return iso + ".geojson"
+		}
 	}
 	return strings.ReplaceAll(name, " ", "") + ".geojson"
 }
