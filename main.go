@@ -15,10 +15,14 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/fogleman/gg"
 )
+
+const Version = "1.0.0"
 
 // Settings define the UI configuration for the application.
 type Settings struct {
@@ -318,18 +322,92 @@ func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
 	return c.base.Size(name)
 }
 
+// messageTheme is a custom Fyne theme to override default styling for the message window.
+type messageTheme struct {
+	fyne.Theme
+}
+
+func (m *messageTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+	if name == theme.ColorNameBackground {
+		return color.Black
+	}
+	if name == theme.ColorNameForeground {
+		return color.White
+	}
+	if name == theme.ColorNameInputBackground {
+		return color.Black
+	}
+	return m.Theme.Color(name, variant)
+}
+
+func (m *messageTheme) Size(name fyne.ThemeSizeName) float32 {
+	if name == theme.SizeNameText {
+		return 16
+	}
+	return m.Theme.Size(name)
+}
+
+// showMessage displays a 800x300 message window centered on the parent window.
+func showMessage(a fyne.App, parent fyne.Window, isError bool, message string) {
+	title := "Message"
+	if isError {
+		title = "An Error Has Occurred"
+	}
+
+	// Use canvas.Text for guaranteed color and size
+	text := widget.NewRichText(&widget.TextSegment{
+		Text:  message,
+		Style: widget.RichTextStyleParagraph,
+	})
+	// Override style for the text segment
+	if len(text.Segments) > 0 {
+		if ts, ok := text.Segments[0].(*widget.TextSegment); ok {
+			ts.Style.ColorName = theme.ColorNameForeground
+			// Size is not directly in RichTextStyle in older Fyne,
+			// it uses the theme size.
+		}
+	}
+	text.Wrapping = fyne.TextWrapWord
+
+	bg := canvas.NewRectangle(color.Black)
+	content := container.NewStack(bg, container.NewScroll(text))
+
+	if parent != nil {
+		d := dialog.NewCustom(title, "OK", content, parent)
+		d.Resize(fyne.NewSize(800, 300))
+		// Apply custom theme to the dialog window if possible
+		// Since we can't easily, the RichText within content should still use the app theme for foreground.
+		d.Show()
+	} else {
+		w := a.NewWindow(title)
+		w.Resize(fyne.NewSize(800, 300))
+		okBtn := widget.NewButton("OK", func() {
+			w.Close()
+		})
+		buttonBar := container.NewHBox(layout.NewSpacer(), okBtn, layout.NewSpacer())
+		w.SetContent(container.NewBorder(nil, buttonBar, nil, nil, content))
+		w.CenterOnScreen()
+		w.Show()
+	}
+}
+
 // main is the application entry point, setting up the GUI and initializing components.
 func main() {
+	a := app.New()
+	a.Settings().SetTheme(&customTheme{base: theme.DefaultTheme()})
+
 	cc, err := NewCountryCollection()
 	if err != nil {
-		log.Fatalf("Fatal error: failed to load country data: %v", err)
+		showMessage(a, nil, true, fmt.Sprintf("Fatal error: failed to load country data: %v", err))
+		// We might want to exit here since we can't continue without data
+		// But showMessage is non-blocking in Fyne unless it's a dialog.
+		// For now, let's just log it as well.
+		log.Printf("Fatal error: failed to load country data: %v", err)
 	}
 	CountryData = cc
 
-	a := app.New()
 	leftSelectedCountry = binding.NewString()
 	rightSelectedCountry = binding.NewString()
-	a.Settings().SetTheme(&customTheme{base: theme.DefaultTheme()})
 	w := a.NewWindow("Fullscreen App")
 	w.Resize(fyne.NewSize(1280, 1024))
 	w.SetFullScreen(true)
@@ -355,7 +433,12 @@ func main() {
 
 	cMap = NewMapWidget()
 	headerContainer = container.NewHBox()
-	cCenter = container.NewBorder(container.NewCenter(headerContainer), nil, nil, nil, cMap)
+	aboutBtn := widget.NewButton("About", func() {
+		attribution := "geoBoundaries data is used under CC-BY 4.0 license.\nFor more information refer to ATTRIBUTION.md"
+		startupMsg := fmt.Sprintf("HowBig %s Copyright 2026 Joel L. Caesar\n\n%s", Version, attribution)
+		showMessage(a, w, false, startupMsg)
+	})
+	cCenter = container.NewBorder(container.NewCenter(headerContainer), aboutBtn, nil, nil, cMap)
 
 	leftBar = container.NewWithoutLayout()
 	leftBarWrapper := container.NewScroll(leftBar)
@@ -384,6 +467,10 @@ func main() {
 	center := addBorder(innerBorder)
 
 	w.SetContent(container.NewBorder(nil, nil, left, right, center))
+
+	attribution := "geoBoundaries data is used under CC-BY 4.0 license.\nFor more information refer to ATTRIBUTION.md"
+	startupMsg := fmt.Sprintf("HowBig %s Copyright 2026 Joel L. Caesar\n\n%s", Version, attribution)
+	showMessage(a, w, false, startupMsg)
 
 	w.ShowAndRun()
 }
@@ -507,7 +594,8 @@ func drawFilledPolygon(polyPoints []Point, fillColor color.Color) fyne.CanvasObj
 func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineColor color.Color) {
 	data, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
 	if err != nil {
-		log.Printf("Error loading %s: %v", country, err)
+		parent := fyne.CurrentApp().Driver().AllWindows()[0]
+		showMessage(fyne.CurrentApp(), parent, true, fmt.Sprintf("Error loading %s: %v", country, err))
 		return
 	}
 
@@ -532,6 +620,27 @@ func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineC
 			size.Height -= h
 		} else {
 			size.Height = 0
+		}
+	}
+
+	// Subtract About button height
+	if cCenter != nil && len(cCenter.Objects) > 0 {
+		// In a Border layout, the South object is typically at index 1 or managed separately
+		// but we can look for it or just use a fixed estimate if we can't reliably get its height here.
+		// However, it's better to try to measure it if it's available.
+		// In container.NewBorder(top, bottom, left, right, content),
+		// objects are [content, top, bottom, left, right] but this is internal.
+		// We'll try to find the button or just subtract its MinSize.
+		for _, obj := range cCenter.Objects {
+			if btn, ok := obj.(*widget.Button); ok && btn.Text == "About" {
+				h := btn.MinSize().Height
+				if size.Height > h {
+					size.Height -= h
+				} else {
+					size.Height = 0
+				}
+				break
+			}
 		}
 	}
 
