@@ -4,7 +4,6 @@ import (
 	"container/list"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 	"os"
 	"path/filepath"
@@ -25,22 +24,68 @@ type cacheEntry struct {
 }
 
 var (
-	geoCache   = make(map[string]*list.Element)
-	cacheOrder = list.New()
-	cacheMu    sync.Mutex
+	cacheMu sync.Mutex
 )
 
-// FetchAndCacheGeoJSON loads and caches parsed GeoJSON paths and their overall geographic bounding box from the mapdata directory.
-// The country parameter specifies the country name, and the singlePolyline parameter indicates if only the outer ring should be kept.
-// The skipSmall parameter indicates the maximum number of coordinates a polygon ring can have to be skipped.
-// The enablePacificCenter parameter indicates if the coordinates should be normalized to Pacific centering if IDL crossing is detected.
-// It returns a GeoData struct containing the paths and the overall geographic bounding box, or an error if the file cannot be read or parsed.
-func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, enablePacificCenter bool) (*GeoData, error) {
+// GeoCache implements a thread-safe LRU cache for GeoData.
+type GeoCache struct {
+	items map[string]*list.Element
+	order *list.List
+	limit int
+	mu    sync.Mutex
+}
 
-	fileName := getFileName(country)
-	filePath := filepath.Join("mapdata", fileName)
+// NewGeoCache creates a new GeoCache with the specified item limit.
+func NewGeoCache(limit int) *GeoCache {
+	return &GeoCache{
+		items: make(map[string]*list.Element),
+		order: list.New(),
+		limit: limit,
+	}
+}
+
+// Get retrieves an item from the cache.
+func (c *GeoCache) Get(key string) (*GeoData, bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if el, ok := c.items[key]; ok {
+		c.order.MoveToFront(el)
+		return el.Value.(*cacheEntry).value, true
+	}
+	return nil, false
+}
+
+// Put adds an item to the cache, evicting the oldest if the limit is reached.
+func (c *GeoCache) Put(key string, value *GeoData) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if el, ok := c.items[key]; ok {
+		c.order.MoveToFront(el)
+		el.Value.(*cacheEntry).value = value
+		return
+	}
+
+	if c.order.Len() >= c.limit {
+		oldest := c.order.Back()
+		if oldest != nil {
+			c.order.Remove(oldest)
+			delete(c.items, oldest.Value.(*cacheEntry).key)
+		}
+	}
+
+	newEntry := &cacheEntry{key: key, value: value}
+	el := c.order.PushFront(newEntry)
+	c.items[key] = el
+}
+
+// FetchAndCacheGeoJSON loads and caches parsed GeoJSON paths and their overall geographic bounding box from the mapdata directory.
+func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, enablePacificCenter bool, mapDataPath string, cache *GeoCache, countryCollection *CountryCollection) (*GeoData, error) {
+
+	fileName := getFileName(country, countryCollection)
+	filePath := filepath.Join(mapDataPath, fileName)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		filePath = filepath.Join("..", "mapdata", fileName)
+		filePath = filepath.Join("..", mapDataPath, fileName)
 	}
 
 	cacheKey := country
@@ -54,12 +99,10 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, en
 		cacheKey += "_pacific"
 	}
 
-	cacheMu.Lock()
-	defer cacheMu.Unlock()
-
-	if el, ok := geoCache[cacheKey]; ok {
-		cacheOrder.MoveToFront(el)
-		return el.Value.(*cacheEntry).value, nil
+	if cache != nil {
+		if data, ok := cache.Get(cacheKey); ok {
+			return data, nil
+		}
 	}
 
 	data, err := os.ReadFile(filePath)
@@ -72,26 +115,17 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, en
 		return nil, err
 	}
 
-	if cacheOrder.Len() >= CacheLimit {
-		oldest := cacheOrder.Back()
-		if oldest != nil {
-			cacheOrder.Remove(oldest)
-			delete(geoCache, oldest.Value.(*cacheEntry).key)
-		}
+	if cache != nil {
+		cache.Put(cacheKey, geoData)
 	}
-
-	newEntry := &cacheEntry{key: cacheKey, value: geoData}
-	el := cacheOrder.PushFront(newEntry)
-	geoCache[cacheKey] = el
 
 	return geoData, nil
 }
 
 // getFileName resolves the correct GeoJSON filename for a given country name.
-// It uses CompactName from CountryData if available, otherwise it falls back to a formatted name.
-func getFileName(name string) string {
-	if CountryData != nil {
-		for _, c := range CountryData.Countries {
+func getFileName(name string, cc *CountryCollection) string {
+	if cc != nil {
+		for _, c := range cc.Countries {
 			if c.Name == name {
 				return c.CompactName
 			}
@@ -140,7 +174,6 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool, skipSmall i
 		}
 
 		needsCentering := NeedsPacificCentering(g)
-		log.Printf("Geometry (%s) needs Pacific centering: %v", g.Type, needsCentering)
 
 		if enablePacificCenter && needsCentering {
 			g = ApplyPacificCentering(g)
