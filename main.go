@@ -27,27 +27,33 @@ const Version = "1.0.0"
 
 // Settings define the UI configuration for the application.
 type Settings struct {
-	DebugShowBoundary   bool   `json:"debug_show_boundary"`   // DebugShowBoundary determines if the bounding box is rendered.
-	LeftColor           string `json:"left_color"`            // LeftColor is the hex color for the left map.
-	RightColor          string `json:"right_color"`           // RightColor is the hex color for the right map.
-	LeftBorderColor     string `json:"left_border_color"`     // LeftBorderColor is the hex color for the left country border.
-	RightBorderColor    string `json:"right_border_color"`    // RightBorderColor is the hex color for the right country border.
-	BackgroundColor     string `json:"background_color"`      // BackgroundColor is the background color for the application.
-	EnablePacificCenter bool   `json:"enable_pacific_center"` // EnablePacificCenter determines if the map is centered on the Pacific Ocean for countries spanning the 180-degree meridian.
-	SkipSmall           int    `json:"skip_small"`            // SkipSmall determines if polygons with few points are skipped.
-	MapDataPath         string `json:"map_data_path"`         // MapDataPath is the path to the directory containing GeoJSON files.
-	CountryDataPath     string `json:"country_data_path"`     // CountryDataPath is the path to the country_data.json file.
+	DebugShowBoundary   bool    `json:"debug_show_boundary"`    // DebugShowBoundary determines if the bounding box is rendered.
+	LeftColor           string  `json:"left_color"`             // LeftColor is the hex color for the left map.
+	RightColor          string  `json:"right_color"`            // RightColor is the hex color for the right map.
+	LeftBorderColor     string  `json:"left_border_color"`      // LeftBorderColor is the hex color for the left country border.
+	RightBorderColor    string  `json:"right_border_color"`     // RightBorderColor is the hex color for the right country border.
+	BackgroundColor     string  `json:"background_color"`       // BackgroundColor is the background color for the application.
+	EnablePacificCenter bool    `json:"enable_pacific_center"`  // EnablePacificCenter determines if the map is centered on the Pacific Ocean for countries spanning the 180-degree meridian.
+	SkipSmall           int     `json:"skip_small"`             // SkipSmall determines if polygons with few points are skipped.
+	MapDataPath         string  `json:"map_data_path"`          // MapDataPath is the path to the directory containing GeoJSON files.
+	CountryDataPath     string  `json:"country_data_path"`      // CountryDataPath is the path to the country_data.json file.
+	ButtonFontSize      float32 `json:"button_font_size"`       // ButtonFontSize is the font size for buttons.
+	SearchFontSize      float32 `json:"search_font_size"`       // SearchFontSize is the font size for search bars.
+	CountryListFontSize float32 `json:"country_list_font_size"` // CountryListFontSize is the font size for country lists.
+	HeaderFontSize      float32 `json:"header_font_size"`       // HeaderFontSize is the font size for the header.
 }
 
 // MapWidget is a custom widget that provides a map interface.
 type MapWidget struct {
 	widget.BaseWidget
 	Container *fyne.Container // Container holds the map canvas objects.
+	app       *App
 }
 
 // customTheme is a custom Fyne theme to override default styling.
 type customTheme struct {
-	base fyne.Theme // base is the default theme being overridden.
+	base     fyne.Theme // base is the default theme being overridden.
+	settings *Settings
 }
 
 // App holds the application state and dependencies.
@@ -66,6 +72,8 @@ type App struct {
 	rightBar             *fyne.Container
 	leftSelectedCountry  binding.String
 	rightSelectedCountry binding.String
+	isFullScreen         bool
+	fullscreenBtn        *widget.Button
 }
 
 // selectionListener implements binding.DataListener to react to country selection changes.
@@ -90,13 +98,37 @@ func NewApp(fyneApp fyne.App) *App {
 }
 
 // NewMapWidget creates and initializes a new MapWidget instance with a container.
-func NewMapWidget() *MapWidget {
+func NewMapWidget(app *App) *MapWidget {
 	zm := &MapWidget{
 		Container: container.NewWithoutLayout(),
+		app:       app,
 	}
 	zm.ExtendBaseWidget(zm)
 	return zm
 }
+
+func (zm *MapWidget) Tapped(event *fyne.PointEvent) {
+	if zm.app != nil && zm.app.window != nil {
+		zm.app.window.Canvas().Focus(zm)
+	}
+}
+
+func (zm *MapWidget) TypedKey(key *fyne.KeyEvent) {
+	if zm.app != nil {
+		if key.Name == fyne.KeyEscape {
+			zm.app.fyneApp.Quit()
+		} else if key.Name == fyne.KeyF {
+			zm.app.toggleFullScreen()
+		} else if key.Name == fyne.KeyA {
+			zm.app.showAbout()
+		}
+	}
+}
+
+func (zm *MapWidget) TypedRune(r rune) {}
+
+func (zm *MapWidget) FocusGained() {}
+func (zm *MapWidget) FocusLost()   {}
 
 // CreateRenderer creates and returns a renderer for the MapWidget.
 func (zm *MapWidget) CreateRenderer() fyne.WidgetRenderer {
@@ -106,6 +138,13 @@ func (zm *MapWidget) CreateRenderer() fyne.WidgetRenderer {
 // Resize handles the resizing of the MapWidget and triggers necessary redraws.
 func (zm *MapWidget) Resize(s fyne.Size) {
 	zm.BaseWidget.Resize(s)
+	if zm.app != nil {
+		zm.app.updateMapDisplay()
+		if zm.app.window != nil {
+			winSize := zm.app.window.Content().Size()
+			zm.app.window.SetTitle(fmt.Sprintf("HowBig %d x %d", int(winSize.Width), int(winSize.Height)))
+		}
+	}
 }
 
 // loadSettings reads application configuration from settings.json, applying default values if the file is missing or invalid.
@@ -125,6 +164,10 @@ func loadSettings(path string) *Settings {
 			SkipSmall:           0,
 			MapDataPath:         "mapdata",
 			CountryDataPath:     "country_data.json",
+			ButtonFontSize:      14,
+			SearchFontSize:      14,
+			CountryListFontSize: 18,
+			HeaderFontSize:      36,
 		}
 	} else if err := json.Unmarshal(data, &s); err != nil {
 		log.Println("Error unmarshaling settings.json:", err)
@@ -139,6 +182,10 @@ func loadSettings(path string) *Settings {
 			SkipSmall:           0,
 			MapDataPath:         "mapdata",
 			CountryDataPath:     "country_data.json",
+			ButtonFontSize:      14,
+			SearchFontSize:      14,
+			CountryListFontSize: 18,
+			HeaderFontSize:      36,
 		}
 	}
 	if s.LeftColor == "" {
@@ -162,11 +209,147 @@ func loadSettings(path string) *Settings {
 	if s.CountryDataPath == "" {
 		s.CountryDataPath = "country_data.json"
 	}
+	if s.ButtonFontSize == 0 {
+		s.ButtonFontSize = 14
+	}
+	if s.SearchFontSize == 0 {
+		s.SearchFontSize = 14
+	}
+	if s.CountryListFontSize == 0 {
+		s.CountryListFontSize = 18
+	}
+	if s.HeaderFontSize == 0 {
+		s.HeaderFontSize = 36
+	}
 	return &s
 }
 
 // createList creates a scrollable list of countries with search functionality and a selection callback.
 // The width parameter sets the minimum width of the list.
+type globalKeyEntry struct {
+	widget.Entry
+	app *App
+}
+
+func newGlobalKeyEntry(a *App) *globalKeyEntry {
+	e := &globalKeyEntry{app: a}
+	e.ExtendBaseWidget(e)
+	return e
+}
+
+func (e *globalKeyEntry) TypedKey(key *fyne.KeyEvent) {
+	if key.Name == fyne.KeyEscape {
+		e.app.fyneApp.Quit()
+		return
+	}
+	e.Entry.TypedKey(key)
+}
+
+// minSizeWrapper enforces a minimum size for its wrapped object.
+type minSizeWrapper struct {
+	widget.BaseWidget
+	obj     fyne.CanvasObject
+	minSize fyne.Size
+}
+
+func newMinSizeWrapper(obj fyne.CanvasObject, minSize fyne.Size) *minSizeWrapper {
+	m := &minSizeWrapper{obj: obj, minSize: minSize}
+	m.ExtendBaseWidget(m)
+	return m
+}
+
+func (m *minSizeWrapper) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(m.obj)
+}
+
+func (m *minSizeWrapper) MinSize() fyne.Size {
+	ms := m.obj.MinSize()
+	if ms.Width < m.minSize.Width {
+		ms.Width = m.minSize.Width
+	}
+	if ms.Height < m.minSize.Height {
+		ms.Height = m.minSize.Height
+	}
+	return ms
+}
+
+func (m *minSizeWrapper) Layout(size fyne.Size) {
+	m.obj.Resize(size)
+}
+
+// barWrapper ensures a fixed width for the area bars.
+type barWrapper struct {
+	widget.BaseWidget
+	obj   fyne.CanvasObject
+	width float32
+}
+
+func newBarWrapper(obj fyne.CanvasObject, width float32) *barWrapper {
+	b := &barWrapper{obj: obj, width: width}
+	b.ExtendBaseWidget(b)
+	return b
+}
+
+func (b *barWrapper) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(b.obj)
+}
+
+func (b *barWrapper) MinSize() fyne.Size {
+	ms := b.obj.MinSize()
+	ms.Width = b.width
+	return ms
+}
+
+func (b *barWrapper) Layout(size fyne.Size) {
+	b.obj.Resize(size)
+}
+
+type searchTheme struct {
+	fyne.Theme
+	settings *Settings
+}
+
+type fixedWidthWrapper struct {
+	widget.BaseWidget
+	obj   fyne.CanvasObject
+	width float32
+}
+
+func newFixedWidthWrapper(obj fyne.CanvasObject, width float32) *fixedWidthWrapper {
+	f := &fixedWidthWrapper{obj: obj, width: width}
+	f.ExtendBaseWidget(f)
+	return f
+}
+
+func (f *fixedWidthWrapper) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(f.obj)
+}
+
+func (f *fixedWidthWrapper) MinSize() fyne.Size {
+	ms := f.obj.MinSize()
+	if ms.Width < f.width {
+		ms.Width = f.width
+	}
+	return ms
+}
+
+func (f *fixedWidthWrapper) Layout(size fyne.Size) {
+	f.obj.Resize(size)
+}
+
+func (t *searchTheme) Size(name fyne.ThemeSizeName) float32 {
+	if name == theme.SizeNameText {
+		return t.settings.SearchFontSize
+	}
+	if name == theme.SizeNamePadding {
+		return 4
+	}
+	if name == theme.SizeNameInnerPadding {
+		return 4
+	}
+	return t.Theme.Size(name)
+}
+
 func (a *App) createList(width float64, onSelected func(string)) fyne.CanvasObject {
 	filteredIndices := slices.Collect(func(yield func(int) bool) {
 		for i := range a.CountryData.Countries {
@@ -180,7 +363,7 @@ func (a *App) createList(width float64, onSelected func(string)) fyne.CanvasObje
 		func() int { return len(filteredIndices) },
 		func() fyne.CanvasObject {
 			text := canvas.NewText("", color.White)
-			text.TextSize = 18
+			text.TextSize = a.Settings.CountryListFontSize
 			return container.NewPadded(text)
 		},
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
@@ -213,8 +396,9 @@ func (a *App) createList(width float64, onSelected func(string)) fyne.CanvasObje
 		onSelected("")
 	})
 
-	entry := widget.NewEntry()
+	entry := newGlobalKeyEntry(a)
 	entry.SetPlaceHolder("Search...")
+
 	entry.OnChanged = func(s string) {
 		searchTerm := strings.ToLower(s)
 		filter := func(yield func(int) bool) {
@@ -235,8 +419,9 @@ func (a *App) createList(width float64, onSelected func(string)) fyne.CanvasObje
 	})
 
 	searchBar := container.NewBorder(nil, nil, nil, clearBtn, entry)
+	searchBarWithTheme := container.NewThemeOverride(searchBar, &searchTheme{Theme: fyne.CurrentApp().Settings().Theme(), settings: a.Settings})
 
-	return container.NewBorder(searchBar, button, nil, nil, container.NewStack(bg, scroll))
+	return container.NewBorder(searchBarWithTheme, button, nil, nil, container.NewStack(bg, scroll))
 }
 
 // addBorder applies a visual border to a Fyne canvas object using a stack container.
@@ -282,25 +467,18 @@ func (a *App) updateHeader() {
 		rightPart = formatPart(right)
 	}
 
-	sep := ""
-	if leftPart != "" && rightPart != "" {
-		sep = " || "
-	}
-
 	a.headerContainer.Objects = nil
 	if leftPart != "" {
 		t := canvas.NewText(leftPart, ParseHexColor(a.Settings.LeftColor))
-		t.TextSize = 36
+		t.Alignment = fyne.TextAlignCenter
+		t.TextSize = a.Settings.HeaderFontSize
 		a.headerContainer.Add(t)
 	}
-	if sep != "" {
-		t := canvas.NewText(sep, color.White)
-		t.TextSize = 36
-		a.headerContainer.Add(t)
-	}
+
 	if rightPart != "" {
 		t := canvas.NewText(rightPart, ParseHexColor(a.Settings.RightColor))
-		t.TextSize = 36
+		t.Alignment = fyne.TextAlignCenter
+		t.TextSize = a.Settings.HeaderFontSize
 		a.headerContainer.Add(t)
 	}
 	a.headerContainer.Refresh()
@@ -316,14 +494,18 @@ func (a *App) updateMapDisplay() {
 	leftColor := ParseHexColor(a.Settings.LeftColor)
 	rightColor := ParseHexColor(a.Settings.RightColor)
 
+	leftArea := a.getArea(left)
+	rightArea := a.getArea(right)
+	maxSelectedArea := max(leftArea, rightArea)
+
 	bgColor := ParseHexColor(a.Settings.BackgroundColor)
 	if left != "" {
 		leftColor.A = 127
-		drawBar(a.leftBar, a.getArea(left), leftColor, bgColor)
+		drawBar(a.leftBar, leftArea, maxSelectedArea, leftColor, bgColor)
 	}
 	if right != "" {
 		rightColor.A = 127
-		drawBar(a.rightBar, a.getArea(right), rightColor, bgColor)
+		drawBar(a.rightBar, rightArea, maxSelectedArea, rightColor, bgColor)
 	}
 
 	var largeColor, smallColor color.Color
@@ -378,17 +560,27 @@ func (c *customTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
 	return c.base.Icon(name)
 }
 
-// Size returns the size for a given theme size name, with customizations for scrollbars.
+// Size returns the size for a given theme size name, with customizations for scrollbars and fonts.
 func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
 	if name == theme.SizeNameScrollBar || name == theme.SizeNameScrollBarSmall {
 		return 20
+	}
+	if name == theme.SizeNameText {
+		return c.settings.ButtonFontSize
+	}
+	if name == theme.SizeNamePadding {
+		return 4
+	}
+	if name == theme.SizeNameInnerPadding {
+		return 4
 	}
 	return c.base.Size(name)
 }
 
 func (a *App) showAbout() {
 	attribution := "geoBoundaries data is used under CC-BY 4.0 license.\nFor more information refer to ATTRIBUTION.md"
-	msg := fmt.Sprintf("HowBig %s Copyright © 2026 Joel L. Caesar. All Rights Reserved.\n\n%s", Version, attribution)
+	shortcuts := "ESC - Exits Program.\nF - Toggles Fullscreen (Click center area to grab focus).\nA - Shows About information."
+	msg := fmt.Sprintf("HowBig %s Copyright © 2026 Joel L. Caesar. All Rights Reserved.\n\n%s\n\n%s", Version, attribution, shortcuts)
 	a.showMessage("About", msg)
 }
 
@@ -436,9 +628,8 @@ func (a *App) showMessage(title string, message string) {
 // main is the application's entry point, setting up the GUI and initializing components.
 func main() {
 	fyneApp := app.New()
-	fyneApp.Settings().SetTheme(&customTheme{base: theme.DefaultTheme()})
-
 	a := NewApp(fyneApp)
+	fyneApp.Settings().SetTheme(&customTheme{base: theme.DefaultTheme(), settings: a.Settings})
 
 	cc, err := NewCountryCollection(a.Settings.CountryDataPath)
 	if err != nil {
@@ -447,42 +638,55 @@ func main() {
 	}
 	a.CountryData = cc
 
-	a.window = fyneApp.NewWindow("Fullscreen App")
-	a.window.Resize(fyne.NewSize(1280, 1024))
+	a.window = fyneApp.NewWindow("HowBig 1280 x 768")
+	a.window.Resize(fyne.NewSize(1280, 768))
 	a.window.SetFullScreen(true)
+	a.isFullScreen = true
 
-	isFullScreen := true
 	a.window.Canvas().SetOnTypedKey(func(key *fyne.KeyEvent) {
 		if key.Name == fyne.KeyEscape {
 			fyneApp.Quit()
 		} else if key.Name == fyne.KeyF {
-			isFullScreen = !isFullScreen
-			a.window.SetFullScreen(isFullScreen)
+			a.toggleFullScreen()
+		} else if key.Name == fyne.KeyA {
+			a.showAbout()
 		}
 	})
 
 	var maxWidth float64
 	for _, country := range a.CountryData.Countries {
-		size := fyne.MeasureText(country.Name, 18, fyne.TextStyle{})
+		size := fyne.MeasureText(country.Name, a.Settings.CountryListFontSize, fyne.TextStyle{})
 		if float64(size.Width) > maxWidth {
 			maxWidth = float64(size.Width)
 		}
 	}
 	maxWidth += 2
+	a.cMap = NewMapWidget(a)
+	a.headerContainer = container.NewVBox()
 
-	a.cMap = NewMapWidget()
-	a.headerContainer = container.NewHBox()
-	aboutBtn := widget.NewButton("About", func() {
+	exitBtn := widget.NewButton("Exit (ESC)", func() {
+		fyneApp.Quit()
+	})
+	exitWrapper := newFixedWidthWrapper(exitBtn, 150)
+
+	a.fullscreenBtn = widget.NewButton("Windowed (F)", func() {
+		a.toggleFullScreen()
+	})
+	fullscreenWrapper := newFixedWidthWrapper(a.fullscreenBtn, 150)
+
+	aboutBtn := widget.NewButton("About (A)", func() {
 		a.showAbout()
 	})
-	a.cCenter = container.NewBorder(container.NewCenter(a.headerContainer), aboutBtn, nil, nil, a.cMap)
+	aboutWrapper := newFixedWidthWrapper(aboutBtn, 150)
+
+	footer := container.NewHBox(layout.NewSpacer(), exitWrapper, fullscreenWrapper, aboutWrapper, layout.NewSpacer())
+
+	a.cCenter = container.NewBorder(container.NewCenter(a.headerContainer), footer, nil, nil, a.cMap)
 
 	a.leftBar = container.NewWithoutLayout()
-	leftBarWrapper := container.NewScroll(a.leftBar)
-	leftBarWrapper.SetMinSize(fyne.NewSize(50, 0))
 	a.rightBar = container.NewWithoutLayout()
-	rightBarWrapper := container.NewScroll(a.rightBar)
-	rightBarWrapper.SetMinSize(fyne.NewSize(50, 0))
+	leftBarWrapper := newBarWrapper(a.leftBar, 50)
+	rightBarWrapper := newBarWrapper(a.rightBar, 50)
 
 	listener := &selectionListener{app: a}
 	a.leftSelectedCountry.AddListener(listener)
@@ -503,27 +707,54 @@ func main() {
 		}
 	}))
 
-	a.window.SetContent(container.NewBorder(nil, nil, left, right, center))
+	content := container.NewBorder(nil, nil, left, right, center)
+	minSizeWrapper := container.NewStack(content)
+	// We don't have a direct SetMinSize on window in Fyne easily,
+	// but we can enforce it by wrapping the content in a custom widget that has a large MinSize.
+	// Actually, we already have fixedWidthWrapper, let's make a general MinSizeWrapper.
+
+	a.window.SetContent(newMinSizeWrapper(minSizeWrapper, fyne.NewSize(1280, 768)))
 
 	a.showAbout()
 
 	a.window.ShowAndRun()
 }
 
+func (a *App) toggleFullScreen() {
+	a.isFullScreen = !a.isFullScreen
+	a.window.SetFullScreen(a.isFullScreen)
+	if a.fullscreenBtn != nil {
+		if a.isFullScreen {
+			a.fullscreenBtn.SetText("Windowed (F)")
+		} else {
+			a.fullscreenBtn.SetText("Fullscreen (F)")
+		}
+	}
+}
+
 // drawBar draws a vertical bar representing the relative area of a country on a given container.
-func drawBar(c *fyne.Container, area float64, barColor color.Color, bgColor color.Color) {
+func drawBar(c *fyne.Container, area float64, maxArea float64, barColor color.Color, bgColor color.Color) {
 	size := c.Size()
 	if size.Width == 0 || size.Height == 0 {
 		size = fyne.NewSize(50, 500)
 	}
 
-	const maxArea = 6601667.0
-	proportion := area / maxArea
+	padding := 2.0
+	proportion := 0.0
+	if maxArea > 0 {
+		proportion = area / maxArea
+	}
 	if proportion > 1 {
 		proportion = 1
 	}
 
-	barHeight := proportion * float64(size.Height)
+	// The total area of the country should be scaled to screen height - padding x2
+	availableHeight := float64(size.Height) - (padding * 2)
+	if availableHeight < 0 {
+		availableHeight = 0
+	}
+
+	barHeight := proportion * availableHeight
 
 	// Create background border rectangle
 	bgRect := canvas.NewRectangle(bgColor)
@@ -533,21 +764,20 @@ func drawBar(c *fyne.Container, area float64, barColor color.Color, bgColor colo
 	// Create bar color rectangle
 	rect := canvas.NewRectangle(barColor)
 
-	// Apply padding: 2px on all sides for the bar relative to the background
-	padding := 2.0
 	rectWidth := float64(size.Width) - (padding * 2)
-	rectHeight := barHeight - (padding * 2)
+	rectHeight := barHeight
 
 	if rectWidth < 0 {
 		rectWidth = 0
 	}
-	if rectHeight < 0 {
-		rectHeight = 0
+	if rectHeight < 1 && area > 0 {
+		rectHeight = 1
 	}
 
 	rect.Resize(fyne.NewSize(float32(rectWidth), float32(rectHeight)))
-	rect.Move(fyne.NewPos(float32(padding), float32(float64(size.Height)-barHeight+padding)))
+	rect.Move(fyne.NewPos(float32(padding), float32(float64(size.Height)-rectHeight-padding)))
 
+	c.Resize(size)
 	c.Objects = []fyne.CanvasObject{bgRect, rect}
 	c.Refresh()
 }
@@ -653,17 +883,28 @@ func (a *App) drawCountry(zm *MapWidget, country string, scale float64, clear bo
 		}
 	}
 
-	// Subtract About button height
+	// Subtract footer height
 	if a.cCenter != nil && len(a.cCenter.Objects) > 0 {
 		for _, obj := range a.cCenter.Objects {
-			if btn, ok := obj.(*widget.Button); ok && btn.Text == "About" {
-				h := btn.MinSize().Height
-				if size.Height > h {
-					size.Height -= h
-				} else {
-					size.Height = 0
+			if footer, ok := obj.(*fyne.Container); ok {
+				// The footer is the second object in Border layout (Bottom)
+				// But let's be safe and check if it contains our buttons
+				isFooter := false
+				for _, child := range footer.Objects {
+					if btn, ok := child.(*widget.Button); ok && (strings.Contains(btn.Text, "Exit") || strings.Contains(btn.Text, "About")) {
+						isFooter = true
+						break
+					}
 				}
-				break
+				if isFooter {
+					h := footer.MinSize().Height
+					if size.Height > h {
+						size.Height -= h
+					} else {
+						size.Height = 0
+					}
+					break
+				}
 			}
 		}
 	}
