@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 )
@@ -23,9 +24,7 @@ type cacheEntry struct {
 	value *GeoData
 }
 
-var (
-	cacheMu sync.Mutex
-)
+var ()
 
 // GeoCache implements a thread-safe LRU cache for GeoData.
 type GeoCache struct {
@@ -125,11 +124,7 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, en
 // getFileName resolves the correct GeoJSON filename for a given country name.
 func getFileName(name string, cc *CountryCollection) string {
 	if cc != nil {
-		for _, c := range cc.Countries {
-			if c.Name == name {
-				return c.CompactName
-			}
-		}
+		return cc.CompactNames[name]
 	}
 	return strings.ReplaceAll(name, " ", "") + ".geojson"
 }
@@ -189,11 +184,14 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool, skipSmall i
 					continue
 				}
 
-				var path []Point
-				for _, pt := range ring {
-					mx, my := LatLonToMercator(pt[0], pt[1])
-					path = append(path, Point{X: mx, Y: my})
-				}
+				path := slices.Collect(func(yield func(Point) bool) {
+					for _, pt := range ring {
+						mx, my := LatLonToMercator(pt[0], pt[1])
+						if !yield(Point{X: mx, Y: my}) {
+							return
+						}
+					}
+				})
 				allPaths = append(allPaths, path)
 			}
 		}
