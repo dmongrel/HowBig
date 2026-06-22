@@ -8,7 +8,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"sort"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -18,6 +17,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/fogleman/gg"
 )
 
 // Settings define the UI configuration for the application.
@@ -86,8 +86,6 @@ func (zm *MapWidget) Resize(s fyne.Size) {
 
 // init initializes the global country collection and loads application settings.
 func init() {
-	cc := NewCountryCollection()
-	CountryData = cc
 	loadSettings()
 }
 
@@ -109,17 +107,6 @@ func loadSettings() {
 	if AppSettings.RightColor == "" {
 		AppSettings.RightColor = "#FF0000"
 	}
-}
-
-// ParseHexColor parses a hexadecimal color string (e.g., "#RRGGBB") and returns its color.NRGBA representation.
-func ParseHexColor(s string) color.NRGBA {
-	var r, g, b uint8
-	if len(s) == 7 && s[0] == '#' {
-		if _, err := fmt.Sscanf(s[1:], "%02x%02x%02x", &r, &g, &b); err == nil {
-			return color.NRGBA{R: r, G: g, B: b, A: 255}
-		}
-	}
-	return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
 }
 
 // createList creates a scrollable list of countries with search functionality and a selection callback.
@@ -207,89 +194,6 @@ func formatNumber(n float64) string {
 		res = append([]byte{s[i]}, res...)
 	}
 	return string(res)
-}
-
-// getFitScale calculates the scale factor required to fit the bounding box of a country within the available display area.
-func getFitScale(country string) float64 {
-	data, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
-	if err != nil {
-		return 1.0
-	}
-
-	// Ensure bounding box is updated from paths (using Mercator scale for fit calculation)
-	data.UpdateBoundingBox(1.0)
-
-	mercWidth := data.BoundingBox.Width
-	mercHeight := data.BoundingBox.Height
-	if mercWidth == 0 || mercHeight == 0 {
-		return 1.0
-	}
-
-	size := cMap.Container.Size()
-	var h float64
-	if headerContainer != nil {
-		h = float64(headerContainer.MinSize().Height)
-	}
-	availableHeight := float64(size.Height)
-	if availableHeight > h {
-		availableHeight -= h
-	} else {
-		availableHeight = 0
-	}
-
-	if float64(size.Width) < 4 || availableHeight < 4 {
-		return 1.0
-	}
-
-	scaleX := (float64(size.Width) - 4) / mercWidth
-	scaleY := (availableHeight - 4) / mercHeight
-	return min(scaleX, scaleY)
-}
-
-// getScaleAndOrder determines the appropriate scale and drawing order for selected countries.
-// It uses the larger of the two bounding box areas to ensure both are visible and fit the screen.
-func getScaleAndOrder(active, other string) (float64, string, string) {
-	if active == "" && other == "" {
-		return 1.0, "", ""
-	}
-	if active == "" {
-		return getFitScale(other), other, ""
-	}
-	if other == "" {
-		return getFitScale(active), active, ""
-	}
-
-	dataActive, errActive := FetchAndCacheGeoJSON(active, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
-	dataOther, errOther := FetchAndCacheGeoJSON(other, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
-
-	if errActive != nil && errOther != nil {
-		return 1.0, active, other
-	}
-	if errActive != nil {
-		return getFitScale(other), other, active
-	}
-	if errOther != nil {
-		return getFitScale(active), active, other
-	}
-
-	dataActive.UpdateBoundingBox(1.0)
-	dataOther.UpdateBoundingBox(1.0)
-
-	if cMap == nil {
-		return 1.0, active, other
-	}
-	size := cMap.Container.Size()
-	if size.Width < 4 || size.Height < 4 {
-		return 1.0, active, other
-	}
-
-	areaActive := dataActive.BoundingBox.Width * dataActive.BoundingBox.Height
-	areaOther := dataOther.BoundingBox.Width * dataOther.BoundingBox.Height
-
-	if areaActive > areaOther {
-		return getFitScale(active), active, other
-	}
-	return getFitScale(other), other, active
 }
 
 // updateHeader updates the header to display the surface area information for the selected countries.
@@ -416,6 +320,12 @@ func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
 
 // main is the application entry point, setting up the GUI and initializing components.
 func main() {
+	cc, err := NewCountryCollection()
+	if err != nil {
+		log.Fatalf("Fatal error: failed to load country data: %v", err)
+	}
+	CountryData = cc
+
 	a := app.New()
 	leftSelectedCountry = binding.NewString()
 	rightSelectedCountry = binding.NewString()
@@ -531,39 +441,28 @@ func getArea(name string) float64 {
 }
 
 // fillPolygonIntoImage implements a scanline fill algorithm to color the polygon.
-func fillPolygonIntoImage(img *image.RGBA, polyPoints []Point, fillColor color.Color) {
+func fillPolygonIntoImage(width, height int, polyPoints []Point, fillColor color.Color) image.Image {
 	if len(polyPoints) < 3 {
-		return
-	}
-	minY, maxY := polyPoints[0].Y, polyPoints[0].Y
-	for _, p := range polyPoints {
-		minY = min(minY, p.Y)
-		maxY = max(maxY, p.Y)
+		return image.NewRGBA(image.Rect(0, 0, width, height))
 	}
 
-	for y := int(math.Floor(minY)); y <= int(math.Ceil(maxY)); y++ {
-		var intersections []float64
-		fy := float64(y)
-		for i := 0; i < len(polyPoints); i++ {
-			p1 := polyPoints[i]
-			p2 := polyPoints[(i+1)%len(polyPoints)]
+	dc := gg.NewContext(width, height)
+	dc.SetFillRule(gg.FillRuleEvenOdd)
 
-			if (p1.Y <= fy && p2.Y > fy) || (p2.Y <= fy && p1.Y > fy) {
-				x := p1.X + (fy-p1.Y)*(p2.X-p1.X)/(p2.Y-p1.Y)
-				intersections = append(intersections, x)
-			}
-		}
-		sort.Slice(intersections, func(i, j int) bool { return intersections[i] < intersections[j] })
+	// Set the fill color
+	dc.SetColor(fillColor)
 
-		for i := 0; i < len(intersections)-1; i += 2 {
-			xStart := intersections[i]
-			xEnd := intersections[i+1]
-			// Use exact range for scanline to avoid 1-pixel bloat
-			for x := int(math.Round(xStart)); x <= int(math.Round(xEnd)); x++ {
-				img.Set(x, y, fillColor)
-			}
-		}
+	// Draw the path
+	dc.MoveTo(polyPoints[0].X, polyPoints[0].Y)
+	for i := 1; i < len(polyPoints); i++ {
+		dc.LineTo(polyPoints[i].X, polyPoints[i].Y)
 	}
+	dc.ClosePath()
+
+	// Fills the path using an optimized scanline with anti-aliasing
+	dc.Fill()
+
+	return dc.Image()
 }
 
 // drawFilledPolygon creates a Raster canvas object representing the filled polygon.
@@ -581,15 +480,22 @@ func drawFilledPolygon(polyPoints []Point, fillColor color.Color) fyne.CanvasObj
 	h := int(math.Round(maxY)) - int(math.Round(minY)) + 1
 
 	raster := canvas.NewRaster(func(width, height int) image.Image {
-		img := image.NewRGBA(image.Rect(0, 0, width, height))
 		relativePoints := make([]Point, len(polyPoints))
 		offsetX := math.Round(minX)
 		offsetY := math.Round(minY)
+
+		// Calculate scaling factor between Fyne's requested size and our calculated size
+		// This handles high-DPI screens correctly.
+		scaleX := float64(width) / float64(w)
+		scaleY := float64(height) / float64(h)
+
 		for i, p := range polyPoints {
-			relativePoints[i] = Point{X: p.X - offsetX, Y: p.Y - offsetY}
+			relativePoints[i] = Point{
+				X: (p.X - offsetX) * scaleX,
+				Y: (p.Y - offsetY) * scaleY,
+			}
 		}
-		fillPolygonIntoImage(img, relativePoints, fillColor)
-		return img
+		return fillPolygonIntoImage(width, height, relativePoints, fillColor)
 	})
 	raster.Resize(fyne.NewSize(float32(w), float32(h)))
 	raster.Move(fyne.NewPos(float32(math.Round(minX)), float32(math.Round(minY))))
@@ -613,8 +519,8 @@ func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineC
 		return
 	}
 
-	// Update bounding box to pixel coordinates
-	data.UpdateBoundingBox(scale)
+	// Ensure bounding box is updated
+	data.UpdateBoundingBox()
 
 	size := zm.Container.Size()
 	if size.Width == 0 || size.Height == 0 {
@@ -640,32 +546,35 @@ func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineC
 		}
 	}
 
-	// Use the pre-calculated pixel-space bounding box
-	pixelBBox := data.BoundingBox
+	// Use the pre-calculated Mercator bounding box scaled to pixels
+	pixelWidth := data.BoundingBox.Width * scale
+	pixelHeight := data.BoundingBox.Height * scale
 
-	offsetX := (float64(size.Width) - pixelBBox.Width) / 2
-	offsetY := (float64(size.Height) - pixelBBox.Height) / 2
+	offsetX := (float64(size.Width) - pixelWidth) / 2
+	offsetY := (float64(size.Height) - pixelHeight) / 2
 
 	// Draw bounding box
 	if AppSettings.DebugShowBoundary {
 		rect := canvas.NewRectangle(color.Transparent)
 		rect.StrokeColor = color.NRGBA{R: 255, A: 255}
 		rect.StrokeWidth = 1
-		rect.Resize(fyne.NewSize(float32(pixelBBox.Width), float32(pixelBBox.Height)))
+		rect.Resize(fyne.NewSize(float32(pixelWidth), float32(pixelHeight)))
 		rect.Move(fyne.NewPos(float32(offsetX), float32(offsetY)))
 		objects = append(objects, rect)
 	}
 
 	// Pass 2: Draw the transformed paths
+	minXScaled := data.BoundingBox.MinX * scale
+	minYScaled := data.BoundingBox.MinY * scale
+
 	for _, path := range data.Paths { // Use original paths for drawing
 		var polyPoints []Point
 		for _, p := range path {
-			// Screen space: (Mercator * scale) - pixelBBox.MinX
-			screenX := p.X*scale - pixelBBox.MinX
-			screenY := p.Y*scale - pixelBBox.MinY
-
-			// Apply centering
-			polyPoints = append(polyPoints, Point{X: screenX + offsetX, Y: screenY + offsetY})
+			// Screen space: (Mercator * scale) - minXScaled
+			polyPoints = append(polyPoints, Point{
+				X: p.X*scale - minXScaled + offsetX,
+				Y: p.Y*scale - minYScaled + offsetY,
+			})
 		}
 
 		if len(polyPoints) < 3 {
