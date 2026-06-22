@@ -244,7 +244,7 @@ func (a *App) getScaleAndOrder(active, other string) (float64, string, string) {
 		larger, smaller = other, active
 	}
 
-	// Step 2: See if either country's pixel delta is larger than current drawing area size
+	// Step 2: See if either country's pixel delta is larger than the current drawing area size
 	// We need a baseline scale to check pixel deltas.
 	// We'll use a temporary fit scale for the larger country as the baseline.
 	scale := a.getFitScale(larger)
