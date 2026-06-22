@@ -2,6 +2,8 @@
 
 HowBig is a Go-based application designed to visualize and compare the geographical sizes of different countries. Built with the [Fyne](https://fyne.io/) GUI toolkit, it provides an interactive way to see how countries stack up against each other in terms of their physical footprint.
 
+<img width="1200" height="502" alt="image" src="https://github.com/user-attachments/assets/bf6f87b2-0f8e-499d-9927-5bb6055e54b5" />
+
 ## Features
 
 - **Side-by-Side Comparison:** Select two countries to compare their shapes and relative sizes.
