@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"os"
-	"path/filepath"
 )
 
 // CountryInfo holds basic information about a country.
@@ -29,15 +28,15 @@ func (cc *CountryCollection) SaveToJSON(filename string) error {
 }
 
 // NewCountryCollection creates and initializes a new CountryCollection from country_data.json.
-func NewCountryCollection() *CountryCollection {
-	path := filepath.Join("mapdata", "country_data.json")
+func NewCountryCollection() (*CountryCollection, error) {
+	path := "country_data.json"
 	data, err := os.ReadFile(path)
 	if err != nil {
-		panic("country_data.json not found: " + err.Error())
+		return nil, err
 	}
 	cc := &CountryCollection{}
 	if err := json.Unmarshal(data, cc); err != nil {
-		panic("error unmarshaling country_data.json: " + err.Error())
+		return nil, err
 	}
-	return cc
+	return cc, nil
 }
