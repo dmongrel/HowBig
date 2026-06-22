@@ -29,8 +29,13 @@ type Settings struct {
 	DebugShowBoundary   bool   `json:"debug_show_boundary"`   // DebugShowBoundary determines if the bounding box is rendered.
 	LeftColor           string `json:"left_color"`            // LeftColor is the hex color for the left map.
 	RightColor          string `json:"right_color"`           // RightColor is the hex color for the right map.
+	LeftBorderColor     string `json:"left_border_color"`     // LeftBorderColor is the hex color for the left country border.
+	RightBorderColor    string `json:"right_border_color"`    // RightBorderColor is the hex color for the right country border.
+	BackgroundColor     string `json:"background_color"`      // BackgroundColor is the background color for the application.
 	EnablePacificCenter bool   `json:"enable_pacific_center"` // EnablePacificCenter determines if the map is centered on the Pacific Ocean for countries spanning the 180-degree meridian.
 	SkipSmall           int    `json:"skip_small"`            // SkipSmall determines if polygons with few points are skipped.
+	MapDataPath         string `json:"map_data_path"`         // MapDataPath is the path to the directory containing GeoJSON files.
+	CountryDataPath     string `json:"country_data_path"`     // CountryDataPath is the path to the country_data.json file.
 }
 
 // MapWidget is a custom widget that provides a map interface.
@@ -44,18 +49,15 @@ type customTheme struct {
 	base fyne.Theme // base is the default theme being overridden.
 }
 
-// selectionListener implements binding.DataListener to react to country selection changes.
-type selectionListener struct{}
+// App holds the application state and dependencies.
+type App struct {
+	fyneApp fyne.App
+	window  fyne.Window
 
-// CountryData holds the global collection of country information.
-// cCenter is the central container for the application.
-// cMap is the custom widget that renders the map.
-// headerContainer holds the header elements for displaying the area.
-// leftBar and rightBar are containers for the side information panels.
-// leftSelectedCountry and rightSelectedCountry manage the selection state.
-// AppSettings stores global application configuration.
-var (
-	CountryData          *CountryCollection
+	Settings    *Settings
+	CountryData *CountryCollection
+	GeoCache    *GeoCache
+
 	cCenter              *fyne.Container
 	cMap                 *MapWidget
 	headerContainer      *fyne.Container
@@ -63,8 +65,28 @@ var (
 	rightBar             *fyne.Container
 	leftSelectedCountry  binding.String
 	rightSelectedCountry binding.String
-	AppSettings          Settings
-)
+}
+
+// selectionListener implements binding.DataListener to react to country selection changes.
+type selectionListener struct {
+	app *App
+}
+
+func (s *selectionListener) DataChanged() {
+	s.app.updateHeader()
+	s.app.updateMapDisplay()
+}
+
+func NewApp(fyneApp fyne.App) *App {
+	settings := loadSettings("settings.json")
+	return &App{
+		fyneApp:              fyneApp,
+		Settings:             settings,
+		GeoCache:             NewGeoCache(CacheLimit),
+		leftSelectedCountry:  binding.NewString(),
+		rightSelectedCountry: binding.NewString(),
+	}
+}
 
 // NewMapWidget creates and initializes a new MapWidget instance with a container.
 func NewMapWidget() *MapWidget {
@@ -83,41 +105,70 @@ func (zm *MapWidget) CreateRenderer() fyne.WidgetRenderer {
 // Resize handles the resizing of the MapWidget and triggers a map redraw if necessary.
 func (zm *MapWidget) Resize(s fyne.Size) {
 	zm.BaseWidget.Resize(s)
-	if cMap != nil && leftBar != nil && rightBar != nil && headerContainer != nil {
-		updateMapDisplay()
-	}
-}
-
-// init initializes the global country collection and loads application settings.
-func init() {
-	loadSettings()
 }
 
 // loadSettings reads application configuration from settings.json, applying default values if the file is missing or invalid.
-func loadSettings() {
-	data, err := os.ReadFile("settings.json")
+func loadSettings(path string) *Settings {
+	var s Settings
+	data, err := os.ReadFile(path)
 	if err != nil {
 		log.Println("Error reading settings.json, using defaults:", err)
-		AppSettings = Settings{DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", EnablePacificCenter: true, SkipSmall: 0}
-		return
-	}
-	if err := json.Unmarshal(data, &AppSettings); err != nil {
+		s = Settings{
+			DebugShowBoundary:   false,
+			LeftColor:           "#00FF00",
+			RightColor:          "#FF0000",
+			LeftBorderColor:     "#00FFFF",
+			RightBorderColor:    "#FFCC00",
+			BackgroundColor:     "#000000",
+			EnablePacificCenter: true,
+			SkipSmall:           0,
+			MapDataPath:         "mapdata",
+			CountryDataPath:     "country_data.json",
+		}
+	} else if err := json.Unmarshal(data, &s); err != nil {
 		log.Println("Error unmarshaling settings.json:", err)
-		AppSettings = Settings{DebugShowBoundary: false, LeftColor: "#00FF00", RightColor: "#FF0000", EnablePacificCenter: true, SkipSmall: 0}
+		s = Settings{
+			DebugShowBoundary:   false,
+			LeftColor:           "#00FF00",
+			RightColor:          "#FF0000",
+			LeftBorderColor:     "#00FFFF",
+			RightBorderColor:    "#FFCC00",
+			BackgroundColor:     "#000000",
+			EnablePacificCenter: true,
+			SkipSmall:           0,
+			MapDataPath:         "mapdata",
+			CountryDataPath:     "country_data.json",
+		}
 	}
-	if AppSettings.LeftColor == "" {
-		AppSettings.LeftColor = "#00FF00"
+	if s.LeftColor == "" {
+		s.LeftColor = "#00FF00"
 	}
-	if AppSettings.RightColor == "" {
-		AppSettings.RightColor = "#FF0000"
+	if s.RightColor == "" {
+		s.RightColor = "#FF0000"
 	}
+	if s.LeftBorderColor == "" {
+		s.LeftBorderColor = "#00FFFF"
+	}
+	if s.RightBorderColor == "" {
+		s.RightBorderColor = "#FFCC00"
+	}
+	if s.BackgroundColor == "" {
+		s.BackgroundColor = "#000000"
+	}
+	if s.MapDataPath == "" {
+		s.MapDataPath = "mapdata"
+	}
+	if s.CountryDataPath == "" {
+		s.CountryDataPath = "country_data.json"
+	}
+	return &s
 }
 
 // createList creates a scrollable list of countries with search functionality and a selection callback.
 // The width parameter sets the minimum width of the list.
-func createList(width float64, onSelected func(string)) fyne.CanvasObject {
-	filteredIndices := make([]int, len(CountryData.Countries))
-	for i := range CountryData.Countries {
+func (a *App) createList(width float64, onSelected func(string)) fyne.CanvasObject {
+	filteredIndices := make([]int, len(a.CountryData.Countries))
+	for i := range a.CountryData.Countries {
 		filteredIndices[i] = i
 	}
 
@@ -131,7 +182,7 @@ func createList(width float64, onSelected func(string)) fyne.CanvasObject {
 		func(id widget.ListItemID, obj fyne.CanvasObject) {
 			padded := obj.(*fyne.Container)
 			text := padded.Objects[0].(*canvas.Text)
-			text.Text = CountryData.Countries[filteredIndices[id]].Name
+			text.Text = a.CountryData.Countries[filteredIndices[id]].Name
 			text.Refresh()
 		},
 	)
@@ -144,11 +195,11 @@ func createList(width float64, onSelected func(string)) fyne.CanvasObject {
 			onSelected("")
 		} else {
 			selectedID = realID
-			onSelected(CountryData.Countries[realID].Name)
+			onSelected(a.CountryData.Countries[realID].Name)
 		}
 	}
 
-	bg := canvas.NewRectangle(color.Black)
+	bg := canvas.NewRectangle(ParseHexColor(a.Settings.BackgroundColor))
 	// Set a reasonable width for the lists
 	scroll := container.NewScroll(list)
 	scroll.SetMinSize(fyne.NewSize(float32(width), 0))
@@ -162,7 +213,7 @@ func createList(width float64, onSelected func(string)) fyne.CanvasObject {
 	entry.SetPlaceHolder("Search...")
 	entry.OnChanged = func(s string) {
 		filteredIndices = []int{}
-		for i, c := range CountryData.Countries {
+		for i, c := range a.CountryData.Countries {
 			if strings.Contains(strings.ToLower(c.Name), strings.ToLower(s)) {
 				filteredIndices = append(filteredIndices, i)
 			}
@@ -201,13 +252,13 @@ func formatNumber(n float64) string {
 }
 
 // updateHeader updates the header to display the surface area information for the selected countries.
-func updateHeader() {
+func (a *App) updateHeader() {
 	const sqMiToSqKm = 2.58998811
-	left, _ := leftSelectedCountry.Get()
-	right, _ := rightSelectedCountry.Get()
+	left, _ := a.leftSelectedCountry.Get()
+	right, _ := a.rightSelectedCountry.Get()
 
 	formatPart := func(name string) string {
-		areaMi := getArea(name)
+		areaMi := a.getArea(name)
 		areaKm := areaMi * sqMiToSqKm
 		return fmt.Sprintf("%s: %s sq. mi. / %s km.", name, formatNumber(areaMi), formatNumber(areaKm))
 	}
@@ -227,76 +278,80 @@ func updateHeader() {
 		sep = " || "
 	}
 
-	headerContainer.Objects = nil
+	a.headerContainer.Objects = nil
 	if leftPart != "" {
-		t := canvas.NewText(leftPart, ParseHexColor(AppSettings.LeftColor))
+		t := canvas.NewText(leftPart, ParseHexColor(a.Settings.LeftColor))
 		t.TextSize = 36
-		headerContainer.Add(t)
+		a.headerContainer.Add(t)
 	}
 	if sep != "" {
 		t := canvas.NewText(sep, color.White)
 		t.TextSize = 36
-		headerContainer.Add(t)
+		a.headerContainer.Add(t)
 	}
 	if rightPart != "" {
-		t := canvas.NewText(rightPart, ParseHexColor(AppSettings.RightColor))
+		t := canvas.NewText(rightPart, ParseHexColor(a.Settings.RightColor))
 		t.TextSize = 36
-		headerContainer.Add(t)
+		a.headerContainer.Add(t)
 	}
-	headerContainer.Refresh()
+	a.headerContainer.Refresh()
 }
 
 // updateMapDisplay clears the map canvas and redraws the selected countries based on the calculated target scale.
-func updateMapDisplay() {
-	clearAll()
-	left, _ := leftSelectedCountry.Get()
-	right, _ := rightSelectedCountry.Get()
+func (a *App) updateMapDisplay() {
+	a.clearAll()
+	left, _ := a.leftSelectedCountry.Get()
+	right, _ := a.rightSelectedCountry.Get()
 
-	scale, large, small := getScaleAndOrder(left, right)
-	leftColor := ParseHexColor(AppSettings.LeftColor)
-	rightColor := ParseHexColor(AppSettings.RightColor)
+	scale, large, small := a.getScaleAndOrder(left, right)
+	leftColor := ParseHexColor(a.Settings.LeftColor)
+	rightColor := ParseHexColor(a.Settings.RightColor)
 
+	bgColor := ParseHexColor(a.Settings.BackgroundColor)
 	if left != "" {
-		drawBar(leftBar, getArea(left), leftColor)
+		leftColor.A = 127
+		drawBar(a.leftBar, a.getArea(left), leftColor, bgColor)
 	}
 	if right != "" {
-		drawBar(rightBar, getArea(right), rightColor)
+		rightColor.A = 127
+		drawBar(a.rightBar, a.getArea(right), rightColor, bgColor)
 	}
 
 	var largeColor, smallColor color.Color
 	if large == left {
 		largeColor = leftColor
-	} else {
-		largeColor = rightColor
-	}
-
-	if small == right {
 		smallColor = rightColor
 	} else {
+		largeColor = rightColor
 		smallColor = leftColor
 	}
 
 	if large != "" {
-		drawCountry(cMap, large, scale, false, largeColor)
+		a.drawCountry(a.cMap, large, scale, false, largeColor, nil)
 	}
 	if small != "" {
-		// Draw the second country with 25% transparency (75% opacity)
-		if sc, ok := smallColor.(color.NRGBA); ok {
-			sc.A = 191
-			smallColor = sc
-		}
-		drawCountry(cMap, small, scale, false, smallColor)
+		a.drawCountry(a.cMap, small, scale, false, smallColor, nil)
+	}
+
+	// Redraw borders in configured border colors
+	if left != "" {
+		borderColor := ParseHexColor(a.Settings.LeftBorderColor)
+		a.drawCountry(a.cMap, left, scale, false, nil, borderColor)
+	}
+	if right != "" {
+		borderColor := ParseHexColor(a.Settings.RightBorderColor)
+		a.drawCountry(a.cMap, right, scale, false, nil, borderColor)
 	}
 }
 
 // clearAll removes all canvas objects from the map container and refreshes it.
-func clearAll() {
-	leftBar.Objects = nil
-	leftBar.Refresh()
-	rightBar.Objects = nil
-	rightBar.Refresh()
-	cMap.Container.Objects = []fyne.CanvasObject{canvas.NewRectangle(color.Black)}
-	cMap.Container.Refresh()
+func (a *App) clearAll() {
+	a.leftBar.Objects = nil
+	a.leftBar.Refresh()
+	a.rightBar.Objects = nil
+	a.rightBar.Refresh()
+	a.cMap.Container.Objects = []fyne.CanvasObject{canvas.NewRectangle(ParseHexColor(a.Settings.BackgroundColor))}
+	a.cMap.Container.Refresh()
 }
 
 // Color returns the color for a given theme color name and variant.
@@ -325,17 +380,18 @@ func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
 // messageTheme is a custom Fyne theme to override default styling for the message window.
 type messageTheme struct {
 	fyne.Theme
+	backgroundColor color.Color
 }
 
 func (m *messageTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	if name == theme.ColorNameBackground {
-		return color.Black
+		return m.backgroundColor
 	}
 	if name == theme.ColorNameForeground {
 		return color.White
 	}
 	if name == theme.ColorNameInputBackground {
-		return color.Black
+		return m.backgroundColor
 	}
 	return m.Theme.Color(name, variant)
 }
@@ -347,12 +403,14 @@ func (m *messageTheme) Size(name fyne.ThemeSizeName) float32 {
 	return m.Theme.Size(name)
 }
 
-// showMessage displays a 800x300 message window centered on the parent window.
-func showMessage(a fyne.App, parent fyne.Window, isError bool, message string) {
-	title := "Message"
-	if isError {
-		title = "An Error Has Occurred"
-	}
+func (a *App) showAbout() {
+	attribution := "geoBoundaries data is used under CC-BY 4.0 license.\nFor more information refer to ATTRIBUTION.md"
+	msg := fmt.Sprintf("HowBig %s Copyright © 2026 Joel L. Caesar. All Rights Reserved.\n\n%s", Version, attribution)
+	a.showMessage("About", msg)
+}
+
+// showMessage displays a 500x300 message window centered on the parent window with a given title.
+func (a *App) showMessage(title string, message string) {
 
 	// Use canvas.Text for guaranteed color and size
 	text := widget.NewRichText(&widget.TextSegment{
@@ -369,18 +427,19 @@ func showMessage(a fyne.App, parent fyne.Window, isError bool, message string) {
 	}
 	text.Wrapping = fyne.TextWrapWord
 
-	bg := canvas.NewRectangle(color.Black)
+	bgColor := ParseHexColor(a.Settings.BackgroundColor)
+	bg := canvas.NewRectangle(bgColor)
 	content := container.NewStack(bg, container.NewScroll(text))
 
-	if parent != nil {
-		d := dialog.NewCustom(title, "OK", content, parent)
-		d.Resize(fyne.NewSize(800, 300))
+	if a.window != nil {
+		d := dialog.NewCustom(title, "OK", content, a.window)
+		d.Resize(fyne.NewSize(500, 300))
 		// Apply custom theme to the dialog window if possible
 		// Since we can't easily, the RichText within content should still use the app theme for foreground.
 		d.Show()
 	} else {
-		w := a.NewWindow(title)
-		w.Resize(fyne.NewSize(800, 300))
+		w := a.fyneApp.NewWindow(title)
+		w.Resize(fyne.NewSize(500, 300))
 		okBtn := widget.NewButton("OK", func() {
 			w.Close()
 		})
@@ -393,37 +452,34 @@ func showMessage(a fyne.App, parent fyne.Window, isError bool, message string) {
 
 // main is the application entry point, setting up the GUI and initializing components.
 func main() {
-	a := app.New()
-	a.Settings().SetTheme(&customTheme{base: theme.DefaultTheme()})
+	fyneApp := app.New()
+	fyneApp.Settings().SetTheme(&customTheme{base: theme.DefaultTheme()})
 
-	cc, err := NewCountryCollection()
+	a := NewApp(fyneApp)
+
+	cc, err := NewCountryCollection(a.Settings.CountryDataPath)
 	if err != nil {
-		showMessage(a, nil, true, fmt.Sprintf("Fatal error: failed to load country data: %v", err))
-		// We might want to exit here since we can't continue without data
-		// But showMessage is non-blocking in Fyne unless it's a dialog.
-		// For now, let's just log it as well.
+		a.showMessage("Error", fmt.Sprintf("Fatal error: failed to load country data: %v", err))
 		log.Printf("Fatal error: failed to load country data: %v", err)
 	}
-	CountryData = cc
+	a.CountryData = cc
 
-	leftSelectedCountry = binding.NewString()
-	rightSelectedCountry = binding.NewString()
-	w := a.NewWindow("Fullscreen App")
-	w.Resize(fyne.NewSize(1280, 1024))
-	w.SetFullScreen(true)
+	a.window = fyneApp.NewWindow("Fullscreen App")
+	a.window.Resize(fyne.NewSize(1280, 1024))
+	a.window.SetFullScreen(true)
 
 	isFullScreen := true
-	w.Canvas().SetOnTypedKey(func(key *fyne.KeyEvent) {
+	a.window.Canvas().SetOnTypedKey(func(key *fyne.KeyEvent) {
 		if key.Name == fyne.KeyEscape {
-			a.Quit()
+			fyneApp.Quit()
 		} else if key.Name == fyne.KeyF {
 			isFullScreen = !isFullScreen
-			w.SetFullScreen(isFullScreen)
+			a.window.SetFullScreen(isFullScreen)
 		}
 	})
 
 	var maxWidth float64
-	for _, country := range CountryData.Countries {
+	for _, country := range a.CountryData.Countries {
 		size := fyne.MeasureText(country.Name, 18, fyne.TextStyle{})
 		if float64(size.Width) > maxWidth {
 			maxWidth = float64(size.Width)
@@ -431,58 +487,48 @@ func main() {
 	}
 	maxWidth += 2
 
-	cMap = NewMapWidget()
-	headerContainer = container.NewHBox()
+	a.cMap = NewMapWidget()
+	a.headerContainer = container.NewHBox()
 	aboutBtn := widget.NewButton("About", func() {
-		attribution := "geoBoundaries data is used under CC-BY 4.0 license.\nFor more information refer to ATTRIBUTION.md"
-		startupMsg := fmt.Sprintf("HowBig %s Copyright 2026 Joel L. Caesar\n\n%s", Version, attribution)
-		showMessage(a, w, false, startupMsg)
+		a.showAbout()
 	})
-	cCenter = container.NewBorder(container.NewCenter(headerContainer), aboutBtn, nil, nil, cMap)
+	a.cCenter = container.NewBorder(container.NewCenter(a.headerContainer), aboutBtn, nil, nil, a.cMap)
 
-	leftBar = container.NewWithoutLayout()
-	leftBarWrapper := container.NewScroll(leftBar)
+	a.leftBar = container.NewWithoutLayout()
+	leftBarWrapper := container.NewScroll(a.leftBar)
 	leftBarWrapper.SetMinSize(fyne.NewSize(50, 0))
-	rightBar = container.NewWithoutLayout()
-	rightBarWrapper := container.NewScroll(rightBar)
+	a.rightBar = container.NewWithoutLayout()
+	rightBarWrapper := container.NewScroll(a.rightBar)
 	rightBarWrapper.SetMinSize(fyne.NewSize(50, 0))
 
-	listener := &selectionListener{}
-	leftSelectedCountry.AddListener(listener)
-	rightSelectedCountry.AddListener(listener)
+	listener := &selectionListener{app: a}
+	a.leftSelectedCountry.AddListener(listener)
+	a.rightSelectedCountry.AddListener(listener)
 
-	innerBorder := container.NewBorder(nil, nil, leftBarWrapper, rightBarWrapper, cCenter)
+	innerBorder := container.NewBorder(nil, nil, leftBarWrapper, rightBarWrapper, a.cCenter)
+	centerBg := canvas.NewRectangle(ParseHexColor(a.Settings.BackgroundColor))
+	center := addBorder(container.NewStack(centerBg, innerBorder))
 
-	left := addBorder(createList(maxWidth, func(c string) {
-		if err := leftSelectedCountry.Set(c); err != nil {
+	left := addBorder(a.createList(maxWidth, func(c string) {
+		if err := a.leftSelectedCountry.Set(c); err != nil {
 			log.Printf("Error setting left country: %v", err)
 		}
 	}))
-	right := addBorder(createList(maxWidth, func(c string) {
-		if err := rightSelectedCountry.Set(c); err != nil {
+	right := addBorder(a.createList(maxWidth, func(c string) {
+		if err := a.rightSelectedCountry.Set(c); err != nil {
 			log.Printf("Error setting right country: %v", err)
 		}
-
 	}))
-	center := addBorder(innerBorder)
 
-	w.SetContent(container.NewBorder(nil, nil, left, right, center))
+	a.window.SetContent(container.NewBorder(nil, nil, left, right, center))
 
-	attribution := "geoBoundaries data is used under CC-BY 4.0 license.\nFor more information refer to ATTRIBUTION.md"
-	startupMsg := fmt.Sprintf("HowBig %s Copyright 2026 Joel L. Caesar\n\n%s", Version, attribution)
-	showMessage(a, w, false, startupMsg)
+	a.showAbout()
 
-	w.ShowAndRun()
-}
-
-// DataChanged reacts to country selection changes and updates the UI.
-func (s *selectionListener) DataChanged() {
-	updateHeader()
-	updateMapDisplay()
+	a.window.ShowAndRun()
 }
 
 // drawBar draws a vertical bar representing the relative area of a country on a given container.
-func drawBar(c *fyne.Container, area float64, barColor color.Color) {
+func drawBar(c *fyne.Container, area float64, barColor color.Color, bgColor color.Color) {
 	size := c.Size()
 	if size.Width == 0 || size.Height == 0 {
 		size = fyne.NewSize(50, 500)
@@ -496,9 +542,15 @@ func drawBar(c *fyne.Container, area float64, barColor color.Color) {
 
 	barHeight := proportion * float64(size.Height)
 
+	// Create background border rectangle
+	bgRect := canvas.NewRectangle(bgColor)
+	bgRect.Resize(size)
+	bgRect.Move(fyne.NewPos(0, 0))
+
+	// Create bar color rectangle
 	rect := canvas.NewRectangle(barColor)
 
-	// Apply padding: 2px on all sides
+	// Apply padding: 2px on all sides for the bar relative to the background
 	padding := 2.0
 	rectWidth := float64(size.Width) - (padding * 2)
 	rectHeight := barHeight - (padding * 2)
@@ -513,13 +565,13 @@ func drawBar(c *fyne.Container, area float64, barColor color.Color) {
 	rect.Resize(fyne.NewSize(float32(rectWidth), float32(rectHeight)))
 	rect.Move(fyne.NewPos(float32(padding), float32(float64(size.Height)-barHeight+padding)))
 
-	c.Objects = []fyne.CanvasObject{rect}
+	c.Objects = []fyne.CanvasObject{bgRect, rect}
 	c.Refresh()
 }
 
-// getArea retrieves the surface area of a country by its name from the global CountryData.
-func getArea(name string) float64 {
-	for _, country := range CountryData.Countries {
+// getArea retrieves the surface area of a country by its name from the collection.
+func (a *App) getArea(name string) float64 {
+	for _, country := range a.CountryData.Countries {
 		if country.Name == name {
 			return country.Area
 		}
@@ -527,33 +579,8 @@ func getArea(name string) float64 {
 	return 0
 }
 
-// fillPolygonIntoImage implements a scanline fill algorithm to color the polygon.
-func fillPolygonIntoImage(width, height int, polyPoints []Point, fillColor color.Color) image.Image {
-	if len(polyPoints) < 3 {
-		return image.NewRGBA(image.Rect(0, 0, width, height))
-	}
-
-	dc := gg.NewContext(width, height)
-	dc.SetFillRule(gg.FillRuleEvenOdd)
-
-	// Set the fill color
-	dc.SetColor(fillColor)
-
-	// Draw the path
-	dc.MoveTo(polyPoints[0].X, polyPoints[0].Y)
-	for i := 1; i < len(polyPoints); i++ {
-		dc.LineTo(polyPoints[i].X, polyPoints[i].Y)
-	}
-	dc.ClosePath()
-
-	// Fills the path using an optimized scanline with anti-aliasing
-	dc.Fill()
-
-	return dc.Image()
-}
-
 // drawFilledPolygon creates a Raster canvas object representing the filled polygon.
-func drawFilledPolygon(polyPoints []Point, fillColor color.Color) fyne.CanvasObject {
+func drawFilledPolygon(polyPoints []Point, fillColor color.Color, strokeColor color.Color, strokeWidth float64) fyne.CanvasObject {
 	minX, maxX := polyPoints[0].X, polyPoints[0].X
 	minY, maxY := polyPoints[0].Y, polyPoints[0].Y
 	for _, p := range polyPoints {
@@ -582,7 +609,33 @@ func drawFilledPolygon(polyPoints []Point, fillColor color.Color) fyne.CanvasObj
 				Y: (p.Y - offsetY) * scaleY,
 			}
 		}
-		return fillPolygonIntoImage(width, height, relativePoints, fillColor)
+
+		if len(relativePoints) < 3 {
+			return image.NewRGBA(image.Rect(0, 0, width, height))
+		}
+
+		dc := gg.NewContext(width, height)
+		dc.SetFillRule(gg.FillRuleEvenOdd)
+
+		// Draw the path
+		dc.MoveTo(relativePoints[0].X, relativePoints[0].Y)
+		for i := 1; i < len(relativePoints); i++ {
+			dc.LineTo(relativePoints[i].X, relativePoints[i].Y)
+		}
+		dc.ClosePath()
+
+		if fillColor != nil {
+			dc.SetColor(fillColor)
+			dc.FillPreserve()
+		}
+
+		if strokeColor != nil && strokeWidth > 0 {
+			dc.SetColor(strokeColor)
+			dc.SetLineWidth(strokeWidth * ((scaleX + scaleY) / 2))
+			dc.Stroke()
+		}
+
+		return dc.Image()
 	})
 	raster.Resize(fyne.NewSize(float32(w), float32(h)))
 	raster.Move(fyne.NewPos(float32(math.Round(minX)), float32(math.Round(minY))))
@@ -591,17 +644,16 @@ func drawFilledPolygon(polyPoints []Point, fillColor color.Color) fyne.CanvasObj
 
 // drawCountry draws the GeoJSON paths of a country on the provided MapWidget.
 // It applies scaling, centering, and optionally renders the bounding box for debugging purposes.
-func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineColor color.Color) {
-	data, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
+func (a *App) drawCountry(zm *MapWidget, country string, scale float64, clear bool, fillColor color.Color, strokeColor color.Color) {
+	data, err := FetchAndCacheGeoJSON(country, true, a.Settings.SkipSmall, a.Settings.EnablePacificCenter, a.Settings.MapDataPath, a.GeoCache, a.CountryData)
 	if err != nil {
-		parent := fyne.CurrentApp().Driver().AllWindows()[0]
-		showMessage(fyne.CurrentApp(), parent, true, fmt.Sprintf("Error loading %s: %v", country, err))
+		a.showMessage("Error", fmt.Sprintf("Error loading %s: %v", country, err))
 		return
 	}
 
 	if len(data.Paths) == 0 {
 		if clear {
-			zm.Container.Objects = []fyne.CanvasObject{canvas.NewRectangle(color.Black)}
+			zm.Container.Objects = []fyne.CanvasObject{canvas.NewRectangle(ParseHexColor(a.Settings.BackgroundColor))}
 			zm.Container.Refresh()
 		}
 		return
@@ -614,8 +666,8 @@ func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineC
 	if size.Width == 0 || size.Height == 0 {
 		size = fyne.NewSize(500, 500)
 	}
-	if headerContainer != nil {
-		h := headerContainer.MinSize().Height
+	if a.headerContainer != nil {
+		h := a.headerContainer.MinSize().Height
 		if size.Height > h {
 			size.Height -= h
 		} else {
@@ -624,14 +676,8 @@ func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineC
 	}
 
 	// Subtract About button height
-	if cCenter != nil && len(cCenter.Objects) > 0 {
-		// In a Border layout, the South object is typically at index 1 or managed separately
-		// but we can look for it or just use a fixed estimate if we can't reliably get its height here.
-		// However, it's better to try to measure it if it's available.
-		// In container.NewBorder(top, bottom, left, right, content),
-		// objects are [content, top, bottom, left, right] but this is internal.
-		// We'll try to find the button or just subtract its MinSize.
-		for _, obj := range cCenter.Objects {
+	if a.cCenter != nil && len(a.cCenter.Objects) > 0 {
+		for _, obj := range a.cCenter.Objects {
 			if btn, ok := obj.(*widget.Button); ok && btn.Text == "About" {
 				h := btn.MinSize().Height
 				if size.Height > h {
@@ -646,12 +692,12 @@ func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineC
 
 	var objects []fyne.CanvasObject
 	if clear {
-		objects = []fyne.CanvasObject{canvas.NewRectangle(color.Black)}
+		objects = []fyne.CanvasObject{canvas.NewRectangle(ParseHexColor(a.Settings.BackgroundColor))}
 	} else {
 		objects = make([]fyne.CanvasObject, len(zm.Container.Objects))
 		copy(objects, zm.Container.Objects)
 		if len(objects) == 0 {
-			objects = []fyne.CanvasObject{canvas.NewRectangle(color.Black)}
+			objects = []fyne.CanvasObject{canvas.NewRectangle(ParseHexColor(a.Settings.BackgroundColor))}
 		}
 	}
 
@@ -663,7 +709,7 @@ func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineC
 	offsetY := (float64(size.Height) - pixelHeight) / 2
 
 	// Draw bounding box
-	if AppSettings.DebugShowBoundary {
+	if a.Settings.DebugShowBoundary {
 		rect := canvas.NewRectangle(color.Transparent)
 		rect.StrokeColor = color.NRGBA{R: 255, A: 255}
 		rect.StrokeWidth = 1
@@ -690,7 +736,12 @@ func drawCountry(zm *MapWidget, country string, scale float64, clear bool, lineC
 			continue
 		}
 
-		poly := drawFilledPolygon(polyPoints, lineColor)
+		var sw float64
+		if strokeColor != nil {
+			sw = 1.0
+		}
+
+		poly := drawFilledPolygon(polyPoints, fillColor, strokeColor, sw)
 		objects = append(objects, poly)
 	}
 	zm.Container.Objects = objects
