@@ -8,5 +8,9 @@
   "right_border_color": "#FFCC00",
   "background_color": "#000000",
   "map_data_path": "mapdata",
-  "country_data_path": "country_data.json"
+  "country_data_path": "country_data.json",
+  "button_font_size": 14,
+  "search_font_size": 14,
+  "country_list_font_size": 18,
+  "header_font_size": 18
 }
