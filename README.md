@@ -16,6 +16,7 @@ HowBig is a Go-based application designed to visualize and compare the geographi
 
 - **Go:** Version 1.26 or higher.
 - **Fyne Dependencies:** You will need the dependencies required by the Fyne toolkit for your operating system (e.g., C compiler, graphics drivers). See the [Fyne Installation Guide](https://developer.fyne.io/started/) for details.
+- **Screen Size:** A minimum resolution of 1280 x 768 is required for the application to display correctly.
 
 ### Building from Source
 
