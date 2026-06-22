@@ -2,7 +2,9 @@ package main
 
 import (
 	"math"
+	"strings"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -162,12 +164,23 @@ func (a *App) getFitScale(country string) float64 {
 		availableHeight -= float64(a.headerContainer.MinSize().Height)
 	}
 
-	// Subtract About button height
+	// Subtract footer height
 	if a.cCenter != nil && len(a.cCenter.Objects) > 0 {
 		for _, obj := range a.cCenter.Objects {
-			if btn, ok := obj.(*widget.Button); ok && btn.Text == "About" {
-				availableHeight -= float64(btn.MinSize().Height)
-				break
+			if footer, ok := obj.(*fyne.Container); ok {
+				// The footer is likely the Bottom in Border layout.
+				// Check if it contains our buttons.
+				isFooter := false
+				for _, child := range footer.Objects {
+					if btn, ok := child.(*widget.Button); ok && (strings.Contains(btn.Text, "Exit") || strings.Contains(btn.Text, "About")) {
+						isFooter = true
+						break
+					}
+				}
+				if isFooter {
+					availableHeight -= float64(footer.MinSize().Height)
+					break
+				}
 			}
 		}
 	}
@@ -223,11 +236,21 @@ func (a *App) getScaleAndOrder(active, other string) (float64, string, string) {
 	if a.headerContainer != nil {
 		availableHeight -= float64(a.headerContainer.MinSize().Height)
 	}
+	// Subtract footer height
 	if a.cCenter != nil && len(a.cCenter.Objects) > 0 {
 		for _, obj := range a.cCenter.Objects {
-			if btn, ok := obj.(*widget.Button); ok && btn.Text == "About" {
-				availableHeight -= float64(btn.MinSize().Height)
-				break
+			if footer, ok := obj.(*fyne.Container); ok {
+				isFooter := false
+				for _, child := range footer.Objects {
+					if btn, ok := child.(*widget.Button); ok && (strings.Contains(btn.Text, "Exit") || strings.Contains(btn.Text, "About")) {
+						isFooter = true
+						break
+					}
+				}
+				if isFooter {
+					availableHeight -= float64(footer.MinSize().Height)
+					break
+				}
 			}
 		}
 	}
