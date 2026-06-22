@@ -17,6 +17,7 @@ HowBig is a Go-based application designed to visualize and compare the geographi
 - **Go:** Version 1.26 or higher.
 - **Fyne Dependencies:** You will need the dependencies required by the Fyne toolkit for your operating system (e.g., C compiler, graphics drivers). See the [Fyne Installation Guide](https://developer.fyne.io/started/) for details.
 - **Inno Setup 7:** Required for packaging releases on Windows.
+- **Bash/Git Bash:** Required for using the `Makefile` (especially on Windows).
 - **Screen Size:** A minimum resolution of 1280 x 768 is required for the application to display correctly.
 
 ### Building from Source
@@ -42,7 +43,7 @@ go run .
 
 ### Using the Makefile
 
-For convenience, a `Makefile` is provided to automate common tasks.
+For convenience, a `Makefile` is provided to automate common tasks. **Note:** This requires a Bash-compatible environment (e.g., Git Bash on Windows).
 
 - **Build the application:**
   ```bash
