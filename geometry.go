@@ -10,26 +10,27 @@ import (
 
 // Point represents a 2D point with float64 precision.
 type Point struct {
-	X, Y float64
+	X float64 // X is the horizontal coordinate.
+	Y float64 // Y is the vertical coordinate.
 }
 
 // BoundingBox represents a geographic or pixel-space bounding box.
 type BoundingBox struct {
-	MinX, MaxX    float64
-	MinY, MaxY    float64
-	Width, Height float64
+	MinX, MaxX    float64 // MinX and MaxX are the horizontal boundaries.
+	MinY, MaxY    float64 // MinY and MaxY are the vertical boundaries.
+	Width, Height float64 // Width and Height are the dimensions of the bounding box.
 }
 
 // Geometry represents a GeoJSON geometry object.
 type Geometry struct {
-	Type        string
-	Coordinates [][][][]float64
+	Type        string          // Type is the GeoJSON geometry type (e.g., "Polygon", "MultiPolygon").
+	Coordinates [][][][]float64 // Coordinates holds the geometry's coordinate data.
 }
 
 // GeoData holds the parsed geographic paths and the overall bounding box for a country.
 type GeoData struct {
-	Paths       [][]Point
-	BoundingBox BoundingBox
+	Paths       [][]Point   // Paths is a collection of path points for rendering.
+	BoundingBox BoundingBox // BoundingBox is the calculated boundary of all paths.
 }
 
 // UpdateBoundingBox recalculates the bounding box based on the current Paths.

@@ -78,14 +78,16 @@ type App struct {
 
 // selectionListener implements binding.DataListener to react to country selection changes.
 type selectionListener struct {
-	app *App
+	app *App // app is the reference to the main application state.
 }
 
+// DataChanged is called when the underlying data binding changes.
 func (s *selectionListener) DataChanged() {
 	s.app.updateHeader()
 	s.app.updateMapDisplay()
 }
 
+// NewApp creates and initializes a new App instance.
 func NewApp(fyneApp fyne.App) *App {
 	settings := loadSettings("settings.json")
 	return &App{
@@ -107,12 +109,14 @@ func NewMapWidget(app *App) *MapWidget {
 	return zm
 }
 
+// Tapped handles tap events on the MapWidget to request focus.
 func (zm *MapWidget) Tapped(event *fyne.PointEvent) {
 	if zm.app != nil && zm.app.window != nil {
 		zm.app.window.Canvas().Focus(zm)
 	}
 }
 
+// TypedKey handles key events for global shortcuts when the MapWidget has focus.
 func (zm *MapWidget) TypedKey(key *fyne.KeyEvent) {
 	if zm.app != nil {
 		if key.Name == fyne.KeyEscape {
@@ -125,10 +129,14 @@ func (zm *MapWidget) TypedKey(key *fyne.KeyEvent) {
 	}
 }
 
+// TypedRune is required to implement the Focusable interface.
 func (zm *MapWidget) TypedRune(r rune) {}
 
+// FocusGained is required to implement the Focusable interface.
 func (zm *MapWidget) FocusGained() {}
-func (zm *MapWidget) FocusLost()   {}
+
+// FocusLost is required to implement the Focusable interface.
+func (zm *MapWidget) FocusLost() {}
 
 // CreateRenderer creates and returns a renderer for the MapWidget.
 func (zm *MapWidget) CreateRenderer() fyne.WidgetRenderer {
@@ -226,17 +234,20 @@ func loadSettings(path string) *Settings {
 
 // createList creates a scrollable list of countries with search functionality and a selection callback.
 // The width parameter sets the minimum width of the list.
+// globalKeyEntry is a custom entry widget that handles global keyboard shortcuts.
 type globalKeyEntry struct {
 	widget.Entry
-	app *App
+	app *App // app is the reference to the main application state.
 }
 
+// newGlobalKeyEntry creates and initializes a new globalKeyEntry instance.
 func newGlobalKeyEntry(a *App) *globalKeyEntry {
 	e := &globalKeyEntry{app: a}
 	e.ExtendBaseWidget(e)
 	return e
 }
 
+// TypedKey handles key events for the globalKeyEntry, including the Escape key to quit the application.
 func (e *globalKeyEntry) TypedKey(key *fyne.KeyEvent) {
 	if key.Name == fyne.KeyEscape {
 		e.app.fyneApp.Quit()
@@ -252,16 +263,19 @@ type minSizeWrapper struct {
 	minSize fyne.Size
 }
 
+// newMinSizeWrapper creates and initializes a new minSizeWrapper instance.
 func newMinSizeWrapper(obj fyne.CanvasObject, minSize fyne.Size) *minSizeWrapper {
 	m := &minSizeWrapper{obj: obj, minSize: minSize}
 	m.ExtendBaseWidget(m)
 	return m
 }
 
+// CreateRenderer creates and returns a renderer for the minSizeWrapper.
 func (m *minSizeWrapper) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(m.obj)
 }
 
+// MinSize returns the minimum size of the wrapped object, enforced by the specified minimum dimensions.
 func (m *minSizeWrapper) MinSize() fyne.Size {
 	ms := m.obj.MinSize()
 	if ms.Width < m.minSize.Width {
@@ -273,6 +287,7 @@ func (m *minSizeWrapper) MinSize() fyne.Size {
 	return ms
 }
 
+// Layout handles the layout of the wrapped object within the minSizeWrapper.
 func (m *minSizeWrapper) Layout(size fyne.Size) {
 	m.obj.Resize(size)
 }
@@ -284,47 +299,56 @@ type barWrapper struct {
 	width float32
 }
 
+// newBarWrapper creates and initializes a new barWrapper instance.
 func newBarWrapper(obj fyne.CanvasObject, width float32) *barWrapper {
 	b := &barWrapper{obj: obj, width: width}
 	b.ExtendBaseWidget(b)
 	return b
 }
 
+// CreateRenderer creates and returns a renderer for the barWrapper.
 func (b *barWrapper) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(b.obj)
 }
 
+// MinSize returns the minimum size of the wrapped object, with a fixed width.
 func (b *barWrapper) MinSize() fyne.Size {
 	ms := b.obj.MinSize()
 	ms.Width = b.width
 	return ms
 }
 
+// Layout handles the layout of the wrapped object within the barWrapper.
 func (b *barWrapper) Layout(size fyne.Size) {
 	b.obj.Resize(size)
 }
 
+// searchTheme is a custom Fyne theme used for search bars to control font size and padding.
 type searchTheme struct {
 	fyne.Theme
-	settings *Settings
+	settings *Settings // settings is the application configuration.
 }
 
+// fixedWidthWrapper ensures a minimum width for its wrapped object.
 type fixedWidthWrapper struct {
 	widget.BaseWidget
-	obj   fyne.CanvasObject
-	width float32
+	obj   fyne.CanvasObject // obj is the canvas object being wrapped.
+	width float32           // width is the fixed minimum width.
 }
 
+// newFixedWidthWrapper creates and initializes a new fixedWidthWrapper instance.
 func newFixedWidthWrapper(obj fyne.CanvasObject, width float32) *fixedWidthWrapper {
 	f := &fixedWidthWrapper{obj: obj, width: width}
 	f.ExtendBaseWidget(f)
 	return f
 }
 
+// CreateRenderer creates and returns a renderer for the fixedWidthWrapper.
 func (f *fixedWidthWrapper) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(f.obj)
 }
 
+// MinSize returns the minimum size of the wrapped object, enforced by the specified fixed width.
 func (f *fixedWidthWrapper) MinSize() fyne.Size {
 	ms := f.obj.MinSize()
 	if ms.Width < f.width {
@@ -333,10 +357,12 @@ func (f *fixedWidthWrapper) MinSize() fyne.Size {
 	return ms
 }
 
+// Layout handles the layout of the wrapped object within the fixedWidthWrapper.
 func (f *fixedWidthWrapper) Layout(size fyne.Size) {
 	f.obj.Resize(size)
 }
 
+// Size returns the size for a specific theme dimension, used to override font size and padding for search bars.
 func (t *searchTheme) Size(name fyne.ThemeSizeName) float32 {
 	if name == theme.SizeNameText {
 		return t.settings.SearchFontSize
@@ -556,6 +582,7 @@ func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
 	return c.base.Size(name)
 }
 
+// showAbout displays the application "About" information including attribution and shortcuts.
 func (a *App) showAbout() {
 	attribution := "geoBoundaries data is used under CC-BY 4.0 license.\nFor more information refer to ATTRIBUTION.md"
 	shortcuts := "ESC - Exits Program.\nF - Toggles Fullscreen (Click center area to grab focus).\nA - Shows About information."
@@ -699,6 +726,7 @@ func main() {
 	a.window.ShowAndRun()
 }
 
+// toggleFullScreen switches between fullscreen and windowed modes and updates the toggle button label.
 func (a *App) toggleFullScreen() {
 	a.isFullScreen = !a.isFullScreen
 	a.window.SetFullScreen(a.isFullScreen)
@@ -761,7 +789,7 @@ func drawBar(c *fyne.Container, area float64, maxArea float64, barColor color.Co
 	c.Refresh()
 }
 
-// getArea retrieves the surface area of a country by its name from the collection.
+// getArea retrieves the surface area of a country by name.
 func (a *App) getArea(name string) float64 {
 	return a.CountryData.Areas[name]
 }

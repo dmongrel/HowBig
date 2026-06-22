@@ -13,11 +13,11 @@ type CountryInfo struct {
 	Area    float64 `json:"Area"`    // Area is the surface area of the country in square miles.
 }
 
-// CountryCollection holds a collection of CountryInfo objects.
+// CountryCollection holds a collection of CountryInfo objects and lookup maps for quick access.
 type CountryCollection struct {
-	Countries []CountryInfo
-	Areas     map[string]float64
-	ISOCodes  map[string]string
+	Countries []CountryInfo      // Countries is a slice of all country information objects.
+	Areas     map[string]float64 // Areas maps country names to their surface area.
+	ISOCodes  map[string]string  // ISOCodes maps country names to their ISO 3166-1 alpha-3 code.
 }
 
 // SaveToJSON saves the CountryCollection to a JSON file.

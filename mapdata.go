@@ -20,16 +20,16 @@ const (
 
 // cacheEntry is a helper struct for the LRU cache.
 type cacheEntry struct {
-	key   string
-	value *GeoData
+	key   string   // key is the unique identifier for the cached item.
+	value *GeoData // value is the cached geographic data.
 }
 
 // GeoCache implements a thread-safe LRU cache for GeoData.
 type GeoCache struct {
-	items map[string]*list.Element
-	order *list.List
-	limit int
-	mu    sync.Mutex
+	items map[string]*list.Element // items maps keys to list elements for O(1) access.
+	order *list.List               // order maintains the LRU order of elements.
+	limit int                      // limit is the maximum number of items in the cache.
+	mu    sync.Mutex               // mu protects the cache from concurrent access.
 }
 
 // NewGeoCache creates a new GeoCache with the specified item limit.
