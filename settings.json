@@ -3,5 +3,10 @@
   "left_color": "#00FF00",
   "right_color": "#FF0000",
   "enable_pacific_center": true,
-  "skip_small": 25
+  "skip_small": 25,
+  "left_border_color": "#00FFFF",
+  "right_border_color": "#FFCC00",
+  "background_color": "#000000",
+  "map_data_path": "mapdata",
+  "country_data_path": "country_data.json"
 }
