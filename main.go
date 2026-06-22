@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"slices"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -167,10 +168,13 @@ func loadSettings(path string) *Settings {
 // createList creates a scrollable list of countries with search functionality and a selection callback.
 // The width parameter sets the minimum width of the list.
 func (a *App) createList(width float64, onSelected func(string)) fyne.CanvasObject {
-	filteredIndices := make([]int, len(a.CountryData.Countries))
-	for i := range a.CountryData.Countries {
-		filteredIndices[i] = i
-	}
+	filteredIndices := slices.Collect(func(yield func(int) bool) {
+		for i := range a.CountryData.Countries {
+			if !yield(i) {
+				return
+			}
+		}
+	})
 
 	list := widget.NewList(
 		func() int { return len(filteredIndices) },
@@ -212,12 +216,17 @@ func (a *App) createList(width float64, onSelected func(string)) fyne.CanvasObje
 	entry := widget.NewEntry()
 	entry.SetPlaceHolder("Search...")
 	entry.OnChanged = func(s string) {
-		filteredIndices = []int{}
-		for i, c := range a.CountryData.Countries {
-			if strings.Contains(strings.ToLower(c.Name), strings.ToLower(s)) {
-				filteredIndices = append(filteredIndices, i)
+		searchTerm := strings.ToLower(s)
+		filter := func(yield func(int) bool) {
+			for i, c := range a.CountryData.Countries {
+				if strings.Contains(strings.ToLower(c.Name), searchTerm) {
+					if !yield(i) {
+						return
+					}
+				}
 			}
 		}
+		filteredIndices = slices.Collect(filter)
 		list.Refresh()
 	}
 
@@ -571,12 +580,7 @@ func drawBar(c *fyne.Container, area float64, barColor color.Color, bgColor colo
 
 // getArea retrieves the surface area of a country by its name from the collection.
 func (a *App) getArea(name string) float64 {
-	for _, country := range a.CountryData.Countries {
-		if country.Name == name {
-			return country.Area
-		}
-	}
-	return 0
+	return a.CountryData.Areas[name]
 }
 
 // drawFilledPolygon creates a Raster canvas object representing the filled polygon.
