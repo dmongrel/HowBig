@@ -103,7 +103,7 @@ func (zm *MapWidget) CreateRenderer() fyne.WidgetRenderer {
 	return widget.NewSimpleRenderer(zm.Container)
 }
 
-// Resize handles the resizing of the MapWidget and triggers a map redraw if necessary.
+// Resize handles the resizing of the MapWidget and triggers necessary redraws.
 func (zm *MapWidget) Resize(s fyne.Size) {
 	zm.BaseWidget.Resize(s)
 }
@@ -386,32 +386,6 @@ func (c *customTheme) Size(name fyne.ThemeSizeName) float32 {
 	return c.base.Size(name)
 }
 
-// messageTheme is a custom Fyne theme to override default styling for the message window.
-type messageTheme struct {
-	fyne.Theme
-	backgroundColor color.Color
-}
-
-func (m *messageTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
-	if name == theme.ColorNameBackground {
-		return m.backgroundColor
-	}
-	if name == theme.ColorNameForeground {
-		return color.White
-	}
-	if name == theme.ColorNameInputBackground {
-		return m.backgroundColor
-	}
-	return m.Theme.Color(name, variant)
-}
-
-func (m *messageTheme) Size(name fyne.ThemeSizeName) float32 {
-	if name == theme.SizeNameText {
-		return 16
-	}
-	return m.Theme.Size(name)
-}
-
 func (a *App) showAbout() {
 	attribution := "geoBoundaries data is used under CC-BY 4.0 license.\nFor more information refer to ATTRIBUTION.md"
 	msg := fmt.Sprintf("HowBig %s Copyright © 2026 Joel L. Caesar. All Rights Reserved.\n\n%s", Version, attribution)
@@ -459,7 +433,7 @@ func (a *App) showMessage(title string, message string) {
 	}
 }
 
-// main is the application entry point, setting up the GUI and initializing components.
+// main is the application's entry point, setting up the GUI and initializing components.
 func main() {
 	fyneApp := app.New()
 	fyneApp.Settings().SetTheme(&customTheme{base: theme.DefaultTheme()})
