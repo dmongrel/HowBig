@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/list"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -14,144 +15,19 @@ import (
 const (
 	EarthRadius = 6378137.0
 	MaxMercator = EarthRadius * math.Pi
+	CacheLimit  = 5
 )
 
-// Point represents a 2D point with float64 precision.
-type Point struct {
-	X, Y float64
-}
-
-// BoundingBox represents a geographic or pixel-space bounding box.
-type BoundingBox struct {
-	MinX, MaxX    float64
-	MinY, MaxY    float64
-	Width, Height float64
-}
-
-// Geometry represents a GeoJSON geometry object.
-type Geometry struct {
-	Type        string
-	Coordinates [][][][]float64
-}
-
-// GeoData holds the parsed geographic paths and the overall bounding box for a country.
-type GeoData struct {
-	Paths       [][]Point
-	BoundingBox BoundingBox
-}
-
-// UpdateBoundingBox recalculates the bounding box based on the current Paths and a scale factor.
-// This ensures the bounding box exactly matches the pixel coordinates used for drawing at the given scale.
-func (gd *GeoData) UpdateBoundingBox(scale float64) {
-	if len(gd.Paths) == 0 {
-		return
-	}
-
-	minX, maxX := math.MaxFloat64, -math.MaxFloat64
-	minY, maxY := math.MaxFloat64, -math.MaxFloat64
-	found := false
-
-	for _, path := range gd.Paths {
-		for _, p := range path {
-			x, y := p.X*scale, p.Y*scale
-			minX = min(minX, x)
-			maxX = max(maxX, x)
-			minY = min(minY, y)
-			maxY = max(maxY, y)
-			found = true
-		}
-	}
-
-	if !found {
-		gd.BoundingBox = BoundingBox{}
-		return
-	}
-
-	gd.BoundingBox = BoundingBox{
-		MinX:   minX,
-		MaxX:   maxX,
-		MinY:   minY,
-		MaxY:   maxY,
-		Width:  maxX - minX,
-		Height: maxY - minY,
-	}
-}
-
-// NeedsPacificCentering checks if a MultiPolygon spans across the anti-meridian
-func NeedsPacificCentering(g Geometry) bool {
-	var hasFarEast, hasFarWest bool
-
-	for _, polygon := range g.Coordinates {
-		for _, ring := range polygon {
-			for _, coord := range ring {
-				lng := coord[0]
-
-				// Check if the coordinates exist significantly deep in both hemispheres
-				if lng > 90.0 {
-					hasFarEast = true
-				}
-				if lng < -90.0 {
-					hasFarWest = true
-				}
-
-				// Early exit condition met
-				if hasFarEast && hasFarWest {
-					return true
-				}
-			}
-		}
-	}
-	return false
-}
-
-// ApplyPacificCentering shifts negative longitudes to create a seamless 0 to 360 map
-func ApplyPacificCentering(g Geometry) Geometry {
-	if !NeedsPacificCentering(g) {
-		return g
-	}
-
-	// Deep copy and transform coordinates
-	newCoords := make([][][][]float64, len(g.Coordinates))
-	for i, polygon := range g.Coordinates {
-		newCoords[i] = make([][][]float64, len(polygon))
-		for j, ring := range polygon {
-			newCoords[i][j] = make([][]float64, len(ring))
-			for k, coord := range ring {
-				lng := coord[0]
-				lat := coord[1]
-
-				// Shift negative longitudes to the 180-360 range
-				if lng < 0 {
-					lng += 360.0
-				}
-				newCoords[i][j][k] = []float64{lng, lat}
-			}
-		}
-	}
-
-	return Geometry{
-		Type:        g.Type,
-		Coordinates: newCoords,
-	}
-}
-
-// LatLonToMercator converts geographic (longitude, latitude) coordinates into Mercator projection coordinates.
-// It returns (x, y) coordinates normalized in the range [0.0, 1.0].
-func LatLonToMercator(lon, lat float64) (x, y float64) {
-	// 1. Project to Mercator meters
-	mx := EarthRadius * (lon * math.Pi / 180.0)
-	my := EarthRadius * math.Log(math.Tan((math.Pi/4.0)+(lat*math.Pi/360.0)))
-
-	// 2. Normalize Mercator coordinates to [0, 1]
-	nx := (mx + MaxMercator) / (2.0 * MaxMercator)
-	ny := (MaxMercator - my) / (2.0 * MaxMercator) // Invert Y for screen space
-
-	return nx, ny
+// cacheEntry is a helper struct for the LRU cache.
+type cacheEntry struct {
+	key   string
+	value *GeoData
 }
 
 var (
-	geoCache = make(map[string]*GeoData)
-	cacheMu  sync.RWMutex
+	geoCache   = make(map[string]*list.Element)
+	cacheOrder = list.New()
+	cacheMu    sync.Mutex
 )
 
 // FetchAndCacheGeoJSON loads and caches parsed GeoJSON paths and their overall geographic bounding box from the mapdata directory.
@@ -178,11 +54,12 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, en
 		cacheKey += "_pacific"
 	}
 
-	cacheMu.RLock()
-	cachedData, ok := geoCache[cacheKey]
-	cacheMu.RUnlock()
-	if ok {
-		return cachedData, nil
+	cacheMu.Lock()
+	defer cacheMu.Unlock()
+
+	if el, ok := geoCache[cacheKey]; ok {
+		cacheOrder.MoveToFront(el)
+		return el.Value.(*cacheEntry).value, nil
 	}
 
 	data, err := os.ReadFile(filePath)
@@ -195,9 +72,18 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, en
 		return nil, err
 	}
 
-	cacheMu.Lock()
-	geoCache[cacheKey] = geoData
-	cacheMu.Unlock()
+	if cacheOrder.Len() >= CacheLimit {
+		oldest := cacheOrder.Back()
+		if oldest != nil {
+			cacheOrder.Remove(oldest)
+			delete(geoCache, oldest.Value.(*cacheEntry).key)
+		}
+	}
+
+	newEntry := &cacheEntry{key: cacheKey, value: geoData}
+	el := cacheOrder.PushFront(newEntry)
+	geoCache[cacheKey] = el
+
 	return geoData, nil
 }
 
@@ -283,7 +169,7 @@ func convertGeoJSONToDisplayFormat(data []byte, singlePolyline bool, skipSmall i
 	geoData := &GeoData{
 		Paths: allPaths,
 	}
-	geoData.UpdateBoundingBox(1.0)
+	geoData.UpdateBoundingBox()
 
 	return geoData, nil
 }
