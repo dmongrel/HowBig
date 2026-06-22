@@ -1,16 +1,16 @@
 {
   "debug_show_boundary": false,
+  "background_color": "#000000",
   "left_color": "#00FF00",
   "right_color": "#FF0000",
-  "enable_pacific_center": true,
-  "skip_small": 25,
   "left_border_color": "#00FFFF",
   "right_border_color": "#FFCC00",
-  "background_color": "#000000",
-  "map_data_path": "mapdata",
-  "country_data_path": "country_data.json",
+  "enable_pacific_center": true,
+  "skip_small": 25,
   "button_font_size": 14,
   "search_font_size": 14,
   "country_list_font_size": 18,
-  "header_font_size": 18
+  "header_font_size": 18,
+  "map_data_path": "mapdata",
+  "country_data_path": "country_data.json"
 }
