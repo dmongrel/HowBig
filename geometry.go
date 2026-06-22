@@ -2,6 +2,8 @@ package main
 
 import (
 	"math"
+
+	"fyne.io/fyne/v2/widget"
 )
 
 // Point represents a 2D point with float64 precision.
@@ -138,8 +140,8 @@ func LatLonToMercator(lon, lat float64) (x, y float64) {
 }
 
 // getFitScale calculates the scale factor required to fit the bounding box of a country within the available display area.
-func getFitScale(country string) float64 {
-	data, err := FetchAndCacheGeoJSON(country, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
+func (a *App) getFitScale(country string) float64 {
+	data, err := FetchAndCacheGeoJSON(country, true, a.Settings.SkipSmall, a.Settings.EnablePacificCenter, a.Settings.MapDataPath, a.GeoCache, a.CountryData)
 	if err != nil {
 		return 1.0
 	}
@@ -153,15 +155,24 @@ func getFitScale(country string) float64 {
 		return 1.0
 	}
 
-	size := cMap.Container.Size()
-	var h float64
-	if headerContainer != nil {
-		h = float64(headerContainer.MinSize().Height)
-	}
+	size := a.cMap.Container.Size()
 	availableHeight := float64(size.Height)
-	if availableHeight > h {
-		availableHeight -= h
-	} else {
+
+	if a.headerContainer != nil {
+		availableHeight -= float64(a.headerContainer.MinSize().Height)
+	}
+
+	// Subtract About button height
+	if a.cCenter != nil && len(a.cCenter.Objects) > 0 {
+		for _, obj := range a.cCenter.Objects {
+			if btn, ok := obj.(*widget.Button); ok && btn.Text == "About" {
+				availableHeight -= float64(btn.MinSize().Height)
+				break
+			}
+		}
+	}
+
+	if availableHeight < 0 {
 		availableHeight = 0
 	}
 
@@ -175,47 +186,77 @@ func getFitScale(country string) float64 {
 }
 
 // getScaleAndOrder determines the appropriate scale and drawing order for selected countries.
-// It uses the larger of the two bounding box areas to ensure both are visible and fit the screen.
-func getScaleAndOrder(active, other string) (float64, string, string) {
+// It uses square mileage as the primary factor to determine the larger country and scales it to fit.
+func (a *App) getScaleAndOrder(active, other string) (float64, string, string) {
 	if active == "" && other == "" {
 		return 1.0, "", ""
 	}
 	if active == "" {
-		return getFitScale(other), other, ""
+		return a.getFitScale(other), other, ""
 	}
 	if other == "" {
-		return getFitScale(active), active, ""
+		return a.getFitScale(active), active, ""
 	}
 
-	dataActive, errActive := FetchAndCacheGeoJSON(active, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
-	dataOther, errOther := FetchAndCacheGeoJSON(other, true, AppSettings.SkipSmall, AppSettings.EnablePacificCenter)
+	dataActive, errActive := FetchAndCacheGeoJSON(active, true, a.Settings.SkipSmall, a.Settings.EnablePacificCenter, a.Settings.MapDataPath, a.GeoCache, a.CountryData)
+	dataOther, errOther := FetchAndCacheGeoJSON(other, true, a.Settings.SkipSmall, a.Settings.EnablePacificCenter, a.Settings.MapDataPath, a.GeoCache, a.CountryData)
 
 	if errActive != nil && errOther != nil {
 		return 1.0, active, other
 	}
 	if errActive != nil {
-		return getFitScale(other), other, active
+		return a.getFitScale(other), other, active
 	}
 	if errOther != nil {
-		return getFitScale(active), active, other
+		return a.getFitScale(active), active, other
 	}
 
 	dataActive.UpdateBoundingBox()
 	dataOther.UpdateBoundingBox()
 
-	if cMap == nil {
-		return 1.0, active, other
-	}
-	size := cMap.Container.Size()
-	if size.Width < 4 || size.Height < 4 {
+	if a.cMap == nil {
 		return 1.0, active, other
 	}
 
-	areaActive := dataActive.BoundingBox.Width * dataActive.BoundingBox.Height
-	areaOther := dataOther.BoundingBox.Width * dataOther.BoundingBox.Height
-
-	if areaActive > areaOther {
-		return getFitScale(active), active, other
+	size := a.cMap.Container.Size()
+	availableHeight := float64(size.Height)
+	if a.headerContainer != nil {
+		availableHeight -= float64(a.headerContainer.MinSize().Height)
 	}
-	return getFitScale(other), other, active
+	if a.cCenter != nil && len(a.cCenter.Objects) > 0 {
+		for _, obj := range a.cCenter.Objects {
+			if btn, ok := obj.(*widget.Button); ok && btn.Text == "About" {
+				availableHeight -= float64(btn.MinSize().Height)
+				break
+			}
+		}
+	}
+	if availableHeight < 4 || float64(size.Width) < 4 {
+		return 1.0, active, other
+	}
+
+	areaActive := a.getArea(active)
+	areaOther := a.getArea(other)
+
+	// Step 1: Start with square mileage to determine larger country
+	larger, smaller := active, other
+	if areaOther > areaActive {
+		larger, smaller = other, active
+	}
+
+	// Step 2: See if either country's pixel delta is larger than current drawing area size
+	// We need a baseline scale to check pixel deltas.
+	// We'll use a temporary fit scale for the larger country as the baseline.
+	scale := a.getFitScale(larger)
+
+	// Check if the other country (smaller by area) is actually larger in pixel delta at this scale.
+	// This can happen with countries that have extreme aspect ratios or spans.
+	if dataOther.BoundingBox.Width*scale >= float64(size.Width)-4 || dataOther.BoundingBox.Height*scale >= availableHeight-4 {
+		// If the smaller country (by sq mileage) doesn't fit at the larger country's scale,
+		// it must be the one that dictates the fit scale.
+		larger, smaller = other, active
+		scale = a.getFitScale(larger)
+	}
+
+	return scale, larger, smaller
 }
