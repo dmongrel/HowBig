@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"maps"
 	"os"
 )
 
@@ -15,7 +16,9 @@ type CountryInfo struct {
 
 // CountryCollection holds a collection of CountryInfo objects.
 type CountryCollection struct {
-	Countries []CountryInfo
+	Countries    []CountryInfo
+	Areas        map[string]float64
+	CompactNames map[string]string
 }
 
 // SaveToJSON saves the CountryCollection to a JSON file.
@@ -37,5 +40,23 @@ func NewCountryCollection(path string) (*CountryCollection, error) {
 	if err := json.Unmarshal(data, cc); err != nil {
 		return nil, err
 	}
+
+	// Populate the lookup maps for O(1) access using maps.Collect and custom iterators.
+	cc.Areas = maps.Collect(func(yield func(string, float64) bool) {
+		for _, c := range cc.Countries {
+			if !yield(c.Name, c.Area) {
+				return
+			}
+		}
+	})
+
+	cc.CompactNames = maps.Collect(func(yield func(string, string) bool) {
+		for _, c := range cc.Countries {
+			if !yield(c.Name, c.CompactName) {
+				return
+			}
+		}
+	})
+
 	return cc, nil
 }
