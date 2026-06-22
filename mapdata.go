@@ -24,8 +24,6 @@ type cacheEntry struct {
 	value *GeoData
 }
 
-var ()
-
 // GeoCache implements a thread-safe LRU cache for GeoData.
 type GeoCache struct {
 	items map[string]*list.Element
