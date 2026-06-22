@@ -424,27 +424,6 @@ func (a *App) createList(width float64, onSelected func(string)) fyne.CanvasObje
 	return container.NewBorder(searchBarWithTheme, button, nil, nil, container.NewStack(bg, scroll))
 }
 
-// addBorder applies a visual border to a Fyne canvas object using a stack container.
-func addBorder(obj fyne.CanvasObject) fyne.CanvasObject {
-	border := canvas.NewRectangle(color.Transparent)
-	border.StrokeColor = color.White
-	border.StrokeWidth = 2
-	return container.NewStack(obj, border)
-}
-
-// formatNumber formats a float as a string with comma-separated thousands.
-func formatNumber(n float64) string {
-	s := fmt.Sprintf("%.0f", n)
-	var res []byte
-	for i, j := len(s)-1, 0; i >= 0; i, j = i-1, j+1 {
-		if j > 0 && j%3 == 0 {
-			res = append([]byte{','}, res...)
-		}
-		res = append([]byte{s[i]}, res...)
-	}
-	return string(res)
-}
-
 // updateHeader updates the header to display the surface area information for the selected countries.
 func (a *App) updateHeader() {
 	const sqMiToSqKm = 2.58998811
