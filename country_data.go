@@ -27,9 +27,8 @@ func (cc *CountryCollection) SaveToJSON(filename string) error {
 	return os.WriteFile(filename, data, 0644)
 }
 
-// NewCountryCollection creates and initializes a new CountryCollection from country_data.json.
-func NewCountryCollection() (*CountryCollection, error) {
-	path := "country_data.json"
+// NewCountryCollection creates and initializes a new CountryCollection from the specified JSON file.
+func NewCountryCollection(path string) (*CountryCollection, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
