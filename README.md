@@ -43,25 +43,60 @@ go run .
 
 The application can be configured via the `settings.json` file located in the project root.
 
-| Setting               | Description                                                                          | Default   |
-|:----------------------|:-------------------------------------------------------------------------------------|:----------|
-| `LineColor`           | Hex color code for the primary selected country's outline and fill.                  | `#ff0000` |
-| `LineColor2`          | Hex color code for the second selected country's outline and fill.                   | `#00ff00` |
-| `DebugShowBoundary`   | If `true`, draws a red bounding box around the rendered country for debugging.       | `false`   |
-| `SkipSmall`           | If `true`, ignores small polygons (islands) during rendering to improve performance. | `true`    |
-| `EnablePacificCenter` | If `true`, applies special centering for countries that cross the anti-meridian.     | `true`    |
+| Setting                   | Description                                                                          | Default               |
+|:--------------------------|:-------------------------------------------------------------------------------------|:----------------------|
+| `debug_show_boundary`     | If `true`, draws a red bounding box around the rendered country for debugging.       | `false`               |
+| `left_color`              | Hex color code for the left selected country's fill.                                 | `#00FF00`             |
+| `right_color`             | Hex color code for the right selected country's fill.                                | `#FF0000`             |
+| `left_border_color`       | Hex color code for the left country's outline.                                      | `#00FFFF`             |
+| `right_border_color`      | Hex color code for the right country's outline.                                     | `#FFCC00`             |
+| `background_color`        | Hex color code for the application background.                                       | `#000000`             |
+| `enable_pacific_center`   | If `true`, applies special centering for countries that cross the anti-meridian.     | `true`                |
+| `skip_small`              | Minimum number of points required for a polygon to be rendered.                      | `25`                  |
+| `button_font_size`        | Font size for buttons and general widgets.                                           | `14`                  |
+| `search_font_size`        | Font size for search input fields.                                                   | `14`                  |
+| `country_list_font_size`  | Font size for the country selection lists.                                           | `18`                  |
+| `header_font_size`        | Font size for the top header text.                                                   | `18`                  |
+| `map_data_path`           | Directory path where GeoJSON files are stored.                                       | `mapdata`             |
+| `country_data_path`       | Path to the JSON file containing country metadata.                                   | `country_data.json`   |
 
 Example `settings.json`:
 ```json
 {
-  "LineColor": "#ff0000",
-  "LineColor2": "#00ff00",
-  "DebugShowBoundary": false,
-  "SkipSmall": true,
-  "EnablePacificCenter": true
+  "debug_show_boundary": false,
+  "background_color": "#000000",
+  "left_color": "#00FF00",
+  "right_color": "#FF0000",
+  "left_border_color": "#00FFFF",
+  "right_border_color": "#FFCC00",
+  "enable_pacific_center": true,
+  "skip_small": 25,
+  "button_font_size": 14,
+  "search_font_size": 14,
+  "country_list_font_size": 18,
+  "header_font_size": 18,
+  "map_data_path": "mapdata",
+  "country_data_path": "country_data.json"
 }
 ```
 
 ## Data Attribution
 
 This project uses geographic data from [geoBoundaries](https://www.geoboundaries.org/), provided under the [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/) license.
+
+## Scripts
+
+The `scripts/` directory contains utility scripts for data management.
+
+### `download_geojson.go`
+
+This script automates the process of downloading and optimizing GeoJSON data from the geoBoundaries API. It performs the following actions:
+- Reads the list of countries from `country_data.json`.
+- Fetches the simplified ADM0 (national level) boundaries for each country.
+- Optimizes the data by truncating coordinates to 4 decimal places and removing duplicate points.
+- Saves the resulting GeoJSON files into the `mapdata/` directory.
+
+To run the script:
+```bash
+go run scripts/download_geojson.go
+```
