@@ -24,8 +24,8 @@ type CountryCollection struct {
 type GeoJSON struct {
 	Type     string `json:"type"`
 	Features []struct {
-		Type       string                 `json:"type"`
-		Properties map[string]interface{} `json:"properties"`
+		Type       string         `json:"type"`
+		Properties map[string]any `json:"properties"`
 		Geometry   struct {
 			Type        string          `json:"type"`
 			Coordinates json.RawMessage `json:"coordinates"`
