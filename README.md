@@ -109,6 +109,10 @@ Example `settings.json`:
 
 This project uses geographic data from [geoBoundaries](https://www.geoboundaries.org/), provided under the [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/) license.
 
+## License
+
+This software is licensed under the GNU General Public License v3.0 (GPL-3.0). See [LICENSE.txt](LICENSE.txt) for the full text.
+
 ## Scripts
 
 The `scripts/` directory contains utility scripts for data management.
