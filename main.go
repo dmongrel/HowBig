@@ -7,7 +7,6 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"log"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -20,11 +19,25 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-// main opens the application window.
+// main loads settings and country data, binds the services and opens the window.
 func main() {
+	settings := loadSettings(resolveDataPath("settings.json"))
+
+	cc, err := NewCountryCollection(resolveDataPath(settings.CountryDataPath))
+	if err != nil {
+		log.Printf("failed to load country data: %v", err)
+	}
+	windowService := &WindowService{}
+
 	app := application.New(application.Options{
 		Name:        "HowBig",
 		Description: "Compares the sizes of two countries",
+		Services: []application.Service{
+			application.NewService(NewCountryService(cc, err)),
+			application.NewService(NewMapService(settings, cc, resolveDataPath(settings.MapDataPath))),
+			application.NewService(NewSettingsService(settings)),
+			application.NewService(windowService),
+		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
 		},
@@ -43,10 +56,11 @@ func main() {
 		BackgroundColour: application.NewRGB(0, 0, 0),
 		URL:              "/",
 	})
+	windowService.window = window
+	windowService.quit = app.Quit
 
 	window.OnWindowEvent(events.Common.WindowDidResize, func(*application.WindowEvent) {
-		w, h := window.Size()
-		window.SetTitle(fmt.Sprintf("HowBig %d x %d", w, h))
+		window.SetTitle(windowTitle(window.Size()))
 	})
 
 	if err := app.Run(); err != nil {
