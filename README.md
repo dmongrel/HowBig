@@ -13,7 +13,17 @@ HowBig is a desktop app for comparing the sizes of countries. Pick one country o
 - **Responsive UI:** both countries are scaled to fit the window and redrawn when it resizes.
 - **Caching:** parsed GeoJSON is cached, so switching between recent countries is quick.
 
-Keyboard shortcuts: `ESC` exits, `F` toggles fullscreen, `A` shows the About box.
+## Using HowBig
+
+Each side has its own country list. Type in the search box above a list to filter it, and click a country to select it. Clicking the selected country again clears it, and so does **Deselect All**. The larger of the two countries is scaled to fill the map, and the other is drawn at the same scale over it.
+
+| Key   | Action                  |
+|:------|:------------------------|
+| `ESC` | Exit, even while typing in a search box |
+| `F`   | Toggle fullscreen       |
+| `A`   | Show the About box      |
+
+`F` and `A` are ignored while a search box has focus, so you can type those letters into a search.
 
 ## Install
 
@@ -47,6 +57,33 @@ go test ./...         # run the Go tests
 `wails3 build` installs the frontend's npm packages, generates the TypeScript bindings, builds the frontend and then the exe. `wails3 task package` does the same build and then wraps the exe, `mapdata\`, `country_data.json`, `settings.json`, `ATTRIBUTION.md` and `LICENSE.md` into an NSIS installer. The version, product name and copyright shown in the exe's and the installer's Properties come from `build/config.yml` and `build/windows/info.json`.
 
 `bin/HowBig.exe` finds its data in the repository root, so it runs straight from the build without being installed.
+
+### Releasing
+
+The version number is set in three files. Change it in all of them:
+
+- `version.go` (the About box)
+- `build/config.yml`
+- `build/windows/info.json`: both `file_version` and the `ProductVersion`/`FileVersion` pair under the `0409` key
+
+Then run `wails3 task package`, and attach `bin/howbig-amd64-installer.exe` to a new GitHub release. There's no CI; releases are built and uploaded by hand.
+
+Don't run `wails3 task common:update:build-assets` without checking `info.json` afterwards. It rewrites the version block under the `0000` language key, and Windows then shows nothing on the exe's Properties > Details tab.
+
+### Project layout
+
+| Path | What's there |
+|:-----|:-------------|
+| `main.go` | Creates the Wails application and window, and registers the services |
+| `countryservice.go`, `mapservice.go`, `settingsservice.go`, `windowservice.go` | The Go services the frontend calls through generated bindings |
+| `internal/geo` | Mercator projection, Pacific centering, bounding boxes, GeoJSON parsing, and the fit-scale and draw-order math |
+| `internal/mapdata` | Loads a country's GeoJSON from `map_data_path`, with caching |
+| `internal/mapcache` | The small LRU cache behind the loader |
+| `internal/country` | Reads `country_data.json` |
+| `internal/settings` | Reads `settings.json` and applies defaults |
+| `frontend/src` | The TypeScript UI: lists, header, area bars, SVG map, dialogs and keyboard handling |
+| `build/` | Wails build config, icons, Windows version info, and the NSIS installer script |
+| `mapdata/` | One GeoJSON file per country, named by ISO code |
 
 ## Settings
 
@@ -115,4 +152,4 @@ To run the script from the repository root:
 ```bash
 go run scripts/download_geojson.go
 ```
-`-country LIE` fetches a single country by ISO code, and `-out <dir>` writes somewhere other than `mapdata/`. The file carries a `//go:build ignore` tag, so `go build ./...` and `go test ./...` skip it.
+`-country LIE` fetches a single country by ISO code, `-out <dir>` writes somewhere other than `mapdata/`, and `-data <file>` reads a country list other than `country_data.json`. The file carries a `//go:build ignore` tag, so `go build ./...` and `go test ./...` skip it.
