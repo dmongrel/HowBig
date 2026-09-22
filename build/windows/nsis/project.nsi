@@ -101,7 +101,10 @@ Section
     # HowBig reads these from next to the exe (relative paths in settings.json
     # resolve against the exe's directory).
     File "..\..\..\country_data.json"
-    File "..\..\..\settings.json"
+    # Keep an existing settings.json on a reinstall or upgrade so edits to the
+    # installed copy survive. The shipped one goes in only when there is none.
+    IfFileExists "$INSTDIR\settings.json" +2
+        File "..\..\..\settings.json"
     File "..\..\..\ATTRIBUTION.md"
     File "..\..\..\LICENSE.md"
     SetOutPath "$INSTDIR\mapdata"
@@ -120,11 +123,8 @@ SectionEnd
 Section "uninstall" 
     !insertmacro wails.setShellContext
 
-    RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
-
-    # The app writes its WebView2 data to the user's roaming AppData even on a
-    # machine install, where $AppData above points at ProgramData, so remove
-    # the uninstalling user's copy too.
+    # Remove the WebView2 data path. The app writes it to the user's roaming
+    # AppData even on a machine install, so remove the uninstalling user's copy.
     SetShellVarContext current
     RMDir /r "$AppData\${PRODUCT_EXECUTABLE}"
     !insertmacro wails.setShellContext
@@ -137,8 +137,11 @@ Section "uninstall"
     Delete "$INSTDIR\LICENSE.md"
     Delete "$INSTDIR\mapdata\*.geojson"
     RMDir "$INSTDIR\mapdata"
+    Delete "$INSTDIR\uninstall.exe"
 
-    RMDir /r $INSTDIR
+    # No /r: this only removes the folder once it is empty, so a folder the
+    # user chose that also holds other files survives the uninstall.
+    RMDir "$INSTDIR"
 
     Delete "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk"
     Delete "$DESKTOP\${INFO_PRODUCTNAME}.lnk"
