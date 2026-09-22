@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright © Joel L. Caesar
 // SPDX-License-Identifier: GPL-3.0
 
-package main
+package country
 
 import (
 	"errors"
@@ -11,15 +11,15 @@ import (
 	"testing"
 )
 
-func TestNewCountryCollectionRealFile(t *testing.T) {
-	cc, err := NewCountryCollection("country_data.json")
+func TestLoadRealFile(t *testing.T) {
+	cc, err := Load(filepath.Join("..", "..", "country_data.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(cc.Countries) != 200 || len(cc.Areas) != 200 || len(cc.ISOCodes) != 200 {
 		t.Errorf("got %d countries, %d areas, %d ISO codes; want 200 each", len(cc.Countries), len(cc.Areas), len(cc.ISOCodes))
 	}
-	if first := cc.Countries[0]; first != (CountryInfo{Name: "Afghanistan", ISOCode: "AFG", Area: 252072}) {
+	if first := cc.Countries[0]; first != (Info{Name: "Afghanistan", ISOCode: "AFG", Area: 252072}) {
 		t.Errorf("first country = %+v", first)
 	}
 	checks := []struct {
@@ -37,7 +37,7 @@ func TestNewCountryCollectionRealFile(t *testing.T) {
 	}
 }
 
-func TestNewCountryCollectionEdgeCases(t *testing.T) {
+func TestLoadEdgeCases(t *testing.T) {
 	write := func(t *testing.T, content string) string {
 		t.Helper()
 		path := filepath.Join(t.TempDir(), "countries.json")
@@ -48,7 +48,7 @@ func TestNewCountryCollectionEdgeCases(t *testing.T) {
 	}
 
 	t.Run("duplicate names: last one wins in the lookup maps", func(t *testing.T) {
-		cc, err := NewCountryCollection(write(t, `{"Countries": [
+		cc, err := Load(write(t, `{"Countries": [
 			{"Name": "X", "ISOCode": "AAA", "Area": 1},
 			{"Name": "X", "ISOCode": "BBB", "Area": 2}
 		]}`))
@@ -61,7 +61,7 @@ func TestNewCountryCollectionEdgeCases(t *testing.T) {
 	})
 
 	t.Run("no countries gives empty non-nil maps", func(t *testing.T) {
-		cc, err := NewCountryCollection(write(t, `{}`))
+		cc, err := Load(write(t, `{}`))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -71,13 +71,13 @@ func TestNewCountryCollectionEdgeCases(t *testing.T) {
 	})
 
 	t.Run("invalid JSON", func(t *testing.T) {
-		if _, err := NewCountryCollection(write(t, `{"Countries": [`)); err == nil {
+		if _, err := Load(write(t, `{"Countries": [`)); err == nil {
 			t.Error("expected an error")
 		}
 	})
 
 	t.Run("missing file", func(t *testing.T) {
-		if _, err := NewCountryCollection(filepath.Join(t.TempDir(), "nope.json")); !errors.Is(err, fs.ErrNotExist) {
+		if _, err := Load(filepath.Join(t.TempDir(), "nope.json")); !errors.Is(err, fs.ErrNotExist) {
 			t.Errorf("err = %v, want not-exist", err)
 		}
 	})

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright © Joel L. Caesar
 // SPDX-License-Identifier: GPL-3.0
 
-package main
+package geo
 
 import (
 	"math"
@@ -29,30 +29,30 @@ func TestLatLonToMercator(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			x, y := LatLonToMercator(tt.lon, tt.lat)
+			x, y := latLonToMercator(tt.lon, tt.lat)
 			if !near(x, tt.wantX) || !near(y, tt.wantY) {
-				t.Errorf("LatLonToMercator(%v, %v) = (%v, %v), want (%v, %v)", tt.lon, tt.lat, x, y, tt.wantX, tt.wantY)
+				t.Errorf("latLonToMercator(%v, %v) = (%v, %v), want (%v, %v)", tt.lon, tt.lat, x, y, tt.wantX, tt.wantY)
 			}
 		})
 	}
 }
 
-// multiPolygon builds a one-polygon, one-ring Geometry from the given longitudes (latitude 0).
-func multiPolygon(lons ...float64) Geometry {
+// multiPolygon builds a one-polygon, one-ring geometry from the given longitudes (latitude 0).
+func multiPolygon(lons ...float64) geometry {
 	ring := make([][]float64, len(lons))
 	for i, lon := range lons {
 		ring[i] = []float64{lon, 0}
 	}
-	return Geometry{Type: "MultiPolygon", Coordinates: [][][][]float64{{ring}}}
+	return geometry{Type: "MultiPolygon", Coordinates: [][][][]float64{{ring}}}
 }
 
 func TestNeedsPacificCentering(t *testing.T) {
 	tests := []struct {
 		name string
-		g    Geometry
+		g    geometry
 		want bool
 	}{
-		{"empty", Geometry{}, false},
+		{"empty", geometry{}, false},
 		{"only far east", multiPolygon(100, 170, 179), false},
 		{"only far west", multiPolygon(-100, -170), false},
 		{"both far hemispheres", multiPolygon(170, -170), true},
@@ -60,14 +60,14 @@ func TestNeedsPacificCentering(t *testing.T) {
 		{"near zero both signs", multiPolygon(-10, 10), false},
 		{
 			"far east and far west in different polygons",
-			Geometry{Coordinates: [][][][]float64{{{{179, 0}}}, {{{-179, 0}}}}},
+			geometry{Coordinates: [][][][]float64{{{{179, 0}}}, {{{-179, 0}}}}},
 			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NeedsPacificCentering(tt.g); got != tt.want {
-				t.Errorf("NeedsPacificCentering() = %v, want %v", got, tt.want)
+			if got := needsPacificCentering(tt.g); got != tt.want {
+				t.Errorf("needsPacificCentering() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -76,7 +76,7 @@ func TestNeedsPacificCentering(t *testing.T) {
 func TestApplyPacificCentering(t *testing.T) {
 	t.Run("no centering needed returns input unchanged", func(t *testing.T) {
 		g := multiPolygon(-10, 10)
-		got := ApplyPacificCentering(g)
+		got := applyPacificCentering(g)
 		if &got.Coordinates[0][0][0][0] != &g.Coordinates[0][0][0][0] {
 			t.Error("expected the same backing coordinates when no centering is needed")
 		}
@@ -86,7 +86,7 @@ func TestApplyPacificCentering(t *testing.T) {
 		g := multiPolygon(170, -170, 0, -0.5)
 		g.Type = "Polygon"
 		g.Coordinates[0][0][1] = []float64{-170, 12, 99} // carries an extra ordinate
-		got := ApplyPacificCentering(g)
+		got := applyPacificCentering(g)
 
 		if got.Type != "Polygon" {
 			t.Errorf("Type = %q, want Polygon", got.Type)
@@ -114,7 +114,7 @@ func TestUpdateBoundingBox(t *testing.T) {
 			{{X: 1, Y: 2}, {X: 3, Y: -1}},
 			{{X: -2, Y: 5}},
 		}}
-		gd.UpdateBoundingBox()
+		gd.updateBoundingBox()
 		want := BoundingBox{MinX: -2, MaxX: 3, MinY: -1, MaxY: 5, Width: 5, Height: 6}
 		if gd.BoundingBox != want {
 			t.Errorf("BoundingBox = %+v, want %+v", gd.BoundingBox, want)
@@ -124,7 +124,7 @@ func TestUpdateBoundingBox(t *testing.T) {
 	t.Run("no paths leaves the old box in place", func(t *testing.T) {
 		old := BoundingBox{MinX: 1, MaxX: 2, Width: 1}
 		gd := GeoData{BoundingBox: old}
-		gd.UpdateBoundingBox()
+		gd.updateBoundingBox()
 		if gd.BoundingBox != old {
 			t.Errorf("BoundingBox = %+v, want unchanged %+v", gd.BoundingBox, old)
 		}
@@ -132,7 +132,7 @@ func TestUpdateBoundingBox(t *testing.T) {
 
 	t.Run("only empty paths zeroes the box", func(t *testing.T) {
 		gd := GeoData{Paths: [][]Point{{}, {}}, BoundingBox: BoundingBox{MinX: 1, Width: 1}}
-		gd.UpdateBoundingBox()
+		gd.updateBoundingBox()
 		if gd.BoundingBox != (BoundingBox{}) {
 			t.Errorf("BoundingBox = %+v, want zero", gd.BoundingBox)
 		}

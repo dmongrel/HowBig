@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: Copyright © Joel L. Caesar
 // SPDX-License-Identifier: GPL-3.0
 
-package main
+// Package country loads country_data.json: each country's name, ISO code and
+// area, with lookup maps by name.
+package country
 
 import (
 	"encoding/json"
@@ -9,36 +11,27 @@ import (
 	"os"
 )
 
-// CountryInfo holds basic information about a country.
-type CountryInfo struct {
+// Info holds basic information about a country.
+type Info struct {
 	Name    string  `json:"Name"`    // Name is the official name of the country.
 	ISOCode string  `json:"ISOCode"` // ISOCode is the ISO 3166-1 alpha-3 code of the country.
 	Area    float64 `json:"Area"`    // Area is the surface area of the country in square miles.
 }
 
-// CountryCollection holds a collection of CountryInfo objects and lookup maps for quick access.
-type CountryCollection struct {
-	Countries []CountryInfo      // Countries is a slice of all country information objects.
+// Collection holds a collection of Info objects and lookup maps for quick access.
+type Collection struct {
+	Countries []Info             // Countries is a slice of all country information objects.
 	Areas     map[string]float64 // Areas maps country names to their surface area.
 	ISOCodes  map[string]string  // ISOCodes maps country names to their ISO 3166-1 alpha-3 code.
 }
 
-// SaveToJSON saves the CountryCollection to a JSON file.
-func (cc *CountryCollection) SaveToJSON(filename string) error {
-	data, err := json.MarshalIndent(cc, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filename, data, 0644)
-}
-
-// NewCountryCollection creates and initializes a new CountryCollection from the specified JSON file.
-func NewCountryCollection(path string) (*CountryCollection, error) {
+// Load creates and initializes a new Collection from the specified JSON file.
+func Load(path string) (*Collection, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	cc := &CountryCollection{}
+	cc := &Collection{}
 	if err := json.Unmarshal(data, cc); err != nil {
 		return nil, err
 	}

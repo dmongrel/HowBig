@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: Copyright © Joel L. Caesar
 // SPDX-License-Identifier: GPL-3.0
 
-package main
+// Package settings loads settings.json and resolves the data paths it names.
+package settings
 
 import (
 	"encoding/json"
@@ -28,8 +29,8 @@ type Settings struct {
 	HeaderFontSize      float32 `json:"header_font_size"`       // HeaderFontSize is the font size for the header.
 }
 
-// loadSettings reads application configuration from settings.json, applying default values if the file is missing or invalid.
-func loadSettings(path string) *Settings {
+// Load reads application configuration from settings.json, applying default values if the file is missing or invalid.
+func Load(path string) *Settings {
 	var s Settings
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -105,22 +106,22 @@ func loadSettings(path string) *Settings {
 	return &s
 }
 
-// resolveDataPath locates a relative data path (settings.json, map_data_path,
+// ResolvePath locates a relative data path (settings.json, map_data_path,
 // country_data_path). It tries the executable's directory, then the working
 // directory, then the executable directory's parent, and returns the first
 // candidate that exists. An absolute path, or one found nowhere, is returned
 // unchanged so the caller's error names the configured path.
-func resolveDataPath(p string) string {
+func ResolvePath(p string) string {
 	exe, err := os.Executable()
 	if err != nil {
-		return resolveDataPathFrom(p, "")
+		return resolvePathFrom(p, "")
 	}
-	return resolveDataPathFrom(p, filepath.Dir(exe))
+	return resolvePathFrom(p, filepath.Dir(exe))
 }
 
-// resolveDataPathFrom is resolveDataPath with the executable directory given.
+// resolvePathFrom is ResolvePath with the executable directory given.
 // An empty exeDir skips the two executable-relative candidates.
-func resolveDataPathFrom(p, exeDir string) string {
+func resolvePathFrom(p, exeDir string) string {
 	if p == "" || filepath.IsAbs(p) {
 		return p
 	}

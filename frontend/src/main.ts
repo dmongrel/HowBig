@@ -6,7 +6,9 @@
 
 import "./style.css";
 import {CountryService, MapService, SettingsService, WindowService} from "../bindings/HowBig";
-import type {CountryInfo, MapLayout, Settings} from "../bindings/HowBig";
+import type {MapLayout} from "../bindings/HowBig";
+import type {Info as CountryInfo} from "../bindings/HowBig/internal/country";
+import type {Settings} from "../bindings/HowBig/internal/settings";
 import type {CancellablePromise} from "@wailsio/runtime";
 import {renderBar} from "./bars";
 import {showAbout, showError} from "./dialogs";

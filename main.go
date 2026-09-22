@@ -7,6 +7,9 @@ import (
 	"embed"
 	"log"
 
+	"HowBig/internal/country"
+	"HowBig/internal/settings"
+
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 )
@@ -19,9 +22,9 @@ var assets embed.FS
 
 // main loads settings and country data, binds the services and opens the window.
 func main() {
-	settings := loadSettings(resolveDataPath("settings.json"))
+	cfg := settings.Load(settings.ResolvePath("settings.json"))
 
-	cc, err := NewCountryCollection(resolveDataPath(settings.CountryDataPath))
+	cc, err := country.Load(settings.ResolvePath(cfg.CountryDataPath))
 	if err != nil {
 		log.Printf("failed to load country data: %v", err)
 	}
@@ -32,8 +35,8 @@ func main() {
 		Description: "Compares the sizes of two countries",
 		Services: []application.Service{
 			application.NewService(NewCountryService(cc, err)),
-			application.NewService(NewMapService(settings, cc, resolveDataPath(settings.MapDataPath))),
-			application.NewService(NewSettingsService(settings)),
+			application.NewService(NewMapService(cfg, cc, settings.ResolvePath(cfg.MapDataPath))),
+			application.NewService(NewSettingsService(cfg)),
 			application.NewService(windowService),
 		},
 		Assets: application.AssetOptions{

@@ -1,9 +1,19 @@
 // SPDX-FileCopyrightText: Copyright © Joel L. Caesar
 // SPDX-License-Identifier: GPL-3.0
 
-package main
+// Package geo holds the map geometry: points and bounding boxes, the Mercator
+// projection, Pacific centering, GeoJSON parsing, and the fit-scale and
+// draw-order math.
+package geo
 
 import "math"
+
+// earthRadius is the WGS 84 equatorial radius in meters; maxMercator is the
+// Mercator x extent at the antimeridian.
+const (
+	earthRadius = 6378137.0
+	maxMercator = earthRadius * math.Pi
+)
 
 // Point represents a 2D point with float64 precision.
 type Point struct {
@@ -18,8 +28,8 @@ type BoundingBox struct {
 	Width, Height float64 // Width and Height are the dimensions of the bounding box.
 }
 
-// Geometry represents a GeoJSON geometry object.
-type Geometry struct {
+// geometry represents a GeoJSON geometry object.
+type geometry struct {
 	Type        string          // Type is the GeoJSON geometry type (e.g., "Polygon", "MultiPolygon").
 	Coordinates [][][][]float64 // Coordinates holds the geometry's coordinate data.
 }
@@ -30,9 +40,9 @@ type GeoData struct {
 	BoundingBox BoundingBox // BoundingBox is the calculated boundary of all paths.
 }
 
-// UpdateBoundingBox recalculates the bounding box based on the current Paths.
+// updateBoundingBox recalculates the bounding box based on the current Paths.
 // This ensures the bounding box exactly matches the Mercator coordinates.
-func (gd *GeoData) UpdateBoundingBox() {
+func (gd *GeoData) updateBoundingBox() {
 	if len(gd.Paths) == 0 {
 		return
 	}
@@ -67,8 +77,8 @@ func (gd *GeoData) UpdateBoundingBox() {
 	}
 }
 
-// NeedsPacificCentering checks if a MultiPolygon spans across the anti-meridian
-func NeedsPacificCentering(g Geometry) bool {
+// needsPacificCentering checks if a MultiPolygon spans across the anti-meridian
+func needsPacificCentering(g geometry) bool {
 	var hasFarEast, hasFarWest bool
 
 	for _, polygon := range g.Coordinates {
@@ -94,9 +104,9 @@ func NeedsPacificCentering(g Geometry) bool {
 	return false
 }
 
-// ApplyPacificCentering shifts negative longitudes to create a seamless 0 to 360 map
-func ApplyPacificCentering(g Geometry) Geometry {
-	if !NeedsPacificCentering(g) {
+// applyPacificCentering shifts negative longitudes to create a seamless 0 to 360 map
+func applyPacificCentering(g geometry) geometry {
+	if !needsPacificCentering(g) {
 		return g
 	}
 
@@ -119,35 +129,35 @@ func ApplyPacificCentering(g Geometry) Geometry {
 		}
 	}
 
-	return Geometry{
+	return geometry{
 		Type:        g.Type,
 		Coordinates: newCoords,
 	}
 }
 
-// LatLonToMercator converts geographic (longitude, latitude) coordinates into Mercator projection coordinates.
+// latLonToMercator converts geographic (longitude, latitude) coordinates into Mercator projection coordinates.
 // It returns (x, y) coordinates normalized in the range [0.0, 1.0].
-func LatLonToMercator(lon, lat float64) (x, y float64) {
+func latLonToMercator(lon, lat float64) (x, y float64) {
 	// 1. Project to Mercator meters
-	mx := EarthRadius * (lon * math.Pi / 180.0)
-	my := EarthRadius * math.Log(math.Tan((math.Pi/4.0)+(lat*math.Pi/360.0)))
+	mx := earthRadius * (lon * math.Pi / 180.0)
+	my := earthRadius * math.Log(math.Tan((math.Pi/4.0)+(lat*math.Pi/360.0)))
 
 	// 2. Normalize Mercator coordinates to [0, 1]
-	nx := (mx + MaxMercator) / (2.0 * MaxMercator)
-	ny := (MaxMercator - my) / (2.0 * MaxMercator) // Invert Y for screen space
+	nx := (mx + maxMercator) / (2.0 * maxMercator)
+	ny := (maxMercator - my) / (2.0 * maxMercator) // Invert Y for screen space
 
 	return nx, ny
 }
 
 // minDrawable is the smallest drawable width or height, in pixels, that the fit
-// math will scale into. fitMargin is subtracted from each dimension before fitting.
+// math will scale into. FitMargin is subtracted from each dimension before fitting.
 const (
 	minDrawable = 4.0
-	fitMargin   = 4.0
+	FitMargin   = 4.0
 )
 
 // fitScale returns the scale factor, in pixels per Mercator unit, that fits bb
-// inside a drawable area of width by height pixels less fitMargin on each axis.
+// inside a drawable area of width by height pixels less FitMargin on each axis.
 // width and height are the map area with the header already subtracted.
 // It returns 1.0 when bb has zero width or height, or when either drawable
 // dimension is below minDrawable.
@@ -158,27 +168,27 @@ func fitScale(bb BoundingBox, width, height float64) float64 {
 	if width < minDrawable || height < minDrawable {
 		return 1.0
 	}
-	scaleX := (width - fitMargin) / bb.Width
-	scaleY := (height - fitMargin) / bb.Height
+	scaleX := (width - FitMargin) / bb.Width
+	scaleY := (height - FitMargin) / bb.Height
 	return min(scaleX, scaleY)
 }
 
-// mapCountry is one selected country as seen by scaleAndOrder.
-type mapCountry struct {
+// MapCountry is one selected country as seen by ScaleAndOrder.
+type MapCountry struct {
 	Name string       // Name is the country name; "" means nothing is selected.
 	Area float64      // Area is the surface area in square miles.
 	BB   *BoundingBox // BB is the Mercator bounding box; nil means its geo data failed to load.
 }
 
-// scaleAndOrder returns the shared scale for drawing active and other together
+// ScaleAndOrder returns the shared scale for drawing active and other together
 // and the draw order: larger is drawn first, smaller on top of it.
 // width and height are the drawable map size as passed to fitScale.
 //
 // The larger country is chosen by area (ties go to active) and fitted. If the
 // smaller-by-area country's bounding box then reaches the drawable edge at that
 // scale, the two swap: it becomes the larger and the scale is refitted to it.
-func scaleAndOrder(active, other mapCountry, width, height float64) (scale float64, larger, smaller string) {
-	fit := func(c mapCountry) float64 {
+func ScaleAndOrder(active, other MapCountry, width, height float64) (scale float64, larger, smaller string) {
+	fit := func(c MapCountry) float64 {
 		if c.BB == nil {
 			return 1.0
 		}
@@ -215,7 +225,7 @@ func scaleAndOrder(active, other mapCountry, width, height float64) (scale float
 	}
 	scale = fitScale(*large.BB, width, height)
 
-	if small.BB.Width*scale >= width-fitMargin || small.BB.Height*scale >= height-fitMargin {
+	if small.BB.Width*scale >= width-FitMargin || small.BB.Height*scale >= height-FitMargin {
 		large, small = small, large
 		scale = fitScale(*large.BB, width, height)
 	}

@@ -6,6 +6,11 @@ package main
 import (
 	"fmt"
 	"math"
+
+	"HowBig/internal/country"
+	"HowBig/internal/geo"
+	"HowBig/internal/mapdata"
+	"HowBig/internal/settings"
 )
 
 // Side values for CountryLayout.Side.
@@ -46,27 +51,30 @@ type MapLayout struct {
 
 // MapService lays out the selected countries for drawing.
 type MapService struct {
-	settings    *Settings
-	countries   *CountryCollection // countries may be nil if country data failed to load.
-	mapDataPath string             // mapDataPath is the resolved map data directory.
-	cache       *GeoCache
+	settings  *settings.Settings
+	countries *country.Collection // countries may be nil if country data failed to load.
+	loader    *mapdata.Loader     // loader reads and caches each country's GeoJSON.
 }
 
-// NewMapService creates a MapService that reads GeoJSON from mapDataPath.
-func NewMapService(settings *Settings, countries *CountryCollection, mapDataPath string) *MapService {
+// NewMapService creates a MapService that reads GeoJSON from mapDataPath,
+// which R4 has already resolved, with the skip_small and
+// enable_pacific_center options from cfg.
+func NewMapService(cfg *settings.Settings, countries *country.Collection, mapDataPath string) *MapService {
 	return &MapService{
-		settings:    settings,
-		countries:   countries,
-		mapDataPath: mapDataPath,
-		cache:       NewGeoCache(CacheLimit),
+		settings:  cfg,
+		countries: countries,
+		loader: mapdata.NewLoader(mapDataPath, countries, mapdata.Options{
+			SkipSmall:     cfg.SkipSmall,
+			PacificCenter: cfg.EnablePacificCenter,
+		}),
 	}
 }
 
 // loadedCountry is a selected country with its map data, if it loaded.
 type loadedCountry struct {
 	side string
-	mc   mapCountry
-	data *GeoData
+	mc   geo.MapCountry
+	data *geo.GeoData
 	err  error
 }
 
@@ -78,7 +86,7 @@ type loadedCountry struct {
 func (s *MapService) Layout(left, right string, width, height float64) MapLayout {
 	l := s.load(left, SideLeft)
 	r := s.load(right, SideRight)
-	scale, larger, _ := scaleAndOrder(l.mc, r.mc, width, height)
+	scale, larger, _ := geo.ScaleAndOrder(l.mc, r.mc, width, height)
 
 	order := []loadedCountry{r, l}
 	if larger == left {
@@ -97,11 +105,11 @@ func (s *MapService) Layout(left, right string, width, height float64) MapLayout
 
 // load fetches a selected country's map data; name "" means nothing is selected.
 func (s *MapService) load(name, side string) loadedCountry {
-	c := loadedCountry{side: side, mc: mapCountry{Name: name, Area: areaOf(s.countries, name)}}
+	c := loadedCountry{side: side, mc: geo.MapCountry{Name: name, Area: areaOf(s.countries, name)}}
 	if name == "" {
 		return c
 	}
-	data, err := FetchAndCacheGeoJSON(name, true, s.settings.SkipSmall, s.settings.EnablePacificCenter, s.mapDataPath, s.cache, s.countries)
+	data, err := s.loader.Load(name)
 	if err != nil {
 		c.err = err
 		return c

@@ -11,12 +11,16 @@ import (
 	"strings"
 	"testing"
 
+	"HowBig/internal/country"
+	"HowBig/internal/geo"
+	"HowBig/internal/settings"
+
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 func TestCountryService(t *testing.T) {
 	t.Run("loaded", func(t *testing.T) {
-		cc, err := NewCountryCollection("country_data.json")
+		cc, err := country.Load("country_data.json")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -44,7 +48,7 @@ func TestCountryService(t *testing.T) {
 	})
 
 	t.Run("failed to load", func(t *testing.T) {
-		cc, err := NewCountryCollection(filepath.Join(t.TempDir(), "missing.json"))
+		cc, err := country.Load(filepath.Join(t.TempDir(), "missing.json"))
 		s := NewCountryService(cc, err)
 		if list := s.List(); list == nil || len(list) != 0 {
 			t.Errorf("List() = %#v, want an empty non-nil slice", list)
@@ -59,7 +63,7 @@ func TestCountryService(t *testing.T) {
 }
 
 func TestSettingsService(t *testing.T) {
-	in := &Settings{LeftColor: "#123456", SkipSmall: 7}
+	in := &settings.Settings{LeftColor: "#123456", SkipSmall: 7}
 	s := NewSettingsService(in)
 	in.LeftColor = "#FFFFFF"
 	if got := s.Get(); got.LeftColor != "#123456" || got.SkipSmall != 7 {
@@ -106,49 +110,6 @@ func TestWindowService(t *testing.T) {
 	}
 }
 
-func TestResolveDataPathFrom(t *testing.T) {
-	root := t.TempDir()
-	exeDir := filepath.Join(root, "bin")
-	cwd := t.TempDir()
-	for _, dir := range []string{exeDir, cwd} {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
-			t.Fatal(err)
-		}
-	}
-	write := func(path string) {
-		t.Helper()
-		if err := os.WriteFile(path, []byte("{}"), 0o644); err != nil {
-			t.Fatal(err)
-		}
-	}
-	write(filepath.Join(exeDir, "both.json"))
-	write(filepath.Join(cwd, "both.json"))
-	write(filepath.Join(cwd, "cwd.json"))
-	write(filepath.Join(root, "parent.json"))
-	t.Chdir(cwd)
-
-	tests := []struct {
-		name, in, want string
-	}{
-		{"exe dir wins over cwd", "both.json", filepath.Join(exeDir, "both.json")},
-		{"cwd", "cwd.json", "cwd.json"},
-		{"exe dir's parent", "parent.json", filepath.Join(root, "parent.json")},
-		{"not found anywhere", "none.json", "none.json"},
-		{"empty", "", ""},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := resolveDataPathFrom(tt.in, exeDir); got != tt.want {
-				t.Errorf("resolveDataPathFrom(%q) = %q, want %q", tt.in, got, tt.want)
-			}
-		})
-	}
-	abs := filepath.Join(root, "parent.json")
-	if got := resolveDataPath(abs); got != abs {
-		t.Errorf("resolveDataPath(abs) = %q, want it unchanged", got)
-	}
-}
-
 // rectGeoJSON returns a one-feature GeoJSON document whose polygon is the
 // lon/lat rectangle from (lon0, lat0) to (lon1, lat1).
 func rectGeoJSON(lon0, lat0, lon1, lat1 float64) string {
@@ -159,21 +120,21 @@ func rectGeoJSON(lon0, lat0, lon1, lat1 float64) string {
 // newTestMapService writes the given ISO code -> GeoJSON documents to a temp
 // map data directory and returns a MapService over countries named after the
 // ISO codes with the given areas.
-func newTestMapService(t *testing.T, settings Settings, docs map[string]string, areas map[string]float64) *MapService {
+func newTestMapService(t *testing.T, cfg settings.Settings, docs map[string]string, areas map[string]float64) *MapService {
 	t.Helper()
 	dir := t.TempDir()
-	cc := &CountryCollection{Areas: map[string]float64{}, ISOCodes: map[string]string{}}
+	cc := &country.Collection{Areas: map[string]float64{}, ISOCodes: map[string]string{}}
 	for iso, doc := range docs {
 		if err := os.WriteFile(filepath.Join(dir, iso+".geojson"), []byte(doc), 0o644); err != nil {
 			t.Fatal(err)
 		}
 	}
 	for name, area := range areas {
-		cc.Countries = append(cc.Countries, CountryInfo{Name: name, ISOCode: name, Area: area})
+		cc.Countries = append(cc.Countries, country.Info{Name: name, ISOCode: name, Area: area})
 		cc.Areas[name] = area
 		cc.ISOCodes[name] = name
 	}
-	return NewMapService(&settings, cc, dir)
+	return NewMapService(&cfg, cc, dir)
 }
 
 // pixelBounds returns the extent of all points in paths.
@@ -201,7 +162,7 @@ func TestMapServiceLayout(t *testing.T) {
 		"BAD":  `not json`,
 	}
 	areas := map[string]float64{"BIG": 1000, "SML": 10, "WIDE": 100, "BAD": 50, "GONE": 5}
-	s := newTestMapService(t, Settings{}, docs, areas)
+	s := newTestMapService(t, settings.Settings{}, docs, areas)
 
 	t.Run("nothing selected", func(t *testing.T) {
 		got := s.Layout("", "", w, h)
@@ -224,8 +185,8 @@ func TestMapServiceLayout(t *testing.T) {
 			t.Errorf("not centered: x %v..%v, y %v..%v in %vx%v", minX, maxX, minY, maxY, w, h)
 		}
 		// BIG is taller than wide in Mercator, so height is the limiting axis.
-		if !nearPx(maxY-minY, h-fitMargin) {
-			t.Errorf("height %v, want %v", maxY-minY, h-fitMargin)
+		if !nearPx(maxY-minY, h-geo.FitMargin) {
+			t.Errorf("height %v, want %v", maxY-minY, h-geo.FitMargin)
 		}
 	})
 
@@ -309,7 +270,7 @@ func TestMapServiceLayoutPaths(t *testing.T) {
 	doc := `{"features":[
 		{"geometry":{"type":"Polygon","coordinates":[[[0,0],[1,1]]]}},
 		{"geometry":{"type":"Polygon","coordinates":[[[0,0],[0.0000001,0],[10,0],[10,10],[0,10],[0,0]]]}}]}`
-	s := newTestMapService(t, Settings{DebugShowBoundary: true}, map[string]string{"SQ": doc}, map[string]float64{"SQ": 1})
+	s := newTestMapService(t, settings.Settings{DebugShowBoundary: true}, map[string]string{"SQ": doc}, map[string]float64{"SQ": 1})
 
 	got := s.Layout("SQ", "", 200, 200)
 	c := got.Countries[0]
@@ -335,12 +296,12 @@ func TestMapServiceLayoutPaths(t *testing.T) {
 }
 
 func TestMapServiceLayoutRealData(t *testing.T) {
-	cc, err := NewCountryCollection("country_data.json")
+	cc, err := country.Load("country_data.json")
 	if err != nil {
 		t.Fatal(err)
 	}
-	settings := loadSettings("settings.json")
-	s := NewMapService(settings, cc, "mapdata")
+	cfg := settings.Load("settings.json")
+	s := NewMapService(cfg, cc, "mapdata")
 	const w, h = 1000.0, 700.0
 
 	got := s.Layout("Fiji", "United States", w, h)
@@ -362,7 +323,7 @@ func TestMapServiceLayoutRealData(t *testing.T) {
 }
 
 func TestMapServiceMissingMapData(t *testing.T) {
-	s := NewMapService(&Settings{}, nil, filepath.Join(t.TempDir(), "nowhere"))
+	s := NewMapService(&settings.Settings{}, nil, filepath.Join(t.TempDir(), "nowhere"))
 	got := s.Layout("Fiji", "", 800, 600)
 	if len(got.Countries) != 1 || got.Countries[0].Error == "" {
 		t.Fatalf("got %+v, want one country with an error", got.Countries)
