@@ -29,6 +29,8 @@ Each side has its own country list. Type in the search box above a list to filte
 
 Download `howbig-amd64-installer.exe` from the [latest release](https://github.com/dmongrel/HowBig/releases/latest) and run it. It installs HowBig to `C:\Program Files\HowBig` and adds Start-menu and desktop shortcuts. Windows x64 only.
 
+If you have HowBig 1.0.0 installed, uninstall it first. Its installer used the same folder, and the two don't know about each other.
+
 A screen of at least 1280 x 768 is required.
 
 ## Building from source
@@ -64,7 +66,9 @@ The version number is set in three files. Change it in all of them:
 
 - `version.go` (the About box)
 - `build/config.yml`
-- `build/windows/info.json`: both `file_version` and the `ProductVersion`/`FileVersion` pair under the `0409` key
+- `build/windows/info.json`: `file_version` and `product_version` under `fixed`, and the `ProductVersion`/`FileVersion` pair under the `0409` key
+
+`go test ./...` fails if these disagree with `version.go`, or if `info.json` has lost its `0409` key.
 
 Then run `wails3 task package`, and attach `bin/howbig-amd64-installer.exe` to a new GitHub release. There's no CI; releases are built and uploaded by hand.
 
@@ -87,7 +91,7 @@ Don't run `wails3 task common:update:build-assets` without checking `info.json` 
 
 ## Settings
 
-HowBig reads `settings.json` at startup. Relative paths, for `settings.json` itself and for `map_data_path` and `country_data_path`, are looked up next to the exe first, then in the working directory, then in the exe folder's parent. An installed copy uses the `settings.json` in its install folder, and a build in `bin/` uses the one in the repository root.
+HowBig reads `settings.json` at startup. Relative paths, for `settings.json` itself and for `map_data_path` and `country_data_path`, are looked up next to the exe first, then in the working directory, then in the exe folder's parent. An installed copy uses the `settings.json` in its install folder, and a build in `bin/` uses the one in the repository root. Reinstalling or upgrading keeps an existing `settings.json` in the install folder; the shipped one is installed only when there's none there.
 
 If the file is missing or isn't valid JSON, every setting takes the default below. A setting left out of an otherwise valid file also takes its default, and so does a color, path or font size set to `""` or `0`.
 
