@@ -19,7 +19,7 @@ export interface RGB {
  * Rounds to a whole number the way Go's %.0f does: halves go to the even neighbour.
  * JS's Math.round and toFixed round halves up, which differs at exact .5 values.
  */
-function roundHalfEven(n: number): number {
+export function roundHalfEven(n: number): number {
     const r = Math.round(n);
     if (r - n === 0.5 && r % 2 !== 0) {
         return r - 1;

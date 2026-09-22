@@ -54,6 +54,7 @@ wails3 dev            # run with hot reload
 wails3 build          # build bin/HowBig.exe
 wails3 task package   # build bin/howbig-amd64-installer.exe
 go test ./...         # run the Go tests
+npm test --prefix frontend   # run the frontend tests
 ```
 
 `wails3 build` installs the frontend's npm packages, generates the TypeScript bindings, builds the frontend and then the exe. `wails3 task package` does the same build and then wraps the exe, `mapdata\`, `country_data.json`, `settings.json`, `ATTRIBUTION.md` and `LICENSE.md` into an NSIS installer. The version, product name and copyright shown in the exe's and the installer's Properties come from `build/config.yml` and `build/windows/info.json`.

@@ -9,12 +9,12 @@ import {CountryService, MapService, SettingsService, WindowService} from "../bin
 import type {MapLayout} from "../bindings/HowBig";
 import type {Info as CountryInfo} from "../bindings/HowBig/internal/country";
 import type {Settings} from "../bindings/HowBig/internal/settings";
-import type {CancellablePromise} from "@wailsio/runtime";
 import {renderBar} from "./bars";
 import {showAbout, showError} from "./dialogs";
 import {cssColor, fillAlpha, parseHexColor} from "./format";
 import {renderHeader, type HeaderLine} from "./header";
 import {installKeys} from "./keys";
+import {LatestCall} from "./latest";
 import {createCountryList, rowPaddingX, scrollbarWidth, widestName} from "./lists";
 import {renderMap, type SideColors} from "./map";
 
@@ -121,7 +121,7 @@ async function start(): Promise<void> {
     };
 
     let lastKey = "";
-    let pending: CancellablePromise<MapLayout> | null = null;
+    const layouts = new LatestCall<MapLayout>();
 
     /** Lays out and draws the map for the current selection and map box size. */
     const refreshMap = () => {
@@ -132,30 +132,19 @@ async function start(): Promise<void> {
             return;
         }
         lastKey = key;
-        pending?.cancel();
-        pending = null;
+        layouts.cancel();
         if ((!left && !right) || w <= 0 || h <= 0) {
             renderMap(svg, null, w, h, colors);
             return;
         }
-        const call = MapService.Layout(left, right, w, h);
-        pending = call;
-        call.then((layout) => {
-            if (pending !== call) {
-                return;
-            }
-            pending = null;
+        layouts.run(MapService.Layout(left, right, w, h), (layout) => {
             renderMap(svg, layout, w, h, colors);
             for (const c of layout.countries ?? []) {
                 if (c.error) {
                     reportError(c.error);
                 }
             }
-        }).catch((err) => {
-            if (pending !== call) {
-                return;
-            }
-            pending = null;
+        }, (err) => {
             lastKey = "";
             reportError(`Error laying out the map: ${err}`);
         });

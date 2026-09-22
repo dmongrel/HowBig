@@ -12,7 +12,7 @@ export interface KeyActions {
 }
 
 /** True when the event target takes typed text. */
-function inTextField(target: EventTarget | null): boolean {
+export function inTextField(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) {
         return false;
     }
