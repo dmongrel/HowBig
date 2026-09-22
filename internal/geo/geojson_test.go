@@ -119,6 +119,21 @@ func TestParseGeoJSONSynthetic(t *testing.T) {
 		}
 	})
 
+	t.Run("positions with fewer than 2 numbers skipped", func(t *testing.T) {
+		const short = `{"features": [{"geometry": {"type": "Polygon", "coordinates": [
+			[[170,0],[175],[-170,10],[],[170,0]]
+		]}}]}`
+		for _, pacific := range []bool{false, true} {
+			gd, err := ParseGeoJSON([]byte(short), 0, pacific)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(gd.Paths) != 1 || len(gd.Paths[0]) != 3 {
+				t.Errorf("pacific=%v: got %v, want one 3-point path", pacific, gd.Paths)
+			}
+		}
+	})
+
 	t.Run("no usable features", func(t *testing.T) {
 		gd, err := ParseGeoJSON([]byte(`{"features": []}`), 0, false)
 		if err != nil {

@@ -10,37 +10,15 @@ import (
 	"testing"
 )
 
-func TestLoaderPathFallback(t *testing.T) {
-	root := t.TempDir()
-	work := filepath.Join(root, "work")
-	if err := os.MkdirAll(filepath.Join(root, "maps"), 0o755); err != nil {
-		t.Fatal(err)
+func TestLoaderMissingFile(t *testing.T) {
+	dir := t.TempDir()
+	_, err := NewLoader(dir, nil, Options{}).Load("Y")
+	if err == nil {
+		t.Fatal("want an error")
 	}
-	if err := os.Mkdir(work, 0o755); err != nil {
-		t.Fatal(err)
+	if want := filepath.Join(dir, "Y.geojson"); !strings.Contains(err.Error(), want) {
+		t.Errorf("error %q should name %q", err, want)
 	}
-	geo := `{"features":[{"geometry":{"type":"Polygon","coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}`
-	if err := os.WriteFile(filepath.Join(root, "maps", "X.geojson"), []byte(geo), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	t.Chdir(work)
-	l := NewLoader("maps", nil, Options{})
-
-	t.Run("parent fallback is used when the file exists there", func(t *testing.T) {
-		if _, err := l.Load("X"); err != nil {
-			t.Fatalf("fallback not used: %v", err)
-		}
-	})
-	t.Run("a missing file's error names the primary path", func(t *testing.T) {
-		_, err := l.Load("Y")
-		if err == nil {
-			t.Fatal("want an error")
-		}
-		want := filepath.Join("maps", "Y.geojson")
-		if msg := err.Error(); !strings.Contains(msg, want) || strings.Contains(msg, "..") {
-			t.Errorf("error %q should name %q and not the .. fallback", msg, want)
-		}
-	})
 }
 
 func TestLoaderCache(t *testing.T) {

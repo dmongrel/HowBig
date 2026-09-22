@@ -58,10 +58,15 @@ func ParseGeoJSON(data []byte, skipSmall int, pacificCenter bool) (*GeoData, err
 
 				path := make([]Point, 0, len(ring))
 				for _, pt := range ring {
+					if len(pt) < 2 {
+						continue // a malformed position with no latitude
+					}
 					mx, my := latLonToMercator(pt[0], pt[1])
 					path = append(path, Point{X: mx, Y: my})
 				}
-				allPaths = append(allPaths, path)
+				if len(path) > 0 {
+					allPaths = append(allPaths, path)
+				}
 			}
 		}
 	}

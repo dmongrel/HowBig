@@ -59,6 +59,9 @@ func truncate(val float64) float64 {
 func simplifyRing(ring [][]float64) [][]float64 {
 	var out [][]float64
 	for _, pt := range ring {
+		if len(pt) < 2 {
+			continue // a malformed position with no latitude
+		}
 		p := []float64{truncate(pt[0]), truncate(pt[1])}
 		if n := len(out); n > 0 && out[n-1][0] == p[0] && out[n-1][1] == p[1] {
 			continue

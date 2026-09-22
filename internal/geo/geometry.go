@@ -84,6 +84,9 @@ func needsPacificCentering(g geometry) bool {
 	for _, polygon := range g.Coordinates {
 		for _, ring := range polygon {
 			for _, coord := range ring {
+				if len(coord) < 2 {
+					continue // a malformed position with no latitude
+				}
 				lng := coord[0]
 
 				// Check if the coordinates exist significantly deep in both hemispheres
@@ -115,8 +118,11 @@ func applyPacificCentering(g geometry) geometry {
 	for i, polygon := range g.Coordinates {
 		newCoords[i] = make([][][]float64, len(polygon))
 		for j, ring := range polygon {
-			newCoords[i][j] = make([][]float64, len(ring))
-			for k, coord := range ring {
+			newCoords[i][j] = make([][]float64, 0, len(ring))
+			for _, coord := range ring {
+				if len(coord) < 2 {
+					continue // a malformed position with no latitude
+				}
 				lng := coord[0]
 				lat := coord[1]
 
@@ -124,7 +130,7 @@ func applyPacificCentering(g geometry) geometry {
 				if lng < 0 {
 					lng += 360.0
 				}
-				newCoords[i][j][k] = []float64{lng, lat}
+				newCoords[i][j] = append(newCoords[i][j], []float64{lng, lat})
 			}
 		}
 	}
@@ -158,7 +164,7 @@ const (
 
 // fitScale returns the scale factor, in pixels per Mercator unit, that fits bb
 // inside a drawable area of width by height pixels less FitMargin on each axis.
-// width and height are the map area with the header already subtracted.
+// width and height are the drawable map box in pixels.
 // It returns 1.0 when bb has zero width or height, or when either drawable
 // dimension is below minDrawable.
 func fitScale(bb BoundingBox, width, height float64) float64 {

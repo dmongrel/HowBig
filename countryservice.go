@@ -10,7 +10,7 @@ import (
 	"HowBig/internal/country"
 )
 
-// CountryService exposes the country list and area lookups to the frontend.
+// CountryService exposes the country list to the frontend.
 type CountryService struct {
 	countries *country.Collection // countries is nil when country data failed to load.
 	loadErr   string              // loadErr is the load failure message, or "".
@@ -33,11 +33,6 @@ func (s *CountryService) List() []country.Info {
 		return []country.Info{}
 	}
 	return slices.Clone(s.countries.Countries)
-}
-
-// Area returns a country's surface area in square miles, or 0 if it is unknown.
-func (s *CountryService) Area(name string) float64 {
-	return areaOf(s.countries, name)
 }
 
 // LoadError returns why country data failed to load, or "" if it loaded.

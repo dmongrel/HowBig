@@ -25,7 +25,7 @@ var assets embed.FS
 func main() {
 	cfg, err := settings.Load(settings.ResolvePath("settings.json"))
 	if err != nil {
-		slog.Warn("could not read settings.json, using defaults", "err", err)
+		slog.Warn("could not load settings.json, using defaults", "err", err)
 	}
 
 	cc, err := country.Load(settings.ResolvePath(cfg.CountryDataPath))

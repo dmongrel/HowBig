@@ -36,12 +36,6 @@ func TestCountryService(t *testing.T) {
 		if cc.Countries[0].Name == "changed" {
 			t.Error("List() returned the collection's own slice")
 		}
-		if got := s.Area("Fiji"); got != cc.Areas["Fiji"] || got == 0 {
-			t.Errorf("Area(Fiji) = %v, want %v", got, cc.Areas["Fiji"])
-		}
-		if got := s.Area("Atlantis"); got != 0 {
-			t.Errorf("Area(Atlantis) = %v, want 0", got)
-		}
 		if got := s.LoadError(); got != "" {
 			t.Errorf("LoadError() = %q, want empty", got)
 		}
@@ -52,9 +46,6 @@ func TestCountryService(t *testing.T) {
 		s := NewCountryService(cc, err)
 		if list := s.List(); list == nil || len(list) != 0 {
 			t.Errorf("List() = %#v, want an empty non-nil slice", list)
-		}
-		if got := s.Area("Fiji"); got != 0 {
-			t.Errorf("Area(Fiji) = %v, want 0", got)
 		}
 		if got := s.LoadError(); !strings.HasPrefix(got, "failed to load country data: ") {
 			t.Errorf("LoadError() = %q, want a load failure message", got)
