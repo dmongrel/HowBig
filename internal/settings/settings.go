@@ -5,8 +5,9 @@
 package settings
 
 import (
+	"cmp"
 	"encoding/json"
-	"log"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -29,81 +30,60 @@ type Settings struct {
 	HeaderFontSize      float32 `json:"header_font_size"`       // HeaderFontSize is the font size for the header.
 }
 
-// Load reads application configuration from settings.json, applying default values if the file is missing or invalid.
-func Load(path string) *Settings {
-	var s Settings
+// Default returns the settings used when settings.json is missing or invalid,
+// and for any setting a valid file leaves out.
+func Default() Settings {
+	return Settings{
+		DebugShowBoundary:   false,
+		LeftColor:           "#00FF00",
+		RightColor:          "#FF0000",
+		LeftBorderColor:     "#00FFFF",
+		RightBorderColor:    "#FFCC00",
+		BackgroundColor:     "#000000",
+		EnablePacificCenter: true,
+		SkipSmall:           0,
+		MapDataPath:         "mapdata",
+		CountryDataPath:     "country_data.json",
+		ButtonFontSize:      14,
+		SearchFontSize:      14,
+		CountryListFontSize: 18,
+		HeaderFontSize:      36,
+	}
+}
+
+// Load reads settings from the JSON file at path. Settings the file leaves
+// out take their Default values, and so do colors, paths and font sizes set
+// to "" or 0. If the file can't be read or isn't valid JSON, Load returns
+// Default() and the error; a missing file's error satisfies
+// errors.Is(err, fs.ErrNotExist).
+func Load(path string) (Settings, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		log.Println("Error reading settings.json, using defaults:", err)
-		s = Settings{
-			DebugShowBoundary:   false,
-			LeftColor:           "#00FF00",
-			RightColor:          "#FF0000",
-			LeftBorderColor:     "#00FFFF",
-			RightBorderColor:    "#FFCC00",
-			BackgroundColor:     "#000000",
-			EnablePacificCenter: true,
-			SkipSmall:           0,
-			MapDataPath:         "mapdata",
-			CountryDataPath:     "country_data.json",
-			ButtonFontSize:      14,
-			SearchFontSize:      14,
-			CountryListFontSize: 18,
-			HeaderFontSize:      36,
-		}
-	} else if err := json.Unmarshal(data, &s); err != nil {
-		log.Println("Error unmarshaling settings.json:", err)
-		s = Settings{
-			DebugShowBoundary:   false,
-			LeftColor:           "#00FF00",
-			RightColor:          "#FF0000",
-			LeftBorderColor:     "#00FFFF",
-			RightBorderColor:    "#FFCC00",
-			BackgroundColor:     "#000000",
-			EnablePacificCenter: true,
-			SkipSmall:           0,
-			MapDataPath:         "mapdata",
-			CountryDataPath:     "country_data.json",
-			ButtonFontSize:      14,
-			SearchFontSize:      14,
-			CountryListFontSize: 18,
-			HeaderFontSize:      36,
-		}
+		return Default(), err
 	}
-	if s.LeftColor == "" {
-		s.LeftColor = "#00FF00"
+	s := Default()
+	if err := json.Unmarshal(data, &s); err != nil {
+		return Default(), fmt.Errorf("parsing %s: %w", path, err)
 	}
-	if s.RightColor == "" {
-		s.RightColor = "#FF0000"
-	}
-	if s.LeftBorderColor == "" {
-		s.LeftBorderColor = "#00FFFF"
-	}
-	if s.RightBorderColor == "" {
-		s.RightBorderColor = "#FFCC00"
-	}
-	if s.BackgroundColor == "" {
-		s.BackgroundColor = "#000000"
-	}
-	if s.MapDataPath == "" {
-		s.MapDataPath = "mapdata"
-	}
-	if s.CountryDataPath == "" {
-		s.CountryDataPath = "country_data.json"
-	}
-	if s.ButtonFontSize == 0 {
-		s.ButtonFontSize = 14
-	}
-	if s.SearchFontSize == 0 {
-		s.SearchFontSize = 14
-	}
-	if s.CountryListFontSize == 0 {
-		s.CountryListFontSize = 18
-	}
-	if s.HeaderFontSize == 0 {
-		s.HeaderFontSize = 36
-	}
-	return &s
+	s.fillZeroValues()
+	return s, nil
+}
+
+// fillZeroValues replaces empty colors and paths and zero font sizes with
+// their defaults.
+func (s *Settings) fillZeroValues() {
+	d := Default()
+	s.LeftColor = cmp.Or(s.LeftColor, d.LeftColor)
+	s.RightColor = cmp.Or(s.RightColor, d.RightColor)
+	s.LeftBorderColor = cmp.Or(s.LeftBorderColor, d.LeftBorderColor)
+	s.RightBorderColor = cmp.Or(s.RightBorderColor, d.RightBorderColor)
+	s.BackgroundColor = cmp.Or(s.BackgroundColor, d.BackgroundColor)
+	s.MapDataPath = cmp.Or(s.MapDataPath, d.MapDataPath)
+	s.CountryDataPath = cmp.Or(s.CountryDataPath, d.CountryDataPath)
+	s.ButtonFontSize = cmp.Or(s.ButtonFontSize, d.ButtonFontSize)
+	s.SearchFontSize = cmp.Or(s.SearchFontSize, d.SearchFontSize)
+	s.CountryListFontSize = cmp.Or(s.CountryListFontSize, d.CountryListFontSize)
+	s.HeaderFontSize = cmp.Or(s.HeaderFontSize, d.HeaderFontSize)
 }
 
 // ResolvePath locates a relative data path (settings.json, map_data_path,

@@ -52,7 +52,7 @@ go test ./...         # run the Go tests
 
 HowBig reads `settings.json` at startup. Relative paths, for `settings.json` itself and for `map_data_path` and `country_data_path`, are looked up next to the exe first, then in the working directory, then in the exe folder's parent. An installed copy uses the `settings.json` in its install folder, and a build in `bin/` uses the one in the repository root.
 
-If the file is missing or isn't valid JSON, every setting takes the default below. A setting left out of an otherwise valid file also takes its default, except `enable_pacific_center`, which is then off.
+If the file is missing or isn't valid JSON, every setting takes the default below. A setting left out of an otherwise valid file also takes its default, and so does a color, path or font size set to `""` or `0`.
 
 | Setting                   | Description                                                                          | Default               |
 |:--------------------------|:-------------------------------------------------------------------------------------|:----------------------|

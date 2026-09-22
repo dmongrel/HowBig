@@ -22,7 +22,10 @@ var assets embed.FS
 
 // main loads settings and country data, binds the services and opens the window.
 func main() {
-	cfg := settings.Load(settings.ResolvePath("settings.json"))
+	cfg, err := settings.Load(settings.ResolvePath("settings.json"))
+	if err != nil {
+		log.Println("Error reading settings.json, using defaults:", err)
+	}
 
 	cc, err := country.Load(settings.ResolvePath(cfg.CountryDataPath))
 	if err != nil {
@@ -35,8 +38,8 @@ func main() {
 		Description: "Compares the sizes of two countries",
 		Services: []application.Service{
 			application.NewService(NewCountryService(cc, err)),
-			application.NewService(NewMapService(cfg, cc, settings.ResolvePath(cfg.MapDataPath))),
-			application.NewService(NewSettingsService(cfg)),
+			application.NewService(NewMapService(&cfg, cc, settings.ResolvePath(cfg.MapDataPath))),
+			application.NewService(NewSettingsService(&cfg)),
 			application.NewService(windowService),
 		},
 		Assets: application.AssetOptions{

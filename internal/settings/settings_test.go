@@ -4,10 +4,106 @@
 package settings
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
 )
+
+// writeSettings writes content to a settings file in a temp dir and returns its path.
+func writeSettings(t *testing.T, content string) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "settings.json")
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return path
+}
+
+func TestDefault(t *testing.T) {
+	want := Settings{
+		LeftColor:           "#00FF00",
+		RightColor:          "#FF0000",
+		LeftBorderColor:     "#00FFFF",
+		RightBorderColor:    "#FFCC00",
+		BackgroundColor:     "#000000",
+		EnablePacificCenter: true,
+		MapDataPath:         "mapdata",
+		CountryDataPath:     "country_data.json",
+		ButtonFontSize:      14,
+		SearchFontSize:      14,
+		CountryListFontSize: 18,
+		HeaderFontSize:      36,
+	}
+	if got := Default(); got != want {
+		t.Errorf("Default() = %+v, want %+v", got, want)
+	}
+}
+
+func TestLoadMissingFile(t *testing.T) {
+	got, err := Load(filepath.Join(t.TempDir(), "settings.json"))
+	if !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("err = %v, want not-exist", err)
+	}
+	if got != Default() {
+		t.Errorf("Load = %+v, want the defaults", got)
+	}
+}
+
+func TestLoadMalformedJSON(t *testing.T) {
+	// The valid prefix must not leak into the result.
+	got, err := Load(writeSettings(t, `{"left_color": "#123456", "skip_small": `))
+	if err == nil {
+		t.Error("want an error")
+	}
+	if got != Default() {
+		t.Errorf("Load = %+v, want the defaults", got)
+	}
+}
+
+func TestLoadPartialJSON(t *testing.T) {
+	got, err := Load(writeSettings(t, `{
+		"left_color": "#123456",
+		"skip_small": 7,
+		"debug_show_boundary": true,
+		"right_color": "",
+		"header_font_size": 0
+	}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := Default()
+	want.LeftColor = "#123456"
+	want.SkipSmall = 7
+	want.DebugShowBoundary = true
+	// right_color "" and header_font_size 0 fall back to their defaults.
+	if got != want {
+		t.Errorf("Load = %+v, want %+v", got, want)
+	}
+
+	// An explicit false is kept; only a missing enable_pacific_center defaults to true.
+	got, err = Load(writeSettings(t, `{"enable_pacific_center": false}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.EnablePacificCenter {
+		t.Error("enable_pacific_center false was overridden")
+	}
+}
+
+func TestLoadShippedFile(t *testing.T) {
+	got, err := Load(filepath.Join("..", "..", "settings.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := Default()
+	want.SkipSmall = 25
+	want.HeaderFontSize = 18
+	if got != want {
+		t.Errorf("Load = %+v, want %+v", got, want)
+	}
+}
 
 func TestResolvePathFrom(t *testing.T) {
 	root := t.TempDir()

@@ -300,8 +300,11 @@ func TestMapServiceLayoutRealData(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg := settings.Load("settings.json")
-	s := NewMapService(cfg, cc, "mapdata")
+	cfg, err := settings.Load("settings.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := NewMapService(&cfg, cc, "mapdata")
 	const w, h = 1000.0, 700.0
 
 	got := s.Layout("Fiji", "United States", w, h)
