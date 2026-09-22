@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=HowBig
+Comment=Compares the sizes of two countries
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/HowBig %u
+Terminal=false
+Type=Application
+Icon=HowBig
+Categories=Utility;
+StartupWMClass=HowBig
+
+ 

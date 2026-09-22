@@ -1,0 +1,15 @@
+{
+	"fixed": {
+		"file_version": "1.0.0"
+	},
+	"info": {
+		"0000": {
+			"ProductVersion": "1.0.0",
+			"CompanyName": "dmongrel",
+			"FileDescription": "Compares the sizes of two countries",
+			"LegalCopyright": "Copyright © Joel L. Caesar",
+			"ProductName": "HowBig",
+			"Comments": "HowBig country size comparison"
+		}
+	}
+}

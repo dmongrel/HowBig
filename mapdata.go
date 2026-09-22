@@ -84,7 +84,7 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, en
 
 	fileName := getFileName(country, countryCollection)
 	filePath := filepath.Join(mapDataPath, fileName)
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) && !filepath.IsAbs(mapDataPath) {
 		filePath = filepath.Join("..", mapDataPath, fileName)
 	}
 
