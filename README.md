@@ -3,7 +3,7 @@
 
 HowBig is a desktop app for comparing the sizes of countries. Pick one country on each side and it draws both at the same scale, one over the other, so you can see how they stack up. It's written in Go, with a [Wails v3](https://v3.wails.io/) window and a TypeScript frontend.
 
-<img width="1200" height="502" alt="image" src="https://github.com/user-attachments/assets/bf6f87b2-0f8e-499d-9927-5bb6055e54b5" />
+<img width="1200" height="503" alt="HowBig comparing the United States and Brazil" src="docs/images/howbig.png" />
 
 ## Features
 
