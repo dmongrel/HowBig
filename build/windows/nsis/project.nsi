@@ -33,6 +33,11 @@ Unicode true
 ####
 ## Include the wails tools
 ####
+## HowBig: the copyright is set here rather than left to wails_tools.nsh, which
+## `wails3 task common:update:build-assets` regenerates. ${U+00A9} is the copyright
+## sign, written as an escape so the result doesn't depend on the file's encoding.
+!define INFO_COPYRIGHT "Copyright ${U+00A9} Joel L. Caesar"
+
 !include "wails_tools.nsh"
 
 # The version information for this two must consist of 4 parts
@@ -72,11 +77,11 @@ ManifestDPIAware true
 #!finalize 'signtool --file "%1"'
 
 Name "${INFO_PRODUCTNAME}"
-OutFile "..\..\..\bin\${INFO_PROJECTNAME}-${ARCH}-installer.exe" # Name of the installer's file.
+OutFile "..\..\..\bin\howbig-${ARCH}-installer.exe" # Name of the installer's file.
 !if "${WAILS_INSTALL_SCOPE}" == "user"
     InstallDir "$LOCALAPPDATA\Programs\${INFO_PRODUCTNAME}"
 !else
-    InstallDir "$PROGRAMFILES64\${INFO_COMPANYNAME}\${INFO_PRODUCTNAME}"
+    InstallDir "$PROGRAMFILES64\${INFO_PROJECTNAME}"
 !endif
 ShowInstDetails show # This will always show the installation details.
 
@@ -93,6 +98,16 @@ Section
     
     !insertmacro wails.files
 
+    # HowBig reads these from next to the exe (relative paths in settings.json
+    # resolve against the exe's directory).
+    File "..\..\..\country_data.json"
+    File "..\..\..\settings.json"
+    File "..\..\..\ATTRIBUTION.md"
+    File "..\..\..\LICENSE.md"
+    SetOutPath "$INSTDIR\mapdata"
+    File "..\..\..\mapdata\*.geojson"
+    SetOutPath $INSTDIR
+
     CreateShortcut "$SMPROGRAMS\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
     CreateShortCut "$DESKTOP\${INFO_PRODUCTNAME}.lnk" "$INSTDIR\${PRODUCT_EXECUTABLE}"
 
@@ -106,6 +121,22 @@ Section "uninstall"
     !insertmacro wails.setShellContext
 
     RMDir /r "$AppData\${PRODUCT_EXECUTABLE}" # Remove the WebView2 DataPath
+
+    # The app writes its WebView2 data to the user's roaming AppData even on a
+    # machine install, where $AppData above points at ProgramData, so remove
+    # the uninstalling user's copy too.
+    SetShellVarContext current
+    RMDir /r "$AppData\${PRODUCT_EXECUTABLE}"
+    !insertmacro wails.setShellContext
+
+    # The exe and the data files installed next to it.
+    Delete "$INSTDIR\${PRODUCT_EXECUTABLE}"
+    Delete "$INSTDIR\country_data.json"
+    Delete "$INSTDIR\settings.json"
+    Delete "$INSTDIR\ATTRIBUTION.md"
+    Delete "$INSTDIR\LICENSE.md"
+    Delete "$INSTDIR\mapdata\*.geojson"
+    RMDir "$INSTDIR\mapdata"
 
     RMDir /r $INSTDIR
 
