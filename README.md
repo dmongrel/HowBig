@@ -158,3 +158,14 @@ To run the script from the repository root:
 go run scripts/download_geojson.go
 ```
 `-country LIE` fetches a single country by ISO code, `-out <dir>` writes somewhere other than `mapdata/`, and `-data <file>` reads a country list other than `country_data.json`. The file carries a `//go:build ignore` tag, so `go build ./...` and `go test ./...` skip it.
+
+### `make_icon.go`
+
+This script draws the app icon: the contiguous United States and Australia at true relative scale, in the app's left and right colors, on a dark rounded tile. It reads the outlines from `mapdata/` and projects them the same way the app does.
+
+To rebuild the icon from the repository root:
+```bash
+go run scripts/make_icon.go > build/appicon.svg
+go run scripts/make_icon.go -bare > build/appicon.icon/Assets/howbig.svg
+```
+Render `build/appicon.svg` to a 1024 x 1024 `build/appicon.png` with a transparent background, for example with headless Chrome, and then run `wails3 task common:generate:icons` to regenerate `build/windows/icon.ico` and `build/darwin/icons.icns`. `-a` and `-b` pick the two countries by ISO code. `build/darwin/Assets.car` is compiled from `build/appicon.icon` and can only be regenerated on a Mac.
