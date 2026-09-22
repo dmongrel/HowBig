@@ -51,7 +51,8 @@ OPTIMIZE.md
 .task
 bin/
 *.syso
-frontend/dist
+frontend/dist/*
+!frontend/dist/.gitkeep
 frontend/node_modules
 frontend/bindings
 build/linux/appimage/build

@@ -65,6 +65,9 @@ func TestSettingsService(t *testing.T) {
 	if got := s.Get(); got.LeftColor != "#123456" || got.SkipSmall != 7 {
 		t.Errorf("Get() = %+v, want the settings as they were passed in", got)
 	}
+	if got := s.Version(); got != Version {
+		t.Errorf("Version() = %q, want %q", got, Version)
+	}
 }
 
 // fakeWindow records fullscreen calls for WindowService tests.

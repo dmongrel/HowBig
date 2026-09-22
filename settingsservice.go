@@ -17,3 +17,8 @@ func NewSettingsService(s *Settings) *SettingsService {
 func (s *SettingsService) Get() Settings {
 	return s.settings
 }
+
+// Version returns the app version shown in the About dialog.
+func (s *SettingsService) Version() string {
+	return Version
+}
