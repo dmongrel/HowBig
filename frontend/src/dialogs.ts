@@ -51,7 +51,7 @@ export function showAbout(version: string): void {
     }
     aboutOpen = true;
     const attribution = "geoBoundaries data is used under CC-BY 4.0 license.\nFor more information refer to ATTRIBUTION.md";
-    const shortcuts = "ESC - Exits Program.\nF - Toggles Fullscreen (Click center area to grab focus).\nA - Shows About information.";
+    const shortcuts = "ESC - Exits Program.\nF - Toggles Fullscreen.\nA - Shows About information.";
     const msg = `HowBig ${version} Copyright © Joel L. Caesar.\n\n${attribution}\n\n${shortcuts}`;
     void showMessage("About", msg).then(() => {
         aboutOpen = false;
