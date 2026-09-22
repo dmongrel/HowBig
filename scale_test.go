@@ -104,14 +104,30 @@ func TestScaleAndOrder(t *testing.T) {
 			wantScale: 10, wantLarger: "B", wantSmaller: "A",
 		},
 		{
-			// Characterization of a known bug: the swap check always tests other, so
-			// when active is the one that is smaller by area but wider in pixels, no
-			// swap happens and active overflows the map (20 * 10 = 200 px in 100 px).
-			// Correct behavior would be scale 5, larger "A", smaller "B".
-			name:      "no swap: active is smaller by area but wider in pixels",
+			name:      "swap: active is smaller by area but wider in pixels",
 			active:    mapCountry{Name: "A", Area: 100, BB: box(20, 2)},
 			other:     mapCountry{Name: "B", Area: 1000, BB: box(10, 10)},
-			wantScale: 10, wantLarger: "B", wantSmaller: "A",
+			wantScale: 5, wantLarger: "A", wantSmaller: "B",
+		},
+		{
+			name:      "swap: active is smaller by area but taller in pixels",
+			active:    mapCountry{Name: "A", Area: 100, BB: box(2, 40)},
+			other:     mapCountry{Name: "B", Area: 1000, BB: box(10, 10)},
+			wantScale: 2.5, wantLarger: "A", wantSmaller: "B",
+		},
+		{
+			name:      "swap: active exactly touches the edge",
+			active:    mapCountry{Name: "A", Area: 100, BB: box(10, 5)},
+			other:     mapCountry{Name: "B", Area: 1000, BB: box(10, 10)},
+			wantScale: 10, wantLarger: "A", wantSmaller: "B",
+		},
+		{
+			// The larger-by-area country is wider in pixels, but the smaller one
+			// fits, so there is no swap.
+			name:      "no swap: smaller by area fits at the larger's scale",
+			active:    mapCountry{Name: "A", Area: 1000, BB: box(10, 10)},
+			other:     mapCountry{Name: "B", Area: 100, BB: box(9, 9)},
+			wantScale: 10, wantLarger: "A", wantSmaller: "B",
 		},
 		{
 			name:      "both selected, both failed to load",

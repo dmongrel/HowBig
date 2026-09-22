@@ -174,10 +174,9 @@ type mapCountry struct {
 // and the draw order: larger is drawn first, smaller on top of it.
 // width and height are the drawable map size as passed to fitScale.
 //
-// The larger country is chosen by area (ties go to active) and fitted. If
-// other's bounding box then reaches the drawable edge at that scale, other
-// becomes the larger and the scale is refitted to it. That check always looks
-// at other, not at whichever country is smaller by area; see the tests.
+// The larger country is chosen by area (ties go to active) and fitted. If the
+// smaller-by-area country's bounding box then reaches the drawable edge at that
+// scale, the two swap: it becomes the larger and the scale is refitted to it.
 func scaleAndOrder(active, other mapCountry, width, height float64) (scale float64, larger, smaller string) {
 	fit := func(c mapCountry) float64 {
 		if c.BB == nil {
@@ -210,18 +209,16 @@ func scaleAndOrder(active, other mapCountry, width, height float64) (scale float
 		return 1.0, active.Name, other.Name
 	}
 
-	larger, smaller = active.Name, other.Name
-	largeBB := active.BB
+	large, small := active, other
 	if other.Area > active.Area {
-		larger, smaller = other.Name, active.Name
-		largeBB = other.BB
+		large, small = other, active
 	}
-	scale = fitScale(*largeBB, width, height)
+	scale = fitScale(*large.BB, width, height)
 
-	if other.BB.Width*scale >= width-fitMargin || other.BB.Height*scale >= height-fitMargin {
-		larger, smaller = other.Name, active.Name
-		scale = fitScale(*other.BB, width, height)
+	if small.BB.Width*scale >= width-fitMargin || small.BB.Height*scale >= height-fitMargin {
+		large, small = small, large
+		scale = fitScale(*large.BB, width, height)
 	}
 
-	return scale, larger, smaller
+	return scale, large.Name, small.Name
 }
