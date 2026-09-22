@@ -1,30 +1,41 @@
 // SPDX-FileCopyrightText: Copyright © Joel L. Caesar
 // SPDX-License-Identifier: GPL-3.0
 
+//go:build ignore
+
+// download_geojson fetches each country's simplified ADM0 boundary from the
+// geoBoundaries API, truncates coordinates to 4 decimal places, drops the
+// consecutive duplicate points that leaves, and writes <ISO code>.geojson.
+//
+// Run it from the repository root:
+//
+//	go run scripts/download_geojson.go                      # every country, into mapdata/
+//	go run scripts/download_geojson.go -country LIE -out /tmp/geo
 package main
 
 import (
 	"encoding/json"
+	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"math"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 )
 
-type CountryInfo struct {
-	Name        string  `json:"Name"`
-	CompactName string  `json:"CompactName"`
-	ISOCode     string  `json:"ISOCode"`
-	Area        float64 `json:"Area"`
+// countryInfo is the part of a country_data.json entry this script needs.
+type countryInfo struct {
+	Name    string `json:"Name"`
+	ISOCode string `json:"ISOCode"`
 }
 
-type CountryCollection struct {
-	Countries []CountryInfo `json:"Countries"`
-}
-
-type GeoJSON struct {
+// geoJSON is a FeatureCollection as geoBoundaries serves it. Geometry
+// coordinates stay raw so only Polygon and MultiPolygon get rewritten.
+type geoJSON struct {
 	Type     string `json:"type"`
 	Features []struct {
 		Type       string         `json:"type"`
@@ -36,184 +47,170 @@ type GeoJSON struct {
 	} `json:"features"`
 }
 
+// client bounds each request so a stalled download doesn't hang the run.
+var client = &http.Client{Timeout: 2 * time.Minute}
+
+// truncate cuts val to 4 decimal places (about 11 m of latitude).
 func truncate(val float64) float64 {
 	return math.Trunc(val*10000) / 10000
 }
 
-func processPoint(p []float64) []float64 {
-	return []float64{truncate(p[0]), truncate(p[1])}
-}
-
-func removeDuplicates(ring [][]float64) [][]float64 {
-	if len(ring) <= 1 {
-		return ring
-	}
-	var newRing [][]float64
-	newRing = append(newRing, ring[0])
-	for i := 1; i < len(ring); i++ {
-		if ring[i][0] != ring[i-1][0] || ring[i][1] != ring[i-1][1] {
-			newRing = append(newRing, ring[i])
+// simplifyRing truncates each point and drops points equal to the one before.
+func simplifyRing(ring [][]float64) [][]float64 {
+	var out [][]float64
+	for _, pt := range ring {
+		p := []float64{truncate(pt[0]), truncate(pt[1])}
+		if n := len(out); n > 0 && out[n-1][0] == p[0] && out[n-1][1] == p[1] {
+			continue
 		}
+		out = append(out, p)
 	}
-	return newRing
+	return out
 }
 
-func processPolygon(polygon [][][]float64) [][][]float64 {
-	var newPolygon [][][]float64
+// simplifyPolygon applies simplifyRing to every ring of a polygon.
+func simplifyPolygon(polygon [][][]float64) [][][]float64 {
+	var out [][][]float64
 	for _, ring := range polygon {
-		var newRing [][]float64
-		for _, pt := range ring {
-			newRing = append(newRing, processPoint(pt))
-		}
-		newPolygon = append(newPolygon, newRing)
+		out = append(out, simplifyRing(ring))
 	}
-	return newPolygon
+	return out
 }
 
-func removeDuplicatesFromPolygon(polygon [][][]float64) [][][]float64 {
-	var newPolygon [][][]float64
-	for _, ring := range polygon {
-		newPolygon = append(newPolygon, removeDuplicates(ring))
-	}
-	return newPolygon
-}
-
+// optimizeGeoJSON simplifies every Polygon and MultiPolygon in data and
+// returns it re-encoded with two-space indentation. Features of other types,
+// or with coordinates that don't parse, are kept as they are.
 func optimizeGeoJSON(data []byte) ([]byte, error) {
-	var fc GeoJSON
+	var fc geoJSON
 	if err := json.Unmarshal(data, &fc); err != nil {
 		return nil, err
 	}
 
 	for i := range fc.Features {
-		geomType := fc.Features[i].Geometry.Type
-		if geomType == "Polygon" {
+		g := &fc.Features[i].Geometry
+		var simplified any
+		switch g.Type {
+		case "Polygon":
 			var coords [][][]float64
-			if err := json.Unmarshal(fc.Features[i].Geometry.Coordinates, &coords); err != nil {
+			if err := json.Unmarshal(g.Coordinates, &coords); err != nil {
 				continue
 			}
-			newCoords := processPolygon(coords)
-			fc.Features[i].Geometry.Coordinates, _ = json.Marshal(newCoords)
-		} else if geomType == "MultiPolygon" {
+			simplified = simplifyPolygon(coords)
+		case "MultiPolygon":
 			var coords [][][][]float64
-			if err := json.Unmarshal(fc.Features[i].Geometry.Coordinates, &coords); err != nil {
+			if err := json.Unmarshal(g.Coordinates, &coords); err != nil {
 				continue
 			}
-			var newCoords [][][][]float64
+			var polygons [][][][]float64
 			for _, poly := range coords {
-				newCoords = append(newCoords, processPolygon(poly))
+				polygons = append(polygons, simplifyPolygon(poly))
 			}
-			fc.Features[i].Geometry.Coordinates, _ = json.Marshal(newCoords)
+			simplified = polygons
+		default:
+			continue
 		}
-	}
-
-	fmt.Print("...Simplification")
-
-	for i := range fc.Features {
-		geomType := fc.Features[i].Geometry.Type
-		if geomType == "Polygon" {
-			var coords [][][]float64
-			if err := json.Unmarshal(fc.Features[i].Geometry.Coordinates, &coords); err != nil {
-				continue
-			}
-			newCoords := removeDuplicatesFromPolygon(coords)
-			fc.Features[i].Geometry.Coordinates, _ = json.Marshal(newCoords)
-		} else if geomType == "MultiPolygon" {
-			var coords [][][][]float64
-			if err := json.Unmarshal(fc.Features[i].Geometry.Coordinates, &coords); err != nil {
-				continue
-			}
-			var newCoords [][][][]float64
-			for _, poly := range coords {
-				newCoords = append(newCoords, removeDuplicatesFromPolygon(poly))
-			}
-			fc.Features[i].Geometry.Coordinates, _ = json.Marshal(newCoords)
+		raw, err := json.Marshal(simplified)
+		if err != nil {
+			return nil, err
 		}
+		g.Coordinates = raw
 	}
-
-	fmt.Print("...Duplicates Removed")
 
 	return json.MarshalIndent(fc, "", "  ")
 }
 
-func downloadAndOptimize(target CountryInfo) error {
-	fmt.Printf("Downloading %s", target.Name)
-
-	apiURL := fmt.Sprintf("https://www.geoboundaries.org/api/current/gbOpen/%s/ADM0/", target.ISOCode)
-	resp, err := http.Get(apiURL)
+// get fetches url and fails on any status other than 200 OK.
+func get(url string) ([]byte, error) {
+	resp, err := client.Get(url)
 	if err != nil {
-		fmt.Println()
-		return fmt.Errorf("error fetching API: %w", err)
+		return nil, err
 	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println()
-		return fmt.Errorf("API returned status %d", resp.StatusCode)
+		return nil, fmt.Errorf("GET %s: status %s", url, resp.Status)
 	}
+	return io.ReadAll(resp.Body)
+}
 
+// downloadAndOptimize fetches one country's boundary and writes it to
+// <outDir>/<ISO code>.geojson.
+func downloadAndOptimize(target countryInfo, outDir string) error {
+	apiURL := fmt.Sprintf("https://www.geoboundaries.org/api/current/gbOpen/%s/ADM0/", target.ISOCode)
+	meta, err := get(apiURL)
+	if err != nil {
+		return fmt.Errorf("fetching API: %w", err)
+	}
 	var result struct {
 		SimplifiedGeometryGeoJSON string `json:"simplifiedGeometryGeoJSON"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		fmt.Println()
-		return fmt.Errorf("error decoding API response: %w", err)
+	if err := json.Unmarshal(meta, &result); err != nil {
+		return fmt.Errorf("decoding API response: %w", err)
+	}
+	if result.SimplifiedGeometryGeoJSON == "" {
+		return errors.New("API response has no simplifiedGeometryGeoJSON URL")
 	}
 
-	geoURL := result.SimplifiedGeometryGeoJSON
-	if geoURL == "" {
-		fmt.Println()
-		return fmt.Errorf("no GeoJSON download URL found")
-	}
-
-	geoResp, err := http.Get(geoURL)
+	geoData, err := get(result.SimplifiedGeometryGeoJSON)
 	if err != nil {
-		fmt.Println()
-		return fmt.Errorf("error fetching GeoJSON: %w", err)
+		return fmt.Errorf("fetching GeoJSON: %w", err)
 	}
-	defer geoResp.Body.Close()
-
-	geoData, err := io.ReadAll(geoResp.Body)
+	optimized, err := optimizeGeoJSON(geoData)
 	if err != nil {
-		fmt.Println()
-		return fmt.Errorf("error reading GeoJSON data: %w", err)
+		return fmt.Errorf("optimizing GeoJSON: %w", err)
 	}
 
-	optimizedData, err := optimizeGeoJSON(geoData)
-	if err != nil {
-		fmt.Println()
-		return fmt.Errorf("error optimizing GeoJSON: %w", err)
+	destPath := filepath.Join(outDir, target.ISOCode+".geojson")
+	if err := os.WriteFile(destPath, optimized, 0o644); err != nil {
+		return fmt.Errorf("saving %s: %w", destPath, err)
 	}
-
-	destPath := filepath.Join("mapdata", target.CompactName)
-	err = os.WriteFile(destPath, optimizedData, 0644)
-	if err != nil {
-		fmt.Println()
-		return fmt.Errorf("error saving %s: %w", destPath, err)
-	}
-
-	fmt.Println("...Done")
 	return nil
 }
 
 func main() {
-	// Load country_data.json
-	dataJSON, err := os.ReadFile("country_data.json")
+	only := flag.String("country", "", "download only the country with this ISO 3166-1 alpha-3 code")
+	outDir := flag.String("out", "mapdata", "directory to write <ISO code>.geojson files to")
+	dataPath := flag.String("data", "country_data.json", "path to country_data.json")
+	flag.Parse()
+
+	dataJSON, err := os.ReadFile(*dataPath)
 	if err != nil {
-		fmt.Println("Error reading country_data.json:", err)
-		return
+		fmt.Fprintln(os.Stderr, "Error reading country data:", err)
+		os.Exit(1)
 	}
-
-	var cc CountryCollection
+	var cc struct {
+		Countries []countryInfo `json:"Countries"`
+	}
 	if err := json.Unmarshal(dataJSON, &cc); err != nil {
-		fmt.Println("Error decoding country_data.json:", err)
-		return
+		fmt.Fprintln(os.Stderr, "Error decoding country data:", err)
+		os.Exit(1)
 	}
 
-	_ = os.MkdirAll("mapdata", 0755)
+	if err := os.MkdirAll(*outDir, 0o755); err != nil {
+		fmt.Fprintln(os.Stderr, "Error creating output directory:", err)
+		os.Exit(1)
+	}
 
-	for _, country := range cc.Countries {
-		if err := downloadAndOptimize(country); err != nil {
-			fmt.Printf("Failed to process %s: %v\n", country.Name, err)
+	matched, failed := 0, 0
+	for _, c := range cc.Countries {
+		if *only != "" && !strings.EqualFold(c.ISOCode, *only) {
+			continue
 		}
+		matched++
+		fmt.Printf("Downloading %s (%s)...", c.Name, c.ISOCode)
+		if err := downloadAndOptimize(c, *outDir); err != nil {
+			fmt.Println()
+			fmt.Fprintf(os.Stderr, "Failed to process %s: %v\n", c.Name, err)
+			failed++
+			continue
+		}
+		fmt.Println("done")
+	}
+
+	if matched == 0 {
+		fmt.Fprintf(os.Stderr, "No country with ISO code %q in %s\n", *only, *dataPath)
+		os.Exit(1)
+	}
+	if failed > 0 {
+		os.Exit(1)
 	}
 }

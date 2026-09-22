@@ -109,9 +109,10 @@ This script automates the process of downloading and optimizing GeoJSON data fro
 - Reads the list of countries from `country_data.json`.
 - Fetches the simplified ADM0 (national level) boundaries for each country.
 - Optimizes the data by truncating coordinates to 4 decimal places and removing duplicate points.
-- Saves the resulting GeoJSON files into the `mapdata/` directory.
+- Saves each one as `<ISO code>.geojson` in the `mapdata/` directory.
 
-To run the script:
+To run the script from the repository root:
 ```bash
 go run scripts/download_geojson.go
 ```
+`-country LIE` fetches a single country by ISO code, and `-out <dir>` writes somewhere other than `mapdata/`. The file carries a `//go:build ignore` tag, so `go build ./...` and `go test ./...` skip it.
