@@ -4,12 +4,25 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>HowBig</title>
-    <style>
-        html, body { margin: 0; height: 100%; background: #000; color: #fff; }
-    </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app">
+    <section class="panel list" id="left-list"></section>
+    <section class="panel center">
+        <div class="bar" id="left-bar"></div>
+        <div class="middle">
+            <div id="header"></div>
+            <div id="map"><svg xmlns="http://www.w3.org/2000/svg"></svg></div>
+            <footer>
+                <button type="button" id="exit-btn">Exit (ESC)</button>
+                <button type="button" id="fullscreen-btn">Windowed (F)</button>
+                <button type="button" id="about-btn">About (A)</button>
+            </footer>
+        </div>
+        <div class="bar" id="right-bar"></div>
+    </section>
+    <section class="panel list" id="right-list"></section>
+</div>
 <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
