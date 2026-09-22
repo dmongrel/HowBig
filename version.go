@@ -4,4 +4,4 @@
 package main
 
 // Version is the application version shown in the About dialog.
-const Version = "1.1.0"
+const Version = "1.1.1"

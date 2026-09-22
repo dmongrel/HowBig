@@ -11,7 +11,7 @@ info:
   description: "Compares the sizes of two countries" # The application description
   copyright: "Copyright © Joel L. Caesar" # Copyright text
   comments: "HowBig country size comparison" # Comments
-  version: "1.1.0" # The application version
+  version: "1.1.1" # The application version
   # cfBundleIconName: "appicon" # The macOS icon name in Assets.car icon bundles (optional)
   #                               # Should match the name of your .icon file without the extension
   #                               # If not set and Assets.car exists, defaults to "appicon"

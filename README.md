@@ -63,13 +63,17 @@ npm test --prefix frontend   # run the frontend tests
 
 ### Releasing
 
-The version number is set in three files. Change it in all of them:
+The version number is set in several files. Change it in all of them:
 
 - `version.go` (the About box)
 - `build/config.yml`
 - `build/windows/info.json`: `file_version` and `product_version` under `fixed`, and the `ProductVersion`/`FileVersion` pair under the `0409` key
+- `build/windows/nsis/wails_tools.nsh` (`INFO_PRODUCTVERSION`, the installer's own version)
+- `build/windows/wails.exe.manifest` and `build/windows/msix/app_manifest.xml` (the latter as `x.y.z.0`)
+- `build/darwin/Info.plist` and `build/darwin/Info.dev.plist` (two `<string>` values each)
+- `build/linux/nfpm/nfpm.yaml`
 
-`go test ./...` fails if these disagree with `version.go`, or if `info.json` has lost its `0409` key.
+`go test ./...` fails if any of these disagree with `version.go`, or if `info.json` has lost its `0409` key.
 
 Then run `wails3 task package`, and attach `bin/howbig-amd64-installer.exe` to a new GitHub release. There's no CI; releases are built and uploaded by hand.
 

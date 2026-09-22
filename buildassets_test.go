@@ -10,8 +10,8 @@ import (
 	"testing"
 )
 
-// TestBuildAssetVersions checks that build/windows/info.json and
-// build/config.yml carry the same version as Version, and that info.json
+// TestBuildAssetVersions checks that build/windows/info.json and every other
+// build file that carries a version agree with Version, and that info.json
 // still uses the 0409 (US English) string table that Explorer shows rather
 // than the neutral 0000 one a build-asset regeneration writes.
 func TestBuildAssetVersions(t *testing.T) {
@@ -47,11 +47,22 @@ func TestBuildAssetVersions(t *testing.T) {
 		}
 	}
 
-	cfg, err := os.ReadFile("build/config.yml")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if want := `version: "` + Version + `"`; !strings.Contains(string(cfg), want) {
-		t.Errorf("build/config.yml does not contain %s", want)
+	// The other files that carry the version, each with the text it must contain.
+	for _, c := range []struct{ path, want string }{
+		{"build/config.yml", `version: "` + Version + `"`},
+		{"build/windows/nsis/wails_tools.nsh", `!define INFO_PRODUCTVERSION "` + Version + `"`},
+		{"build/windows/wails.exe.manifest", `name="com.dmongrel.howbig" version="` + Version + `"`},
+		{"build/windows/msix/app_manifest.xml", `Version="` + Version + `.0"`},
+		{"build/darwin/Info.plist", `<string>` + Version + `</string>`},
+		{"build/darwin/Info.dev.plist", `<string>` + Version + `</string>`},
+		{"build/linux/nfpm/nfpm.yaml", `version: "` + Version + `"`},
+	} {
+		data, err := os.ReadFile(c.path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(string(data), c.want) {
+			t.Errorf("%s does not contain %s", c.path, c.want)
+		}
 	}
 }
