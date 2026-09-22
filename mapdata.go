@@ -6,7 +6,9 @@ package main
 import (
 	"container/list"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/fs"
 	"math"
 	"os"
 	"path/filepath"
@@ -84,8 +86,13 @@ func FetchAndCacheGeoJSON(country string, singlePolyline bool, skipSmall int, en
 
 	fileName := getFileName(country, countryCollection)
 	filePath := filepath.Join(mapDataPath, fileName)
-	if _, err := os.Stat(filePath); os.IsNotExist(err) && !filepath.IsAbs(mapDataPath) {
-		filePath = filepath.Join("..", mapDataPath, fileName)
+	// Fall back to ../mapDataPath only when that file exists, so a missing
+	// file's error names the primary path rather than the fallback.
+	if _, err := os.Stat(filePath); errors.Is(err, fs.ErrNotExist) && !filepath.IsAbs(mapDataPath) {
+		fallback := filepath.Join("..", mapDataPath, fileName)
+		if _, err := os.Stat(fallback); err == nil {
+			filePath = fallback
+		}
 	}
 
 	cacheKey := country
@@ -132,7 +139,7 @@ func getFileName(name string, cc *CountryCollection) string {
 	return strings.ReplaceAll(name, " ", "") + ".geojson"
 }
 
-// convertGeoJSONToDisplayFormat parses raw GeoJSON bytes into a format suitable for drawing on the Fyne canvas.
+// convertGeoJSONToDisplayFormat parses raw GeoJSON bytes into a format suitable for projection and drawing.
 // It also calculates the overall Mercator bounding box of all features.
 // The singlePolyline flag indicates if polygon simplification (keeping only the outer ring) should be applied.
 // The skipSmall parameter indicates if polygons with skipSmall or fewer coordinates should be skipped.

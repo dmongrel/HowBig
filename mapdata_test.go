@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -207,6 +208,38 @@ func TestGeoCacheEviction(t *testing.T) {
 	t.Run("miss", func(t *testing.T) {
 		if got, ok := NewGeoCache(1).Get("x"); ok || got != nil {
 			t.Errorf("Get on empty cache = %v, %v", got, ok)
+		}
+	})
+}
+
+func TestFetchGeoJSONPathFallback(t *testing.T) {
+	root := t.TempDir()
+	work := filepath.Join(root, "work")
+	if err := os.MkdirAll(filepath.Join(root, "maps"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(work, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	geo := `{"features":[{"geometry":{"type":"Polygon","coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}}]}`
+	if err := os.WriteFile(filepath.Join(root, "maps", "X.geojson"), []byte(geo), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	t.Chdir(work)
+
+	t.Run("parent fallback is used when the file exists there", func(t *testing.T) {
+		if _, err := FetchAndCacheGeoJSON("X", true, 0, false, "maps", nil, nil); err != nil {
+			t.Fatalf("fallback not used: %v", err)
+		}
+	})
+	t.Run("a missing file's error names the primary path", func(t *testing.T) {
+		_, err := FetchAndCacheGeoJSON("Y", true, 0, false, "maps", nil, nil)
+		if err == nil {
+			t.Fatal("want an error")
+		}
+		want := filepath.Join("maps", "Y.geojson")
+		if msg := err.Error(); !strings.Contains(msg, want) || strings.Contains(msg, "..") {
+			t.Errorf("error %q should name %q and not the .. fallback", msg, want)
 		}
 	})
 }
