@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: Copyright © Joel L. Caesar
+// SPDX-License-Identifier: GPL-3.0
+
 import { defineConfig } from "vite";
 import wails from "@wailsio/runtime/plugins/vite";
 
