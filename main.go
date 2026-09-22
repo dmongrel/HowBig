@@ -797,6 +797,46 @@ func (a *App) getArea(name string) float64 {
 	return a.CountryData.Areas[name]
 }
 
+// mapDrawableSize returns the width and height the map draws into: size less
+// the header's minimum height, clamped at zero.
+//
+// The footer is not subtracted. The loops this replaced looked for a footer
+// container holding *widget.Button children, but the footer's children are
+// *fixedWidthWrapper, so they never matched and never subtracted anything.
+func (a *App) mapDrawableSize(size fyne.Size) (width, height float64) {
+	width, height = float64(size.Width), float64(size.Height)
+	if a.headerContainer != nil {
+		height = max(height-float64(a.headerContainer.MinSize().Height), 0)
+	}
+	return width, height
+}
+
+// loadMapCountry gathers what scaleAndOrder needs to know about a selected country.
+// BB stays nil when name is empty or its geo data fails to load.
+func (a *App) loadMapCountry(name string) mapCountry {
+	if name == "" {
+		return mapCountry{}
+	}
+	c := mapCountry{Name: name, Area: a.getArea(name)}
+	data, err := FetchAndCacheGeoJSON(name, true, a.Settings.SkipSmall, a.Settings.EnablePacificCenter, a.Settings.MapDataPath, a.GeoCache, a.CountryData)
+	if err != nil {
+		return c
+	}
+	data.UpdateBoundingBox()
+	c.BB = &data.BoundingBox
+	return c
+}
+
+// getScaleAndOrder determines the scale and drawing order for the selected countries
+// by measuring the map and handing off to scaleAndOrder.
+func (a *App) getScaleAndOrder(active, other string) (float64, string, string) {
+	var width, height float64
+	if a.cMap != nil {
+		width, height = a.mapDrawableSize(a.cMap.Container.Size())
+	}
+	return scaleAndOrder(a.loadMapCountry(active), a.loadMapCountry(other), width, height)
+}
+
 // drawFilledPolygon creates a Raster canvas object representing the filled polygon.
 func drawFilledPolygon(polyPoints []Point, fillColor color.Color, strokeColor color.Color, strokeWidth float64) fyne.CanvasObject {
 	minX, maxX := polyPoints[0].X, polyPoints[0].X
@@ -884,40 +924,7 @@ func (a *App) drawCountry(zm *MapWidget, country string, scale float64, clear bo
 	if size.Width == 0 || size.Height == 0 {
 		size = fyne.NewSize(500, 500)
 	}
-	if a.headerContainer != nil {
-		h := a.headerContainer.MinSize().Height
-		if size.Height > h {
-			size.Height -= h
-		} else {
-			size.Height = 0
-		}
-	}
-
-	// Subtract footer height
-	if a.cCenter != nil && len(a.cCenter.Objects) > 0 {
-		for _, obj := range a.cCenter.Objects {
-			if footer, ok := obj.(*fyne.Container); ok {
-				// The footer is the second object in Border layout (Bottom)
-				// But let's be safe and check if it contains our buttons
-				isFooter := false
-				for _, child := range footer.Objects {
-					if btn, ok := child.(*widget.Button); ok && (strings.Contains(btn.Text, "Exit") || strings.Contains(btn.Text, "About")) {
-						isFooter = true
-						break
-					}
-				}
-				if isFooter {
-					h := footer.MinSize().Height
-					if size.Height > h {
-						size.Height -= h
-					} else {
-						size.Height = 0
-					}
-					break
-				}
-			}
-		}
-	}
+	width, height := a.mapDrawableSize(size)
 
 	var objects []fyne.CanvasObject
 	if clear {
@@ -934,8 +941,8 @@ func (a *App) drawCountry(zm *MapWidget, country string, scale float64, clear bo
 	pixelWidth := data.BoundingBox.Width * scale
 	pixelHeight := data.BoundingBox.Height * scale
 
-	offsetX := (float64(size.Width) - pixelWidth) / 2
-	offsetY := (float64(size.Height) - pixelHeight) / 2
+	offsetX := (width - pixelWidth) / 2
+	offsetY := (height - pixelHeight) / 2
 
 	// Draw bounding box
 	if a.Settings.DebugShowBoundary {

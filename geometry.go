@@ -3,13 +3,7 @@
 
 package main
 
-import (
-	"math"
-	"strings"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/widget"
-)
+import "math"
 
 // Point represents a 2D point with float64 precision.
 type Point struct {
@@ -145,144 +139,88 @@ func LatLonToMercator(lon, lat float64) (x, y float64) {
 	return nx, ny
 }
 
-// getFitScale calculates the scale factor required to fit the bounding box of a country within the available display area.
-func (a *App) getFitScale(country string) float64 {
-	data, err := FetchAndCacheGeoJSON(country, true, a.Settings.SkipSmall, a.Settings.EnablePacificCenter, a.Settings.MapDataPath, a.GeoCache, a.CountryData)
-	if err != nil {
+// minDrawable is the smallest drawable width or height, in pixels, that the fit
+// math will scale into. fitMargin is subtracted from each dimension before fitting.
+const (
+	minDrawable = 4.0
+	fitMargin   = 4.0
+)
+
+// fitScale returns the scale factor, in pixels per Mercator unit, that fits bb
+// inside a drawable area of width by height pixels less fitMargin on each axis.
+// width and height are the map area with the header already subtracted.
+// It returns 1.0 when bb has zero width or height, or when either drawable
+// dimension is below minDrawable.
+func fitScale(bb BoundingBox, width, height float64) float64 {
+	if bb.Width == 0 || bb.Height == 0 {
 		return 1.0
 	}
-
-	// Ensure bounding box is updated from paths (already done in FetchAndCacheGeoJSON, but good for safety)
-	data.UpdateBoundingBox()
-
-	mercWidth := data.BoundingBox.Width
-	mercHeight := data.BoundingBox.Height
-	if mercWidth == 0 || mercHeight == 0 {
+	if width < minDrawable || height < minDrawable {
 		return 1.0
 	}
-
-	size := a.cMap.Container.Size()
-	availableHeight := float64(size.Height)
-
-	if a.headerContainer != nil {
-		availableHeight -= float64(a.headerContainer.MinSize().Height)
-	}
-
-	// Subtract footer height
-	if a.cCenter != nil && len(a.cCenter.Objects) > 0 {
-		for _, obj := range a.cCenter.Objects {
-			if footer, ok := obj.(*fyne.Container); ok {
-				// The footer is likely the Bottom in Border layout.
-				// Check if it contains our buttons.
-				isFooter := false
-				for _, child := range footer.Objects {
-					if btn, ok := child.(*widget.Button); ok && (strings.Contains(btn.Text, "Exit") || strings.Contains(btn.Text, "About")) {
-						isFooter = true
-						break
-					}
-				}
-				if isFooter {
-					availableHeight -= float64(footer.MinSize().Height)
-					break
-				}
-			}
-		}
-	}
-
-	if availableHeight < 0 {
-		availableHeight = 0
-	}
-
-	if float64(size.Width) < 4 || availableHeight < 4 {
-		return 1.0
-	}
-
-	scaleX := (float64(size.Width) - 4) / mercWidth
-	scaleY := (availableHeight - 4) / mercHeight
+	scaleX := (width - fitMargin) / bb.Width
+	scaleY := (height - fitMargin) / bb.Height
 	return min(scaleX, scaleY)
 }
 
-// getScaleAndOrder determines the appropriate scale and drawing order for selected countries.
-// It uses square mileage as the primary factor to determine the larger country and scales it to fit.
-func (a *App) getScaleAndOrder(active, other string) (float64, string, string) {
-	if active == "" && other == "" {
+// mapCountry is one selected country as seen by scaleAndOrder.
+type mapCountry struct {
+	Name string       // Name is the country name; "" means nothing is selected.
+	Area float64      // Area is the surface area in square miles.
+	BB   *BoundingBox // BB is the Mercator bounding box; nil means its geo data failed to load.
+}
+
+// scaleAndOrder returns the shared scale for drawing active and other together
+// and the draw order: larger is drawn first, smaller on top of it.
+// width and height are the drawable map size as passed to fitScale.
+//
+// The larger country is chosen by area (ties go to active) and fitted. If
+// other's bounding box then reaches the drawable edge at that scale, other
+// becomes the larger and the scale is refitted to it. That check always looks
+// at other, not at whichever country is smaller by area; see the tests.
+func scaleAndOrder(active, other mapCountry, width, height float64) (scale float64, larger, smaller string) {
+	fit := func(c mapCountry) float64 {
+		if c.BB == nil {
+			return 1.0
+		}
+		return fitScale(*c.BB, width, height)
+	}
+
+	if active.Name == "" && other.Name == "" {
 		return 1.0, "", ""
 	}
-	if active == "" {
-		return a.getFitScale(other), other, ""
+	if active.Name == "" {
+		return fit(other), other.Name, ""
 	}
-	if other == "" {
-		return a.getFitScale(active), active, ""
-	}
-
-	dataActive, errActive := FetchAndCacheGeoJSON(active, true, a.Settings.SkipSmall, a.Settings.EnablePacificCenter, a.Settings.MapDataPath, a.GeoCache, a.CountryData)
-	dataOther, errOther := FetchAndCacheGeoJSON(other, true, a.Settings.SkipSmall, a.Settings.EnablePacificCenter, a.Settings.MapDataPath, a.GeoCache, a.CountryData)
-
-	if errActive != nil && errOther != nil {
-		return 1.0, active, other
-	}
-	if errActive != nil {
-		return a.getFitScale(other), other, active
-	}
-	if errOther != nil {
-		return a.getFitScale(active), active, other
+	if other.Name == "" {
+		return fit(active), active.Name, ""
 	}
 
-	dataActive.UpdateBoundingBox()
-	dataOther.UpdateBoundingBox()
-
-	if a.cMap == nil {
-		return 1.0, active, other
+	if active.BB == nil && other.BB == nil {
+		return 1.0, active.Name, other.Name
+	}
+	if active.BB == nil {
+		return fit(other), other.Name, active.Name
+	}
+	if other.BB == nil {
+		return fit(active), active.Name, other.Name
 	}
 
-	size := a.cMap.Container.Size()
-	availableHeight := float64(size.Height)
-	if a.headerContainer != nil {
-		availableHeight -= float64(a.headerContainer.MinSize().Height)
-	}
-	// Subtract footer height
-	if a.cCenter != nil && len(a.cCenter.Objects) > 0 {
-		for _, obj := range a.cCenter.Objects {
-			if footer, ok := obj.(*fyne.Container); ok {
-				isFooter := false
-				for _, child := range footer.Objects {
-					if btn, ok := child.(*widget.Button); ok && (strings.Contains(btn.Text, "Exit") || strings.Contains(btn.Text, "About")) {
-						isFooter = true
-						break
-					}
-				}
-				if isFooter {
-					availableHeight -= float64(footer.MinSize().Height)
-					break
-				}
-			}
-		}
-	}
-	if availableHeight < 4 || float64(size.Width) < 4 {
-		return 1.0, active, other
+	if height < minDrawable || width < minDrawable {
+		return 1.0, active.Name, other.Name
 	}
 
-	areaActive := a.getArea(active)
-	areaOther := a.getArea(other)
-
-	// Step 1: Start with square mileage to determine larger country
-	larger, smaller := active, other
-	if areaOther > areaActive {
-		larger, smaller = other, active
+	larger, smaller = active.Name, other.Name
+	largeBB := active.BB
+	if other.Area > active.Area {
+		larger, smaller = other.Name, active.Name
+		largeBB = other.BB
 	}
+	scale = fitScale(*largeBB, width, height)
 
-	// Step 2: See if either country's pixel delta is larger than the current drawing area size
-	// We need a baseline scale to check pixel deltas.
-	// We'll use a temporary fit scale for the larger country as the baseline.
-	scale := a.getFitScale(larger)
-
-	// Check if the other country (smaller by area) is actually larger in pixel delta at this scale.
-	// This can happen with countries that have extreme aspect ratios or spans.
-	if dataOther.BoundingBox.Width*scale >= float64(size.Width)-4 || dataOther.BoundingBox.Height*scale >= availableHeight-4 {
-		// If the smaller country (by sq mileage) doesn't fit at the larger country's scale,
-		// it must be the one that dictates the fit scale.
-		larger, smaller = other, active
-		scale = a.getFitScale(larger)
+	if other.BB.Width*scale >= width-fitMargin || other.BB.Height*scale >= height-fitMargin {
+		larger, smaller = other.Name, active.Name
+		scale = fitScale(*other.BB, width, height)
 	}
 
 	return scale, larger, smaller
