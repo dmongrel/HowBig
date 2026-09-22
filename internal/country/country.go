@@ -7,7 +7,6 @@ package country
 
 import (
 	"encoding/json"
-	"maps"
 	"os"
 )
 
@@ -36,22 +35,12 @@ func Load(path string) (*Collection, error) {
 		return nil, err
 	}
 
-	// Populate the lookup maps for O(1) access using maps.Collect and custom iterators.
-	cc.Areas = maps.Collect(func(yield func(string, float64) bool) {
-		for _, c := range cc.Countries {
-			if !yield(c.Name, c.Area) {
-				return
-			}
-		}
-	})
-
-	cc.ISOCodes = maps.Collect(func(yield func(string, string) bool) {
-		for _, c := range cc.Countries {
-			if !yield(c.Name, c.ISOCode) {
-				return
-			}
-		}
-	})
+	cc.Areas = make(map[string]float64, len(cc.Countries))
+	cc.ISOCodes = make(map[string]string, len(cc.Countries))
+	for _, c := range cc.Countries {
+		cc.Areas[c.Name] = c.Area
+		cc.ISOCodes[c.Name] = c.ISOCode
+	}
 
 	return cc, nil
 }

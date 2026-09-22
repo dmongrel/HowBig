@@ -3,10 +3,7 @@
 
 package geo
 
-import (
-	"encoding/json"
-	"slices"
-)
+import "encoding/json"
 
 // ParseGeoJSON parses raw GeoJSON bytes into Mercator paths ready to scale
 // and draw, with the overall Mercator bounding box of all features.
@@ -59,14 +56,11 @@ func ParseGeoJSON(data []byte, skipSmall int, pacificCenter bool) (*GeoData, err
 					continue
 				}
 
-				path := slices.Collect(func(yield func(Point) bool) {
-					for _, pt := range ring {
-						mx, my := latLonToMercator(pt[0], pt[1])
-						if !yield(Point{X: mx, Y: my}) {
-							return
-						}
-					}
-				})
+				path := make([]Point, 0, len(ring))
+				for _, pt := range ring {
+					mx, my := latLonToMercator(pt[0], pt[1])
+					path = append(path, Point{X: mx, Y: my})
+				}
 				allPaths = append(allPaths, path)
 			}
 		}

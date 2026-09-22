@@ -5,7 +5,8 @@ package main
 
 import (
 	"embed"
-	"log"
+	"log/slog"
+	"os"
 
 	"HowBig/internal/country"
 	"HowBig/internal/settings"
@@ -24,12 +25,12 @@ var assets embed.FS
 func main() {
 	cfg, err := settings.Load(settings.ResolvePath("settings.json"))
 	if err != nil {
-		log.Println("Error reading settings.json, using defaults:", err)
+		slog.Warn("could not read settings.json, using defaults", "err", err)
 	}
 
 	cc, err := country.Load(settings.ResolvePath(cfg.CountryDataPath))
 	if err != nil {
-		log.Printf("failed to load country data: %v", err)
+		slog.Error("failed to load country data", "err", err)
 	}
 	windowService := &WindowService{}
 
@@ -68,6 +69,7 @@ func main() {
 	})
 
 	if err := app.Run(); err != nil {
-		log.Fatal(err)
+		slog.Error("application stopped with an error", "err", err)
+		os.Exit(1)
 	}
 }
